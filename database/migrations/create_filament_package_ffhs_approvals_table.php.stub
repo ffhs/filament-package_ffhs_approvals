@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+     /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create(config('approvals.tables.approvals', 'approvals'), function (Blueprint $table) {
+            $table->id();
+            $table->string('category');
+            $table->string('scope')->nullable();
+            $table->nullableMorphs('approvable');
+            $table->string('status');
+            $table->foreignId('approver_id')->constrained(config('approvals.tables.approvers', 'users'));
+            $table->dateTime('approved_at');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists(config('approvals.tables.approvals', 'approvals'));
+    }
+};

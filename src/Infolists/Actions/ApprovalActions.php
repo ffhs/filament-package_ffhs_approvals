@@ -1,0 +1,68 @@
+<?php
+
+namespace Ffhs\Approvals\Infolists\Actions;
+
+use BackedEnum;
+use Ffhs\Approvals\Contracts\HasApprovalStatuses;
+use Filament\Infolists\Components\Actions;
+use Filament\Infolists\Components\Actions\Action;
+
+class ApprovalActions extends Actions
+{
+    protected ?string $category = null;
+
+    protected ?string $scope = null;
+
+    /**
+     * @param  array<HasApprovalStatuses|Action>  $options
+     */
+    public static function make(array $options): static
+    {
+        $actions = [];
+
+        foreach ($options as $option) {
+
+            if ($option instanceof HasApprovalStatuses && $option instanceof BackedEnum) {
+                $actions[] = ApprovalAction::make($option->value)
+                    ->status($option);
+
+                continue;
+            }
+
+            $actions[] = $option;
+        }
+
+        $static = app(static::class, ['actions' => $actions]);
+        $static->configure();
+
+        return $static;
+    }
+
+    public function category(string $category): static
+    {
+        $this->category = $category;
+
+        foreach ($this->childComponents as $actionContainer) {
+            $action = $actionContainer->action;
+            if ($action instanceof ApprovalAction) {
+                $action->category($this->category);
+            }
+        }
+
+        return $this;
+    }
+
+    public function scope(string $scope): static
+    {
+        $this->scope = $scope;
+
+        foreach ($this->childComponents as $actionContainer) {
+            $action = $actionContainer->action;
+            if ($action instanceof ApprovalAction) {
+                $action->scope($this->scope);
+            }
+        }
+
+        return $this;
+    }
+}
