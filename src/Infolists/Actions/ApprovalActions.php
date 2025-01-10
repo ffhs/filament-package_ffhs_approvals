@@ -34,7 +34,7 @@ class ApprovalActions extends Actions
 
         $static = app(static::class, ['actions' => $actions]);
         $static->configure();
-
+        
         return $static;
     }
 
@@ -43,7 +43,10 @@ class ApprovalActions extends Actions
         $this->category = $category;
 
         foreach ($this->childComponents as $actionContainer) {
+            $actionContainer->statePath($this->category);
+
             $action = $actionContainer->action;
+
             if ($action instanceof ApprovalAction) {
                 $action->category($this->category);
             }
