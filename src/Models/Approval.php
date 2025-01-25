@@ -2,12 +2,16 @@
 
 namespace Ffhs\Approvals\Models;
 
+use Ffhs\Approvals\Infolists\Actions\ApprovalAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use InvalidArgumentException;
 
+/**
+ * @property string $status
+ */
 class Approval extends Model
 {
     protected $fillable = [
@@ -28,12 +32,12 @@ class Approval extends Model
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        $this->table = config('approvals.tables.approvals');
+        $this->table = config('filament-package_ffhs_approvals.tables.approvals');
     }
 
     public function approver(): BelongsTo
     {
-        return $this->belongsTo(config('approvals.models.approver'), 'approver_id');
+        return $this->belongsTo(config('filament-package_ffhs_approvals.models.approver'), 'approver_id');
     }
 
     public function approvable(): MorphTo
@@ -84,6 +88,38 @@ class Approval extends Model
         return $this->where('category', $category)
             ->when($scope, fn ($query) => $query->where('scope', $scope))
             ->whereIn('status', $declinedStatuses)
+            ->exists();
+    }
+
+    public static function getApprovalForAction(ApprovalAction $action): ?Approval
+    {
+        return self::where('category', $action->getCategory())
+            ->where('scope', $action->getScope())
+            ->where('approvable_type', get_class($action->getRecord()))
+            ->where('approvable_id', $action->getRecord()->getKey())
+            ->where('approver_id', auth()->id())
+            ->first();
+    }
+
+    public static function userHasApproved(Model $record, string $statusClass, string $category, ?string $scope = null): bool
+    {
+        return self::where('category', $category)
+            ->when($scope, fn ($query) => $query->where('scope', $scope))
+            ->where('approvable_type', get_class($record))
+            ->where('approvable_id', $record->getKey())
+            ->where('approver_id', auth()->id())
+            ->whereIn('status', $statusClass::getApprovedStatuses())
+            ->exists();
+    }
+
+    public static function userHasResponded(Model $record, string $category, ?string $scope = null): bool
+    {
+        return self::where('category', $category)
+            ->when($scope, fn ($query) => $query->where('scope', $scope))
+            ->where('approvable_type', get_class($record))
+            ->where('approvable_id', $record->getKey())
+            ->where('approver_id', auth()->id())
+            ->whereNot('status', '')
             ->exists();
     }
 }

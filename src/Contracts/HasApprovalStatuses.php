@@ -4,9 +4,9 @@ namespace Ffhs\Approvals\Contracts;
 
 interface HasApprovalStatuses
 {
-    public function getApprovedStatuses(): array;
+    public static function getApprovedStatuses(): array;
 
-    public function getDeclinedStatuses(): array;
+    public static function getDeclinedStatuses(): array;
 
-    public function getPendingStatuses(): array;
+    public static function getPendingStatuses(): array;
 }

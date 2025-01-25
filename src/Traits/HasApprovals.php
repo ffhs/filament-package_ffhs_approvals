@@ -9,6 +9,6 @@ trait HasApprovals
 {
     public function approvals(): MorphMany
     {
-        return $this->morphMany(config('approvals.models.approvals', Approval::class), 'approvable');
+        return $this->morphMany(config('filament-package_ffhs_approvals.models.approvals', Approval::class), 'approvable');
     }
 }
