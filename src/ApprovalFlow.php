@@ -71,21 +71,6 @@ class ApprovalFlow
                 ];
                 $this->steps[] = $step;
             }
-
-            for ($i = 0; $i < $item->getAtLeast(); $i++) {
-
-                $approvalsNeeded++;
-
-                $step = [
-                    'approvalByIndex' => $index,
-                    'config' => [
-                        'order' => $this->isChained() ? $approvalsNeeded : null,
-                        'access' => $item->getAccess(),
-                    ],
-
-                ];
-                $this->steps[] = $step;
-            }
         }
 
         $this->approvalBy = $approvalBy;
