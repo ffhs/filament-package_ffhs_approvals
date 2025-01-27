@@ -1,10 +1,14 @@
 <?php
 
+use App\Models\User;
+use Ffhs\Approvals\Models\Approval;
+use Ffhs\Approvals\Models\PendingApproval;
+
 return [
     'models' => [
-        'approver' => '\App\Models\User',
-        'approval' => Ffhs\Approvals\Models\Approval::class,
-        'pending_approval' => Ffhs\Approvals\Models\PendingApproval::class,
+        'approver' => User::class,
+        'approval' => Approval::class,
+        'pending_approval' => PendingApproval::class,
     ],
     'tables' => [
         'approvers' => 'users',

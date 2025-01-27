@@ -7,7 +7,7 @@ describe('HandlesApprovals Trait', function () {
     beforeEach(function () {
         // Create a class that uses the HandlesApprovals trait
 
-        $this->action = new class
+        $this->action = new class()
         {
             use HandlesApprovals;
 
@@ -28,11 +28,6 @@ describe('HandlesApprovals Trait', function () {
                 return $this->mockRecord;
             }
 
-            public function getScope()
-            {
-                return $this->scope;
-            }
-
             public function getStatus()
             {
                 return $this->status;
@@ -44,12 +39,6 @@ describe('HandlesApprovals Trait', function () {
         $this->action->category('custom-category');
 
         expect($this->action->getCategory())->toBe('custom-category');
-    });
-
-    it('sets the scope', function () {
-        $this->action->scope('custom-scope');
-
-        expect($this->action->getScope())->toBe('custom-scope');
     });
 
     it('sets the status', function () {

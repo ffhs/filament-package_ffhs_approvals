@@ -10,6 +10,7 @@ use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Models\PendingApproval;
 use Filament\Notifications\Notification;
 use Filament\Support\Facades\FilamentColor;
+use InvalidArgumentException;
 
 trait HandlesApprovals
 {
@@ -292,11 +293,11 @@ trait HandlesApprovals
 
         foreach ($colors as $key => $value) {
             if (! in_array($key, $allowedKeys, true)) {
-                throw new \InvalidArgumentException("Invalid status key: {$key}. Allowed keys are: " . implode(', ', $allowedKeys));
+                throw new InvalidArgumentException("Invalid status key: {$key}. Allowed keys are: " . implode(', ', $allowedKeys));
             }
 
             if (! in_array($value, $validColors, true)) {
-                throw new \InvalidArgumentException("Invalid color value for '{$key}': {$value}. Allowed colors are: " . implode(', ', $validColors));
+                throw new InvalidArgumentException("Invalid color value for '{$key}': {$value}. Allowed colors are: " . implode(', ', $validColors));
             }
 
             $this->statusCategoryColors[$key] = $value;

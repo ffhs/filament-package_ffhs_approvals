@@ -1,0 +1,9 @@
+parameters:
+    ignoreErrors:
+        -
+            path: src/Traits/HasApprovals.php
+            identifier: trait.unused
+
+        -
+            path: config/filament-package_ffhs_approvals.php
+            message: '#Class App\\Models\\User not found.#'

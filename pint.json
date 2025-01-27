@@ -5,7 +5,17 @@
         "concat_space": {
             "spacing": "one"
         },
+        "fully_qualified_strict_types" : {
+            "import_symbols": true,
+            "leading_backslash_in_global_namespace": false
+        },
+        "global_namespace_import": {
+            "import_classes": true,
+            "import_constants": true,
+            "import_functions": true
+        },
         "method_argument_space": true,
+        "new_with_parentheses": true,
         "single_trait_insert_per_statement": true,
         "types_spaces": {
             "space": "single"

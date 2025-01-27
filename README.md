@@ -19,14 +19,22 @@ php artisan vendor:publish --tag="filament-package_ffhs_approvals-config"
 This is necessary before running our migrations. The contents of the published config file are:
 
 ```php
+<?php
+
+use App\Models\User;
+use Ffhs\Approvals\Models\Approval;
+use Ffhs\Approvals\Models\PendingApproval;
+
 return [
     'models' => [
-        'approver' => '\App\Models\User',
-        'approval' => Ffhs\Approvals\Models\Approval::class,
+        'approver' => User::class,
+        'approval' => Approval::class,
+        'pending_approval' => PendingApproval::class,
     ],
     'tables' => [
         'approvers' => 'users',
         'approvals' => 'approvals',
+        'pendings' => 'pendings',
     ],
 ];
 ```

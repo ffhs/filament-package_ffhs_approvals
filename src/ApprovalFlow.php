@@ -6,6 +6,7 @@ use Closure;
 use Ffhs\Approvals\Models\Approval;
 use Filament\Support\Concerns\EvaluatesClosures;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 
 class ApprovalFlow
 {
@@ -53,7 +54,22 @@ class ApprovalFlow
         $approvalsNeeded = 0;
         foreach ($approvalBy as $index => $item) {
             if (! $item instanceof ApprovalBy) {
-                throw new \InvalidArgumentException('Each element must be an instance of ApprovalBy.');
+                throw new InvalidArgumentException('Each element must be an instance of ApprovalBy.');
+            }
+
+            for ($i = 0; $i < $item->getAtLeast(); $i++) {
+
+                $approvalsNeeded++;
+
+                $step = [
+                    'approvalByIndex' => $index,
+                    'config' => [
+                        'order' => $this->isChained() ? $approvalsNeeded : null,
+                        'access' => $item->getAccess(),
+                    ],
+
+                ];
+                $this->steps[] = $step;
             }
 
             for ($i = 0; $i < $item->getAtLeast(); $i++) {

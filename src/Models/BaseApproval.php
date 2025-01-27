@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $category
  * @property string $approvable_type
  * @property int $approvable_id
  * @property string $status
- * @property \Illuminate\Support\Carbon|null $status_at
+ * @property Carbon|null $status_at
  * @property int|null $approver_id
  * @property array|null $config
  */
