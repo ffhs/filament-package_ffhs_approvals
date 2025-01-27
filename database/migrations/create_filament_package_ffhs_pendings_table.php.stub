@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(config('filament-package_ffhs_approvals.tables.approvals', 'approvals'), function (Blueprint $table) {
+        Schema::create(config('filament-package_ffhs_approvals.tables.pendings', 'pendings'), function (Blueprint $table) {
             $table->id();
             $table->string('category');
             $table->nullableMorphs('approvable');
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists(config('filament-package_ffhs_approvals.tables.approvals', 'approvals'));
+        Schema::dropIfExists(config('filament-package_ffhs_approvals.tables.pendings', 'pendings'));
     }
 };

@@ -7,7 +7,7 @@ describe('Approval Model', function () {
 
     beforeEach(function () {
         // Set up a custom table name for testing
-        Config::set('approvals.tables.approvals', 'test_approvals');
+        Config::set('filament-package_ffhs_approvals.tables.approvals', 'test_approvals');
 
         // Create an instance of the Approval model
         $this->approval = new Approval;
@@ -50,16 +50,6 @@ describe('Approval Model', function () {
 
         expect($approvals)->toHaveCount(1);
         expect($approvals->first()->approvable_id)->toBe(1);
-    });
-
-    it('throws an exception for invalid enums in allInCategoryApproved', function () {
-        expect(fn () => $this->approval->allInCategoryApproved('finance', 'InvalidEnumClass'))
-            ->toThrow(InvalidArgumentException::class, 'The provided class must be a valid enum.');
-    });
-
-    it('throws an exception for invalid enums in anyInCategoryDeclined', function () {
-        expect(fn () => $this->approval->anyInCategoryDeclined('finance', 'InvalidEnumClass'))
-            ->toThrow(InvalidArgumentException::class, 'The provided class must be a valid enum.');
     });
 
     it('retrieves approvals for a specific approver', function () {

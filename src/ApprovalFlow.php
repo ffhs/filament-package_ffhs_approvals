@@ -5,6 +5,7 @@ namespace Ffhs\Approvals;
 use Closure;
 use Ffhs\Approvals\Models\Approval;
 use Filament\Support\Concerns\EvaluatesClosures;
+use Illuminate\Database\Eloquent\Model;
 
 class ApprovalFlow
 {
@@ -12,11 +13,11 @@ class ApprovalFlow
 
     protected bool | Closure $isChained = false;
 
-    protected int $atLeast = 1;
-
     protected array $approvalBy = [];
 
     protected ?string $name = null;
+
+    protected array $steps = [];
 
     final public function __construct(string $name)
     {
@@ -42,13 +43,6 @@ class ApprovalFlow
         return $this;
     }
 
-    public function atLeast(int $atLeast): static
-    {
-        $this->atLeast = $atLeast;
-
-        return $this;
-    }
-
     /**
      * Set the approvals required.
      *
@@ -56,9 +50,25 @@ class ApprovalFlow
      */
     public function approvalBy(array $approvalBy): static
     {
-        foreach ($approvalBy as $item) {
+        $approvalsNeeded = 0;
+        foreach ($approvalBy as $index => $item) {
             if (! $item instanceof ApprovalBy) {
                 throw new \InvalidArgumentException('Each element must be an instance of ApprovalBy.');
+            }
+
+            for ($i = 0; $i < $item->getAtLeast(); $i++) {
+
+                $approvalsNeeded++;
+
+                $step = [
+                    'approvalByIndex' => $index,
+                    'config' => [
+                        'order' => $this->isChained() ? $approvalsNeeded : null,
+                        'access' => $item->getAccess(),
+                    ],
+
+                ];
+                $this->steps[] = $step;
             }
         }
 
@@ -67,7 +77,59 @@ class ApprovalFlow
         return $this;
     }
 
-    public function shouldDisable($record, $category, $scope, $statusClass): bool
+    public function getSteps(): array
+    {
+        return $this->steps;
+    }
+
+    public function bestMatchStep(Model $record, string $category, string $statusClass): array
+    {
+        // all early returns should be the same as the currentStep method
+        $defaultStep = $this->currentStep($record, $category, $statusClass);
+
+        if ($this->isChained()) {
+            return $defaultStep;
+        }
+
+        $stepsWithAccess = array_filter($this->steps, function ($step) {
+            return $step['config']['access'] !== null;
+        });
+
+        if (empty($stepsWithAccess)) {
+            return $defaultStep;
+        }
+
+        $user = auth()->user();
+
+        foreach ($stepsWithAccess as $step) {
+
+            $approvalStep = $this->approvalBy[$step['approvalByIndex']];
+
+            if ($approvalStep->isSatisfied($record, $category, $statusClass)) {
+                continue;
+            }
+
+            $access = explode(':', $step['config']['access']);
+            $type = $access[0];
+            $value = $access[1];
+
+            if ($type == 'role' && method_exists($user, 'hasRole')) {
+                if ($user->hasRole($value)) {
+                    return $step;
+                }
+            }
+
+            if ($type == 'permission' && method_exists($user, 'hasPermissionTo')) {
+                if ($user->hasPermissionTo($value)) {
+                    return $step;
+                }
+            }
+        }
+
+        return $defaultStep;
+    }
+
+    public function shouldDisable($record, $category, $statusClass): bool
     {
         // Assumes downstream dev is using spatie's permissions package
 
@@ -102,19 +164,19 @@ class ApprovalFlow
                 }
             }
 
-            return in_array(true, $conditions);
+            return in_array(true, $conditions) && ! in_array(false, $conditions);
 
         }
 
-        $currentStep = $this->currentStep($record, $category, $scope, $statusClass);
+        $currentStep = $this->currentStep($record, $category, $statusClass);
 
-        $approvalStep = $currentStep !== null ? $this->approvalBy[$currentStep] : null;
+        $approvalStep = $currentStep !== null ? $this->approvalBy[$currentStep['approvalByIndex']] : null;
 
         if (! $approvalStep) {
             return false;
         }
 
-        if ($currentStep > 0 && Approval::userHasApproved($record, $statusClass, $category, $scope)) {
+        if (Approval::userHasApproved($record, $statusClass, $category)) {
             return false;
         }
 
@@ -133,11 +195,28 @@ class ApprovalFlow
         return false;
     }
 
-    public function currentStep($record, $category, $scope, $statusClass): ?int
+    public function currentStep($record, $category, $statusClass): ?array
     {
         foreach ($this->approvalBy as $index => $approvalStep) {
-            if (! $approvalStep->isSatisfied($record, $category, $scope, $statusClass)) {
-                return $index;
+            if (! $approvalStep->isSatisfied($record, $category, $statusClass)) {
+
+                $relevantSteps = array_filter($this->steps, function ($step) use ($index) {
+                    return $step['approvalByIndex'] == $index;
+                });
+
+                if (! empty($relevantSteps)) {
+                    usort($relevantSteps, function ($a, $b) {
+
+                        $orderA = $a['config']['order'];
+                        $orderB = $b['config']['order'];
+
+                        return $orderA <=> $orderB;
+                    });
+
+                    return $relevantSteps[0];
+                }
+
+                return null;
             }
         }
 

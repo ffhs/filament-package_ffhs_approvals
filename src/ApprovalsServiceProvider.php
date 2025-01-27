@@ -141,6 +141,7 @@ class ApprovalsServiceProvider extends PackageServiceProvider
     {
         return [
             'create_filament_package_ffhs_approvals_table',
+            'create_filament_package_ffhs_pendings_table',
         ];
     }
 }

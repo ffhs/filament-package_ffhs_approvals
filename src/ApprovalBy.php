@@ -13,7 +13,7 @@ class ApprovalBy
 
     protected ?string $permission = null;
 
-    protected bool $multiple = false;
+    protected int $atLeast = 1;
 
     protected bool $satisfied = false;
 
@@ -25,13 +25,6 @@ class ApprovalBy
     public static function make(string $name): static
     {
         return new static($name);
-    }
-
-    public function multiple(bool $multiple = true): static
-    {
-        $this->multiple = $multiple;
-
-        return $this;
     }
 
     public function role(string $role): static
@@ -58,14 +51,41 @@ class ApprovalBy
         return $this->permission;
     }
 
-    public function isSatisfied(Model $record, $category, $scope, $statusClass): bool
+    public function atLeast(int $atLeast): static
+    {
+        $this->atLeast = $atLeast;
+
+        return $this;
+    }
+
+    public function getAtLeast(): int
+    {
+        return $this->atLeast;
+    }
+
+    public function getAccess(): ?string
+    {
+        // Assuming role should take precedence over a permission
+
+        if ($this->role) {
+            return 'role:' . $this->role;
+        }
+
+        if ($this->permission) {
+            return 'permission:' . $this->permission;
+        }
+
+        return null;
+    }
+
+    public function isSatisfied(Model $record, $category, $statusClass): bool
     {
 
         $approvals = Approval::where('category', $category)
-            ->where('scope', $scope)
             ->where('approvable_type', get_class($record))
             ->where('approvable_id', $record->getKey())
             ->whereIn('status', $statusClass::getApprovedStatuses())
+            ->whereJsonContains('config->access', $this->getAccess())
             ->get();
 
         $conditions = [];
@@ -87,7 +107,9 @@ class ApprovalBy
             }
         }
 
-        $this->satisfied = in_array(true, $conditions);
+        $countTrue = count(array_filter($conditions));
+
+        $this->satisfied = $countTrue >= $this->atLeast;
 
         return $this->satisfied;
     }

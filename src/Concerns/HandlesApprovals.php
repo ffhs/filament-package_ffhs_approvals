@@ -7,6 +7,7 @@ use Closure;
 use Ffhs\Approvals\ApprovalFlow;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Models\Approval;
+use Ffhs\Approvals\Models\PendingApproval;
 use Filament\Notifications\Notification;
 use Filament\Support\Facades\FilamentColor;
 
@@ -14,14 +15,17 @@ trait HandlesApprovals
 {
     protected ?string $category = null;
 
-    protected ?string $scope = null;
-
     protected ?HasApprovalStatuses $status = null;
 
     protected array $statusCategoryColors = [
         'approved' => 'success',
         'declined' => 'danger',
         'pending' => 'info',
+    ];
+
+    protected array $defaultConfig = [
+        'order' => null,
+        'access' => null,
     ];
 
     protected ?ApprovalFlow $approvalFlow = null;
@@ -41,18 +45,6 @@ trait HandlesApprovals
             })
             ->action($this->process());
 
-    }
-
-    public function scope(string $scope): static
-    {
-        $this->scope = $scope;
-
-        return $this;
-    }
-
-    public function getScope(): ?string
-    {
-        return $this->scope;
     }
 
     public function category(string $category): static
@@ -82,7 +74,25 @@ trait HandlesApprovals
     public function process(): Closure
     {
         return function (): void {
-            if (Approval::userHasResponded($this->getRecord(), $this->category, $this->scope) && $this->actionHasCurrentApprovalStatus()) {
+
+            if ($this->isPending()) {
+
+                if (PendingApproval::userHasResponded($this->getRecord(), $this->category)) {
+                    $this->removePendingApproval();
+
+                    return;
+                }
+
+                $this->createPendingApproval();
+
+                return;
+            }
+
+            if (! $this->approvalActionTaken()) {
+                $this->createDefaultApprovals();
+            }
+
+            if (Approval::userHasResponded($this->getRecord(), $this->category) && $this->actionHasCurrentApprovalStatus()) {
                 $this->resetApproval();
 
                 return;
@@ -93,25 +103,45 @@ trait HandlesApprovals
         };
     }
 
+    public function createDefaultApprovals(): void
+    {
+        $steps = $this->approvalFlow->getSteps();
+
+        $record = $this->getRecord();
+        $recordName = strtolower(class_basename($record));
+        assert($this->status instanceof BackedEnum);
+
+        foreach ($steps as $step) {
+            Approval::create([
+                'category' => $this->category ?? "approvals-$recordName",
+                'approvable_type' => get_class($record),
+                'approvable_id' => $record->id ?? null,
+                'config' => json_encode($step['config']),
+            ]);
+        }
+    }
+
     public function setApproval(): void
     {
         $record = $this->getRecord();
         $recordName = strtolower(class_basename($record));
         assert($this->status instanceof BackedEnum);
 
-        Approval::updateOrCreate(
-            [
-                'category' => $this->category ?? "approvals-$recordName",
-                'scope' => $this->scope,
-                'approvable_type' => get_class($record),
-                'approvable_id' => $record->id ?? null,
-                'approver_id' => auth()->id(),
-            ],
-            [
-                'status' => $this->status->value,
-                'approved_at' => now(),
-            ]
-        );
+        $nextApproval = Approval::where([
+            'category' => $this->category ?? "approvals-$recordName",
+            'approvable_type' => get_class($record),
+            'approvable_id' => $record->id ?? null,
+            'approver_id' => null,
+        ])
+            ->whereJsonContains('config->order', $this->getConfig()['order'])
+            ->whereJsonContains('config->access', $this->getConfig()['access'])
+            ->first();
+
+        $nextApproval->update([
+            'approver_id' => auth()->id(),
+            'status' => $this->status->value,
+            'status_at' => now(),
+        ]);
 
         Notification::make()
             ->title("Successfully marked as $this->name!")
@@ -125,19 +155,88 @@ trait HandlesApprovals
         $recordName = strtolower(class_basename($record));
         assert($this->status instanceof BackedEnum);
 
-        Approval::where([
+        $approval = Approval::where([
             'category' => $this->category ?? "approvals-$recordName",
-            'scope' => $this->scope,
             'approvable_type' => get_class($record),
             'approvable_id' => $record->id ?? null,
             'status' => $this->status->value,
             'approver_id' => auth()->id(),
+        ])->first();
+
+        Approval::create([
+            'category' => $approval->category,
+            'approvable_type' => $approval->approvable_type,
+            'approvable_id' => $approval->approvable_id,
+            'config' => $approval->config,
+        ]);
+
+        $approval->delete();
+
+        Notification::make()
+            ->title("Successfully unmarked as $this->name!")
+            ->success()
+            ->send();
+    }
+
+    public function createPendingApproval(): void
+    {
+        $record = $this->getRecord();
+        $recordName = strtolower(class_basename($record));
+        assert($this->status instanceof BackedEnum);
+
+        PendingApproval::create([
+            'category' => $this->category ?? "approvals-$recordName",
+            'approvable_type' => get_class($record),
+            'approvable_id' => $record->id ?? null,
+            'status' => $this->status->value,
+            'status_at' => now(),
+            'approver_id' => auth()->id(),
+            'config' => json_encode($this->getConfig()),
+        ]);
+
+        Notification::make()
+            ->title("Successfully marked as $this->name!")
+            ->success()
+            ->send();
+    }
+
+    public function removePendingApproval(): void
+    {
+        $record = $this->getRecord();
+        $recordName = strtolower(class_basename($record));
+        assert($this->status instanceof BackedEnum);
+
+        PendingApproval::where([
+            'category' => $this->category ?? "approvals-$recordName",
+            'approvable_type' => get_class($record),
+            'approvable_id' => $record->id ?? null,
+            'approver_id' => auth()->id(),
+            'status' => $this->status->value,
         ])->delete();
 
         Notification::make()
             ->title("Successfully unmarked as $this->name!")
             ->success()
             ->send();
+    }
+
+    public function getConfig(): array
+    {
+        if (! $this->approvalFlow) {
+            return $this->defaultConfig;
+        }
+
+        if (! $this->approvalFlow->isChained()) {
+            return $this->approvalFlow->bestMatchStep($this->getRecord(), $this->getCategory(), $this->getStatusEnumClass())['config'];
+        }
+
+        $currentStep = $this->approvalFlow->currentStep($this->getRecord(), $this->getCategory(), $this->getStatusEnumClass());
+
+        if (! $currentStep) {
+            return $this->defaultConfig;
+        }
+
+        return $currentStep['config'];
     }
 
     public function getStatusEnumClass(): string
@@ -208,11 +307,27 @@ trait HandlesApprovals
 
     protected function actionHasCurrentApprovalStatus(): bool
     {
-        $approval = Approval::getApprovalForAction($this);
 
         assert($this->status instanceof BackedEnum);
 
+        if ($this->isPending()) {
+            $approval = PendingApproval::getApprovalForAction($this);
+
+            return $approval && $approval->status === $this->status->value;
+
+        }
+
+        $approval = Approval::getApprovalForAction($this);
+
         return $approval && $approval->status === $this->status->value;
+    }
+
+    protected function approvalActionTaken(): bool
+    {
+        return Approval::where('category', $this->category)
+            ->where('approvable_type', get_class($this->getRecord()))
+            ->where('approvable_id', $this->getRecord()->getKey())
+            ->exists();
     }
 
     public function approvalFlow(ApprovalFlow $approvalFlow): static
@@ -229,10 +344,19 @@ trait HandlesApprovals
             return true;
         }
 
-        if (! $this->actionHasCurrentApprovalStatus() && Approval::userHasResponded($this->getRecord(), $this->category, $this->scope)) {
+        $hasResponded = PendingApproval::userHasResponded($this->getRecord(), $this->category) || Approval::userHasResponded($this->getRecord(), $this->category);
+
+        if (! $this->actionHasCurrentApprovalStatus() && $hasResponded) {
             return true;
         }
 
         return false;
+    }
+
+    public function isPending(): bool
+    {
+        $pendingStatuses = $this->status::getPendingStatuses();
+
+        return in_array($this->status, $pendingStatuses, true);
     }
 }
