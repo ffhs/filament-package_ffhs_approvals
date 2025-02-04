@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Filament\Resources\TestApprovableModelResource;
 use Ffhs\Approvals\ApprovalsPlugin;
 use Ffhs\FilamentPackageFfhsCustomForms\CustomFormPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -28,6 +29,9 @@ class WorkbenchAdminPanelProvider extends PanelProvider
            ->login()
            ->id('admin')
            ->path('admin')
+           ->resources([
+               TestApprovableModelResource::class
+           ])
            ->middleware([
                EncryptCookies::class,
                AddQueuedCookiesToResponse::class,

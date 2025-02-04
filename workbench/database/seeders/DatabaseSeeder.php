@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\TestApprovableModels;
 use Illuminate\Database\Seeder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Database\Factories\UserFactory;
@@ -19,5 +20,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        TestApprovableModels::create(['name' => 'test']);
     }
 }
