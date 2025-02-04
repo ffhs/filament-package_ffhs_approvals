@@ -83,7 +83,7 @@ class ApprovalsServiceProvider extends PackageServiceProvider
         }
 
         // Testing
-        Testable::mixin(new TestsApprovals());
+        // Testable::mixin(new TestsApprovals());
     }
 
     protected function getAssetPackageName(): ?string
