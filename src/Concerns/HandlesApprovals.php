@@ -72,7 +72,7 @@ trait HandlesApprovals
         return $this->status;
     }
 
-    public function process(): Closure
+    public function process() //:Closure
     {
         return function (): void {
 

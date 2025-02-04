@@ -6,7 +6,9 @@ use Ffhs\Approvals\Approval\ApprovalFlow;
 use Ffhs\Approvals\ApprovalBy;
 use Ffhs\Approvals\Traits\HasApprovalActionModifications;
 use Ffhs\Approvals\Traits\HasApprovals;
+use Filament\Infolists\ComponentContainer;
 use Filament\Infolists\Components\Component;
+use Filament\Infolists\Concerns\HasColumns;
 use Filament\Support\Concerns\HasAlignment;
 use Filament\Support\Concerns\HasVerticalAlignment;
 use Mockery\Matcher\Closure;
@@ -17,6 +19,7 @@ class ApprovalActions extends Component
     use HasAlignment;
     use HasVerticalAlignment;
     use HasApprovalActionModifications;
+    use HasColumns; //ToDo implement
 
 
     protected bool | Closure $isFullWidth = false;
@@ -25,11 +28,14 @@ class ApprovalActions extends Component
     protected string|Closure $approvalKey;
     protected ApprovalFlow|null $cachedApprovalFlow = null;
 
+    protected bool|Closure $requiresConfirmation = false;
+
 
 
     final public function __construct(string|Closure $approvalKey)
     {
         $this->approvalKey($approvalKey);
+        $this->statePath($this->getApprovalKey());
     }
 
 
@@ -82,16 +88,6 @@ class ApprovalActions extends Component
         return $this->getApprovalFlow()->getApprovalStatus();
     }
 
-    public function getActions(): array
-    {
-        $allActions = [];
-        foreach ($this->getApprovalFlow()->getApprovalBys() as $approvalBy) {
-           $allActions = array_merge($allActions, $this->getApprovalByActions($approvalBy));
-        }
-
-        return $allActions;
-    }
-
 
 
 
@@ -107,8 +103,11 @@ class ApprovalActions extends Component
             $color = $colorMap[$status->value] ?? null;
 
             $actions[] = ApprovalAction::make($approvalBy->getName() . '-' . $status->value)
+                ->requiresConfirmation($this->isRequiresConfirmation())
+                ->approvalBy($approvalBy)
                 ->color($color)
-                ->label($label);
+                ->label($label)
+                ->toInfolistComponent();
         }
 
         return $actions;
@@ -127,6 +126,35 @@ class ApprovalActions extends Component
         return (bool) $this->evaluate($this->isFullWidth);
     }
 
+
+    public function requiresConfirmation(bool|Closure $requiresConfirmation = true): static
+    {
+        $this->requiresConfirmation = $requiresConfirmation;
+        return $this;
+    }
+
+    public function isRequiresConfirmation(): bool
+    {
+       return $this->evaluate($this->requiresConfirmation);
+    }
+
+    public function getChildComponentContainers(bool $withHidden = false): array
+    {
+        $containers = [];
+        foreach ($this->getApprovalFlow()->getApprovalBys() as $approvalBy) {
+            $containers[$approvalBy->getName()] = ComponentContainer::make($this->getLivewire())
+                ->parentComponent($this)
+                ->components($this->getApprovalByActions($approvalBy));
+        }
+
+        return $containers;
+    }
+
+    public function hasChildComponentContainer(bool $withHidden = false): bool
+    {
+        if(!$withHidden && $this->isHidden()) return false;
+        return sizeof($this->getApprovalFlow()->getApprovalBys()) > 0;
+    }
 
 
 
