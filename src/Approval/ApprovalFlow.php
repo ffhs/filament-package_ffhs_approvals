@@ -1,12 +1,10 @@
 <?php
 
-namespace Ffhs\Approvals;
+namespace Ffhs\Approvals\Approval;
 
 use Closure;
-use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Filament\Support\Concerns\EvaluatesClosures;
 use Illuminate\Database\Eloquent\Model;
-use LaraDumpsCore\___PHPSTORM_HELPERS\static;
 
 class ApprovalFlow
 {
@@ -46,7 +44,7 @@ class ApprovalFlow
         return $this;
     }
 
-    public function getApprovalBy(): array{
+    public function getApprovalBys(): array{
         return $this->evaluate($this->approvalBy);
     }
 

@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\TestApprovableModels;
 use Illuminate\Database\Seeder;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Database\Factories\UserFactory;
 
 class DatabaseSeeder extends Seeder
@@ -19,6 +18,7 @@ class DatabaseSeeder extends Seeder
         UserFactory::new()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'password' => bcrypt('password'),
         ]);
 
         TestApprovableModels::create(['name' => 'test']);

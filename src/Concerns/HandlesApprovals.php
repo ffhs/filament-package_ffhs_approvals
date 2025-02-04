@@ -345,17 +345,18 @@ trait HandlesApprovals
             return true;
         }
 
-        $hasResponded = PendingApproval::userHasResponded($this->getRecord(), $this->category) || Approval::userHasResponded($this->getRecord(), $this->category);
-
-        if (! $this->actionHasCurrentApprovalStatus() && $hasResponded) {
-            return true;
-        }
+//        $hasResponded = PendingApproval::userHasResponded($this->getRecord(), $this->category) || Approval::userHasResponded($this->getRecord(), $this->category); //ToDo
+//
+//        if (! $this->actionHasCurrentApprovalStatus() && $hasResponded) {
+//            return true;
+//        }
 
         return false;
     }
 
     public function isPending(): bool
     {
+        return false; //ToDo
         $pendingStatuses = $this->status::getPendingStatuses();
 
         return in_array($this->status, $pendingStatuses, true);

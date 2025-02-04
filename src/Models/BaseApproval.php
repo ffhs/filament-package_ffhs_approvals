@@ -49,6 +49,7 @@ class BaseApproval extends Model
 
     public static function getApprovalForAction(ApprovalAction $action): ?BaseApproval
     {
+        return null;
         return self::where('category', $action->getCategory())
             ->where('approvable_type', get_class($action->getRecord()))
             ->where('approvable_id', $action->getRecord()->getKey())

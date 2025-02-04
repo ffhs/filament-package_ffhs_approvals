@@ -34,6 +34,11 @@ class ApprovalBy
         return $this;
     }
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
     public function getRole(): ?string
     {
         return $this->role;
