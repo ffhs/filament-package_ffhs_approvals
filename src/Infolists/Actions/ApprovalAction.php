@@ -13,6 +13,15 @@ class ApprovalAction extends Action
 
     protected ?HasApprovalStatuses $status = null;
     protected ApprovalBy $approvalBy;
+    private string|array|null $colorSelected = null;
+    private string|array|null $colorNotSelected = null;
+
+    protected array $statusCategoryColors = [
+        'approved' => 'success',
+        'declined' => 'danger',
+        'pending' => 'info',
+    ];
+
 
     public function approvalBy(ApprovalBy $approvalBy):static
     {
@@ -34,6 +43,35 @@ class ApprovalAction extends Action
         return $this->status;
     }
 
+    public function colorSelected(null|string|array $colorSelected):static
+    {
+        $this->colorSelected = $colorSelected;
+        return $this;
+    }
+
+    public function colorNotSelected(null|string|array $colorNotSelected):static
+    {
+        $this->colorNotSelected = $colorNotSelected;
+        return $this;
+    }
+
+    public function getColorSelected(): null|string|array
+    {
+        return $this->evaluate($this->colorSelected);
+    }
+
+    public function getColorNotSelected(): string|array|null
+    {
+        return $this->evaluate($this->colorNotSelected);
+    }
+
+    public function getApprovalBy(): ApprovalBy
+    {
+        return $this->approvalBy;
+    }
+
+
+
 
     protected function setUp(): void
     {
@@ -51,7 +89,46 @@ class ApprovalAction extends Action
 
 
     public function process(){
+        //ToDo
+    }
 
+
+    public function getColor(): string | array | null
+    {
+        if (! $this->actionHasCurrentApprovalStatus()) {
+            $colors = $this->getColorNotSelected();
+            if(!is_array($colors)) return $colors ?? 'gray';
+            return $colors[$this->getStatus()->value] ?? 'gray';
+        }
+
+        $state = $this->getStatus();
+
+        $statusEnum = $this->getStatusEnumClass();
+        $colors = $this->getColorSelected();
+
+        if(!is_null($colors)){
+            if(!is_array($colors)){
+                return $colors;
+            }
+            if(array_key_exists($state->value, $colors)) {
+                return $colors[$state->value];
+            }
+        }
+
+
+        if (in_array($state, $statusEnum::getApprovedStatuses(), true)) {
+            return $this->getApprovedStatusColor();
+        }
+
+        if (in_array($state, $statusEnum::getDeclinedStatuses(), true)) {
+            return $this->getDeclinedStatusColor();
+        }
+
+        if (in_array($state, $statusEnum::getPendingStatuses(), true)) {
+            return $this->getPendingStatusColor();
+        }
+
+        return parent::getColor();
     }
 
 

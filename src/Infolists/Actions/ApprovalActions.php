@@ -100,13 +100,14 @@ class ApprovalActions extends Component
         $actions = [];
         foreach ($this->getApprovalStatus() as $status){
             $label = $labelMap[$status->value] ?? $status->value;
-            $color = $colorMap[$status->value] ?? null;
 
             $actions[] = ApprovalAction::make($approvalBy->getName() . '-' . $status->value)
                 ->requiresConfirmation($this->isRequiresConfirmation())
+                ->colorSelected($this->getApprovalActionsSelectColor())
+                ->colorNotSelected($this->getApprovalActionsColor())
                 ->approvalBy($approvalBy)
-                ->color($color)
                 ->label($label)
+                ->status($status)
                 ->toInfolistComponent();
         }
 

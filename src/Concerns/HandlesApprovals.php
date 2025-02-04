@@ -14,15 +14,32 @@ use InvalidArgumentException;
 
 trait HandlesApprovals
 {
+    public function canApprove(PendingApproval $approval): bool
+    {
+//        $hasResponded = PendingApproval::userHasResponded($this->getRecord(), $this->category) || Approval::userHasResponded($this->getRecord(), $this->category); //ToDo
+//        if (! $this->actionHasCurrentApprovalStatus() && $hasResponded) {
+//            return true;
+//        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     protected ?string $category = null;
 
     protected ?HasApprovalStatuses $status = null;
-
-    protected array $statusCategoryColors = [
-        'approved' => 'success',
-        'declined' => 'danger',
-        'pending' => 'info',
-    ];
 
     protected array $defaultConfig = [
         'order' => null,
@@ -31,22 +48,21 @@ trait HandlesApprovals
 
     protected ?ApprovalFlow $approvalFlow = null;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->name($this->name)
-            ->requiresConfirmation()
-            ->modalDescription(function () {
-                if ($this->actionHasCurrentApprovalStatus()) {
-                    return "Are you sure you want to unmark this as $this->name?";
-                }
-
-                return "Are you sure you want to mark this as $this->name?";
-            })
-            ->action($this->process());
-
-    }
+//    protected function setUp(): void
+//    {
+//        parent::setUp();
+//
+//        $this->name($this->name)
+//            ->requiresConfirmation()
+//            ->modalDescription(function () {
+//                if ($this->actionHasCurrentApprovalStatus()) {
+//                    return "Are you sure you want to unmark this as $this->name?";
+//                }
+//
+//                return "Are you sure you want to mark this as $this->name?";
+//            })
+//            ->action($this->process());
+//    }
 
     public function category(string $category): static
     {
@@ -263,28 +279,28 @@ trait HandlesApprovals
     /**
      * @return string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | null
      */
-    public function getColor(): string | array | null
-    {
-        if (! $this->actionHasCurrentApprovalStatus()) {
-            return 'gray';
-        }
-
-        $statusEnum = $this->getStatusEnumClass();
-
-        if (in_array($this->status, $statusEnum::getApprovedStatuses(), true)) {
-            return $this->getApprovedStatusColor();
-        }
-
-        if (in_array($this->status, $statusEnum::getDeclinedStatuses(), true)) {
-            return $this->getDeclinedStatusColor();
-        }
-
-        if (in_array($this->status, $statusEnum::getPendingStatuses(), true)) {
-            return $this->getPendingStatusColor();
-        }
-
-        return parent::getColor();
-    }
+//    public function getColor(): string | array | null
+//    {
+//        if (! $this->actionHasCurrentApprovalStatus()) {
+//            return 'gray';
+//        }
+//
+//        $statusEnum = $this->getStatusEnumClass();
+//
+//        if (in_array($this->status, $statusEnum::getApprovedStatuses(), true)) {
+//            return $this->getApprovedStatusColor();
+//        }
+//
+//        if (in_array($this->status, $statusEnum::getDeclinedStatuses(), true)) {
+//            return $this->getDeclinedStatusColor();
+//        }
+//
+//        if (in_array($this->status, $statusEnum::getPendingStatuses(), true)) {
+//            return $this->getPendingStatusColor();
+//        }
+//
+//        return parent::getColor();
+//    }
 
     public function statusCategoryColors(array $colors): static
     {
