@@ -108,7 +108,7 @@ class ApprovalActions extends Component
                 ->approvalKey($this->getApprovalKey())
                 ->approvalBy($approvalBy)
                 ->label($label)
-                ->status($status)
+                ->actionStatus($status)
                 ->toInfolistComponent();
         }
 

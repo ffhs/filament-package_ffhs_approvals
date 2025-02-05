@@ -2,11 +2,15 @@
 
 namespace Ffhs\Approvals\Infolists\Actions;
 
+use App\Models\User;
 use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Concerns\HandlesApprovals;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
+use Ffhs\Approvals\Models\Approval;
 use Filament\Infolists\Components\Actions\Action;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class ApprovalAction extends Action implements ApprovableByComponent
 {
@@ -25,20 +29,88 @@ class ApprovalAction extends Action implements ApprovableByComponent
     ];
 
 
-    public function status(HasApprovalStatuses $status): static
+    public function changeApproval():void{
+        if($this->isActionActive()){
+            $this->getActionBoundApproval()->delete();
+            Notification::make()
+                ->title('remove approval') //ToDo Translate and add text state
+                ->success()
+                ->send();
+            return;
+        }
+
+        $isChange = !is_null($this->getStatus());
+        $oldState = $this->getStatus();
+
+        if($isChange) $this->getActionBoundApproval()->delete();
+
+        Approval::create([
+            'approver_id' => Auth::id(),
+            'approver_type' => User::class,
+            'approvable_id' => $this->approvable()->id,
+            'approvable_type' => $this->approvable()::class,
+            'status' => $this->getActionStatus()->value,
+            'key' => $this->getApprovalKey(),
+            'approval_by' => $this->getApprovalBy()->getName()
+        ]);
+
+        if($isChange){
+            Notification::make()
+                ->title('change approval from ' . $oldState->value . ' to ' . $this->getActionStatus()->value) //ToDo Translate and add text state
+                ->success()
+                ->send();
+        }
+        else{
+            Notification::make()
+                ->title('set approval to ' . $this->getActionStatus()->value) //ToDo Translate and add text state
+                ->success()
+                ->send();
+        }
+
+
+    }
+
+
+    public function actionStatus(HasApprovalStatuses $status): static
     {
         $this->status = $status;
 
         return $this;
     }
 
-    public function getStatus(): ?HasApprovalStatuses
+    /**
+     * The Sate which the Action is bound, as example the 'approve' because it's the approval action
+     * @return HasApprovalStatuses|null
+     */
+    public function getActionStatus(): ?HasApprovalStatuses
     {
         return $this->status;
     }
 
+    public function isActionActive(): bool
+    {
+       return $this->getStatus() === $this->getActionStatus();
+    }
 
+    public function getStatus(): ?\UnitEnum
+    {
+        return $this->getActionBoundApproval()?->status;
+    }
 
+    protected function getStatusEnumClass(): ?string
+    {
+        if(!$this->getActionStatus())return null;
+        return $this->getActionStatus()::class;
+    }
+
+    public function getActionBoundApproval(): ?Approval
+    {
+        return $this->getBoundApprovals()->first();
+//            ->firstWhere(function (Approval $approval) {
+//                return $approval->approver_id == Auth::id() &&
+//                    $approval->approver_type == User::class;
+//            }); ToDo Later for at least
+    }
 
 
     public function colorSelected(null|string|array $colorSelected):static
@@ -63,27 +135,11 @@ class ApprovalAction extends Action implements ApprovableByComponent
         return $this->evaluate($this->colorNotSelected);
     }
 
-
-
-
-
     protected function setUp(): void
     {
         parent::setUp();
-
         $this->name($this->name);
-        $this->modalDescription(function () {
-                if ($this->actionHasCurrentApprovalStatus()) {
-                    return "Are you sure you want to unmark this as $this->name?"; //toDo Translation
-                }
-                return "Are you sure you want to mark this as $this->name?";
-            });
-        $this->action($this->process(...));
-    }
-
-
-    public function process(){
-        //ToDo
+        $this->action($this->changeApproval(...));
     }
 
     public function isDisabled(): bool
@@ -95,13 +151,13 @@ class ApprovalAction extends Action implements ApprovableByComponent
 
     public function getColor(): string | array | null
     {
-        if (! $this->actionHasCurrentApprovalStatus()) {
+        if (! $this->isActionActive()) {
             $colors = $this->getColorNotSelected();
             if(!is_array($colors)) return $colors ?? 'gray';
-            return $colors[$this->getStatus()->value] ?? 'gray';
+            return $colors[$this->getActionStatus()->value] ?? 'gray';
         }
 
-        $state = $this->getStatus();
+        $state = $this->getActionStatus();
 
         $statusEnum = $this->getStatusEnumClass();
         $colors = $this->getColorSelected();
@@ -114,7 +170,6 @@ class ApprovalAction extends Action implements ApprovableByComponent
                 return $colors[$state->value];
             }
         }
-
 
         if (in_array($state, $statusEnum::getApprovedStatuses(), true)) {
             return $this->getApprovedStatusColor();

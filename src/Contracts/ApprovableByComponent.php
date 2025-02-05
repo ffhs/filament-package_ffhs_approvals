@@ -4,6 +4,7 @@ namespace Ffhs\Approvals\Contracts;
 
 use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Models\Approval;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 interface ApprovableByComponent
@@ -17,7 +18,8 @@ interface ApprovableByComponent
 
     public function canApprove(): bool;
 
-    public function getBoundApproval(): ?Approval;
+    public function getBoundApprovals(): ?Collection;
+
 
 
 

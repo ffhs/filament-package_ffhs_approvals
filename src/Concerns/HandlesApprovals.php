@@ -8,23 +8,47 @@ use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Models\Approval;
 use Filament\Support\Facades\FilamentColor;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use InvalidArgumentException;
 
 trait HandlesApprovals
 {
+    protected ?ApprovalFlow $approvalFlow = null;
+    protected ?Collection $cachedApprovals = null;
+
+
+
     public function canApprove(): bool
     {
        return $this->getApprovalBy()->canApprove(Auth::user(), $this->approvable());
     }
 
-    public function getBoundApproval(): ?Approval
+
+    public function approvalFlow(ApprovalFlow $approvalFlow): static
     {
-        $approvals = $this->approvable()->approvals;
-        return $approvals->where('key', $this->getApprovalKey())
-            ->where('approval_by', $this->getApprovalBy())
-            ->first();
+        $this->approvalFlow = $approvalFlow;
+
+        return $this;
+    }
+
+    public function getApprovalFlow(): ?ApprovalFlow
+    {
+        return $this->approvalFlow;
+    }
+
+
+
+
+    public function getBoundApprovals(): ?Collection
+    {
+        if($this->cachedApprovals) return $this->cachedApprovals;
+        return $this->cachedApprovals = $this->approvable()->approvals
+            ->where(fn (Approval $approval) =>
+                    $approval->key == $this->getApprovalKey() &&
+                    $approval->approval_by == $this->getApprovalBy()->getName()
+            );
     }
 
     public function approvable(): Approvable|Model
@@ -53,22 +77,9 @@ trait HandlesApprovals
         return $this->evaluate($this->approvalKey);
     }
 
-    protected function actionHasCurrentApprovalStatus(): bool
+    protected function hasCurrentApprovalStatus(): bool
     {
-        return false;
-
-//        assert($this->status instanceof BackedEnum);
-//
-//        if ($this->isPending()) {
-//            $approval = PendingApproval::getApprovalForAction($this);
-//
-//            return $approval && $approval->status === $this->status->value;
-//
-//        }
-//
-//        $approval = Approval::getApprovalForAction($this);
-//
-//        return $approval && $approval->status === $this->status->value;
+        return $this->getBoundApprovals()->count() > 0;
     }
 
 
@@ -85,53 +96,6 @@ trait HandlesApprovals
 
 
 
-
-    protected ?string $category = null;
-
-    protected ?HasApprovalStatuses $status = null;
-
-//    protected array $defaultConfig = [
-//        'order' => null,
-//        'access' => null,
-//    ];
-
-    protected ?ApprovalFlow $approvalFlow = null;
-
-
-    public function getStatusEnumClass(): string
-    {
-        return $this->status::class;
-    }
-
-    public function category(string $category): static
-    {
-        $this->category = $category;
-
-        return $this;
-    }
-
-    public function getCategory(): ?string
-    {
-        return $this->category;
-    }
-
-    public function status(HasApprovalStatuses $status): static
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
-    public function getStatus(): ?HasApprovalStatuses
-    {
-        return $this->status;
-    }
-    public function approvalFlow(ApprovalFlow $approvalFlow): static
-    {
-        $this->approvalFlow = $approvalFlow;
-
-        return $this;
-    }
 
 //    public function process() //:Closure
 //    {
@@ -165,23 +129,7 @@ trait HandlesApprovals
 //        };
 //    }
 
-//    public function createDefaultApprovals(): void
-//    {
-//        $steps = $this->approvalFlow->getSteps();
-//
-//        $record = $this->getRecord();
-//        $recordName = strtolower(class_basename($record));
-//        assert($this->status instanceof BackedEnum);
-//
-//        foreach ($steps as $step) {
-//            Approval::create([
-//                'category' => $this->category ?? "approvals-$recordName",
-//                'approvable_type' => get_class($record),
-//                'approvable_id' => $record->id ?? null,
-//                'config' => json_encode($step['config']),
-//            ]);
-//        }
-//    }
+
 
 //    public function setApproval(): void
 //    {

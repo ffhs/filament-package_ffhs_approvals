@@ -7,9 +7,11 @@ use Error;
 use Exception;
 use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\Approver;
+use Ffhs\Approvals\Models\Approval;
 use Filament\Support\Concerns\EvaluatesClosures;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 
 class ApprovalBy
@@ -24,7 +26,6 @@ class ApprovalBy
 
     protected int $atLeast = 1;
 
-    protected bool $satisfied = false;
     protected bool $any = false;
 
     protected ?Closure $canApproveUsing = null;
@@ -43,8 +44,6 @@ class ApprovalBy
     {
         $this->name = $name;
     }
-
-
 
     public static function make(string $name): static
     {
@@ -92,7 +91,6 @@ class ApprovalBy
         return $this->atLeast;
     }
 
-
     public function canApprove(Approver|Model $approver, Approvable $approvable): bool
     {
         if($this->canApproveUsing){
@@ -108,86 +106,38 @@ class ApprovalBy
             return Gate::allows('can_approve_by', $this);
         }
 
-
         return $this->canApproveFromPermissions($approver);
-
-
     }
 
-    public function canApproveFromPermissions(Approver|Model$approver): bool
+    public function canApproveFromPermissions(Approver|Model $approver): bool
     {
         try {
-            if ($this->role) {
-                $approver->hasRole($this->role);
-                return $approver->hasRole($this->role);
+            if ($this->getRole()) {
+                return $approver->hasRole($this->getRole());
             }
 
-            if ($this->permission) {
-                return $approver->hasPermissionTo($this->permission);
+            if ($this->getPermission()) {
+                return $approver->hasPermissionTo($this->getPermission());
             }
-        }catch (Error|Exception){
-
-        }
+        }catch (Error|Exception){}
         return false;
     }
 
-//    public function getAccess(): ?string
-//    {
-//        // Assuming role should take precedence over a permission
-//
-//        if ($this->role) {
-//            return 'role:' . $this->role;
-//        }
-//
-//        if ($this->permission) {
-//            return 'permission:' . $this->permission;
-//        }
-//
-//        return null;
-//    }
-
-//    public function isSatisfied(Model $record, $category, $statusClass): bool
-//    {
-//
-//        $approvals = Approval::where('category', $category)
-//            ->where('approvable_type', get_class($record))
-//            ->where('approvable_id', $record->getKey())
-//            ->whereIn('status', $statusClass::getApprovedStatuses())
-//            ->whereJsonContains('config->access', $this->getAccess())
-//            ->get();
-//
-//        $conditions = [];
-//
-//        foreach ($approvals as $approval) {
-//
-//            $approver = $approval->approver;
-//
-//            if ($this->role === null && $this->permission === null) {
-//                $conditions[] = true;
-//            }
-//
-//            if ($this->role && method_exists($approver, 'hasRole')) {
-//                $conditions[] = $approver->hasRole($this->role);
-//            }
-//
-//            if ($this->permission && method_exists($approver, 'hasPermissionTo')) {
-//                $conditions[] = $approver->hasPermissionTo($this->permission);
-//            }
-//        }
-//
-//        $countTrue = count(array_filter($conditions));
-//
-//        $this->satisfied = $countTrue >= $this->atLeast;
-//
-//        return $this->satisfied;
-//    }
-//
-//    public function satisfied(bool $satisfied = true): static
-//    {
-//        $this->satisfied = $satisfied;
-//
-//        return $this;
-//    }
+    public function reachAtLeast(Approvable|Model $approvable, $key): bool {
+        $approvals = $this->getApprovals($approvable, $key);
+        return $approvals->count() >= $this->atLeast;
+    }
 
 
+    public function getApprovals(Model|Approvable $approvable,$key): Collection{
+        return $approvable->approvals->where(function (Approval $approval) use ($key) {
+            if ($approval->key != $key) {
+                return false;
+            }
+            if ($approval->approval_by != $this->getName()) {
+                return false;
+            }
+            return true;
+        });
+    }
 }

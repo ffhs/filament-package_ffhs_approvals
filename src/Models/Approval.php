@@ -2,8 +2,11 @@
 
 namespace Ffhs\Approvals\Models;
 
+use App\Domain\Documents\DocumentApprovalStatus;
 use Attribute;
+use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
+use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,6 +20,7 @@ use UnitEnum;
  * @property string approver_type
  * @property string approval_by
  * @property string|UnitEnum status
+ * @property Model|Approvable approvable
  */
 class Approval extends Model
 {
@@ -48,19 +52,46 @@ class Approval extends Model
         return $this->morphTo('approvable');
     }
 
-
-    protected function status(): Attribute
+    public function __get($key)
     {
-        return Attribute::make(
-            get: function (string $value){
-                return $value; //ToDo
-            },
-            set: function (string|UnitEnum $value){
-                if($value instanceof UnitEnum) return $value->value;
-                else return $value;
-            }
-        );
+        return match ($key) {
+            'status' => $this->getStatus(),
+            default => parent::__get($key),
+        };
     }
+
+    public function __set($key, $value)
+    {
+        match ($key) {
+            'status' => $this->setStatus($value),
+            default => parent::__set($key, $value),
+        };
+    }
+
+
+    protected function getStatus(): DocumentApprovalStatus
+    {
+        $value = parent::__get('status');
+        try {
+            $flow = $this->approvable->getApprovalFlows()[$this->key];
+            return collect($flow->getApprovalStatus())
+                ->firstWhere(fn($unitEnum) =>$unitEnum->value ==  $value);
+        }catch (\Error|\Exception){
+            return $value;
+        }
+    }
+
+    protected function setStatus(DocumentApprovalStatus|UnitEnum|string $status): void
+    {
+      if(is_string($status)){
+          parent::__set('status', $status);
+          return;
+      }
+
+        parent::__set('status', $status->value);
+
+    }
+
 
 
 
