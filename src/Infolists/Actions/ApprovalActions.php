@@ -3,7 +3,7 @@
 namespace Ffhs\Approvals\Infolists\Actions;
 
 use Ffhs\Approvals\Approval\ApprovalFlow;
-use Ffhs\Approvals\ApprovalBy;
+use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Traits\HasApprovalActionModifications;
 use Ffhs\Approvals\Traits\HasApprovals;
 use Filament\Infolists\ComponentContainer;
@@ -64,7 +64,6 @@ class ApprovalActions extends Component
         if(!is_null($this->cachedApprovalFlow))
             return $this->cachedApprovalFlow;
 
-
         /** @var HasApprovals $record */
         $record = $this->getRecord();
 //        if(!($record instanceof HasApprovals))
@@ -74,6 +73,8 @@ class ApprovalActions extends Component
             $this->cachedApprovalFlow = $record->getApprovalFlows()[$this->getApprovalKey()] ?? null;
         }catch (UndefinedFunctionError){
             throw new \RuntimeException('Record hasn\'t an Approval Flow [function getApprovalFlows()]');
+        }catch (ErrorException){
+            throw new \RuntimeException('The key ' . $this->getApprovalKey(). ' doesnt exist');
         }
 
 
@@ -95,7 +96,6 @@ class ApprovalActions extends Component
     public function getApprovalByActions(ApprovalBy $approvalBy):array
     {
         $labelMap = $this->getApprovalActionsLabel();
-        $colorMap = $this->getApprovalActionsColor();
 
         $actions = [];
         foreach ($this->getApprovalStatus() as $status){
@@ -105,6 +105,7 @@ class ApprovalActions extends Component
                 ->requiresConfirmation($this->isRequiresConfirmation())
                 ->colorSelected($this->getApprovalActionsSelectColor())
                 ->colorNotSelected($this->getApprovalActionsColor())
+                ->approvalKey($this->getApprovalKey())
                 ->approvalBy($approvalBy)
                 ->label($label)
                 ->status($status)
@@ -134,10 +135,14 @@ class ApprovalActions extends Component
         return $this;
     }
 
+
     public function isRequiresConfirmation(): bool
     {
        return $this->evaluate($this->requiresConfirmation);
     }
+
+
+
 
     public function getChildComponentContainers(bool $withHidden = false): array
     {

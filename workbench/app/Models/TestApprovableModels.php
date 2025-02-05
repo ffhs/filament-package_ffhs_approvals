@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Approvals\TestApprovalStatuses;
-use Ffhs\Approvals\ApprovalBy;
+use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\ApprovalFlow;
 use Ffhs\Approvals\Traits\HasApprovals;
 use Illuminate\Database\Eloquent\Model;

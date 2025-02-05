@@ -2,12 +2,13 @@
 
 namespace Ffhs\Approvals\Infolists\Actions;
 
-use Ffhs\Approvals\ApprovalBy;
+use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Concerns\HandlesApprovals;
+use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Filament\Infolists\Components\Actions\Action;
 
-class ApprovalAction extends Action
+class ApprovalAction extends Action implements ApprovableByComponent
 {
     use HandlesApprovals;
 
@@ -15,20 +16,13 @@ class ApprovalAction extends Action
     protected ApprovalBy $approvalBy;
     private string|array|null $colorSelected = null;
     private string|array|null $colorNotSelected = null;
+    private string|\Closure $approvalKey;
 
     protected array $statusCategoryColors = [
         'approved' => 'success',
         'declined' => 'danger',
         'pending' => 'info',
     ];
-
-
-    public function approvalBy(ApprovalBy $approvalBy):static
-    {
-        $this->approvalBy = $approvalBy;
-        return $this;
-    }
-
 
 
     public function status(HasApprovalStatuses $status): static
@@ -42,6 +36,10 @@ class ApprovalAction extends Action
     {
         return $this->status;
     }
+
+
+
+
 
     public function colorSelected(null|string|array $colorSelected):static
     {
@@ -65,10 +63,6 @@ class ApprovalAction extends Action
         return $this->evaluate($this->colorNotSelected);
     }
 
-    public function getApprovalBy(): ApprovalBy
-    {
-        return $this->approvalBy;
-    }
 
 
 
@@ -90,6 +84,12 @@ class ApprovalAction extends Action
 
     public function process(){
         //ToDo
+    }
+
+    public function isDisabled(): bool
+    {
+        if($this->evaluate($this->isDisabled) || $this->isHidden()) return true;
+        return !$this->canApprove();
     }
 
 
