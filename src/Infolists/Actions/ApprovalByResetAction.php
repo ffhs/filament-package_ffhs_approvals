@@ -38,6 +38,8 @@ class ApprovalByResetAction extends Action implements ApprovableByComponent
             ->title('Approval is reset ' . $this->getApprovalBy()->getName()) //ToDo translate
             ->success()
             ->send();
+
+        $this->getRecord()->refresh();
     }
 
     public function getActionApproval(): ?Approval

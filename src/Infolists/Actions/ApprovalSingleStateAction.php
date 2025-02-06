@@ -39,6 +39,8 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
                 ->title('remove approval') //ToDo Translate and add text state
                 ->success()
                 ->send();
+
+            $this->getRecord()->refresh();
             return;
         }
 
@@ -69,6 +71,7 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
                 ->success()
                 ->send();
         }
+        $this->getRecord()->refresh();
 
     }
 
