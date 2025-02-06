@@ -111,13 +111,15 @@ class ApprovalFlow
 
     public function approved(Model|Approvable $approvable, string $key): ApprovalState
     {
+        if($this->isApprovalDisabled()) return ApprovalState::APPROVED;
+
         $isPending = false;
         $isOpen= false;
         foreach ($this->getApprovalBys() as $approvalBy) {
             $approved = $approvalBy->approved($approvable, $key);
             if($approved == ApprovalState::PENDING) $isPending = true;
             elseif($approved == ApprovalState::OPEN) $isOpen = true;
-            elseif(ApprovalState::DECLINED) return ApprovalState::DECLINED;
+            elseif($approved == ApprovalState::DECLINED) return ApprovalState::DECLINED;
         }
 
         if($isPending) return ApprovalState::PENDING;

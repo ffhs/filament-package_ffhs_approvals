@@ -21,15 +21,7 @@ trait HasApprovals
     public function approvalStatistics(?array $categories = null, ?array $keys = null): array
     {
 
-        $flows = $this->getApprovalFlows();
-        if($keys) $flows = Arr::only($flows, $keys);
-
-        if($categories){
-            $flows = Arr::where($flows, function (ApprovalFlow $value, $key) use ($categories) {
-               return in_array($value->getCategory(), $categories);
-            });
-        }
-
+        $flows = $this->getFiltertApprovalFlow($categories, $keys);
         $statistic = [];
 
         foreach ($flows as $key => $flow) {
@@ -82,27 +74,45 @@ trait HasApprovals
         return $statistic;
     }
 
+    public function getFilteredApprovalFlow(?array $categories = null, ?array $keys = null): array{
+        $flows=$this->getApprovalFlows();
+        if($keys) $flows = Arr::only($flows, $keys);
 
-    public function anyDenied(?array $categories = null, ?array $keys = null): bool{
+        if($categories){
+            $flows = Arr::where($flows, function (ApprovalFlow $value, $key) use ($categories) {
+                return in_array($value->getCategory(), $categories);
+            });
+        }
+        return $flows;
+    }
+
+
+    public function isDenied(?array $categories = null, ?array $keys = null): bool{
         return $this->approved($categories, $keys) == ApprovalState::DECLINED;
     }
 
-    public function approved(?array $categories = null, ?array $keys = null, bool $failOnNotReachAtLeast = true): ApprovalState
+    public function approved(?array $categories = null, ?array $keys = null): ApprovalState
     {
-        $flows = $this->getApprovalFlows();
+        $flows = $this->getFilteredApprovalFlow($categories, $keys);
+
         $isPending = false;
         $isOpen= false;
         foreach ($flows as $key => $flow) {
             $approved = $flow->approved($this, $key);
             if($approved == ApprovalState::PENDING) $isPending = true;
             elseif($approved == ApprovalState::OPEN) $isOpen = true;
-            elseif(ApprovalState::DECLINED) return ApprovalState::DECLINED;
+            elseif($approved == ApprovalState::DECLINED) return ApprovalState::DECLINED;
         }
 
         if($isPending) return ApprovalState::PENDING;
         elseif($isOpen) return ApprovalState::OPEN;
         return ApprovalState::APPROVED;
 
+    }
+
+
+    public function isApproved(?array $categories = null, ?array $keys = null): bool{
+        return $this->approved($categories, $keys) == ApprovalState::APPROVED;
     }
 
 }

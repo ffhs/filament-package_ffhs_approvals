@@ -7,6 +7,7 @@ use Error;
 use Exception;
 use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\Approver;
+use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Enums\ApprovalState;
 use Ffhs\Approvals\Models\Approval;
 use Filament\Support\Concerns\EvaluatesClosures;
@@ -166,11 +167,18 @@ class ApprovalBy
 
         if(!$this->reachAtLeast($approvable, $key)) return ApprovalState::OPEN;
 
+        $notOpenStatuses = array_merge(
+            $statusClass::getPendingStatuses(),
+            $statusClass::getDeclinedStatuses(),
+            $statusClass::getApprovedStatuses()
+        );
+        $notOpenStatuses =collect($notOpenStatuses)->map(fn ($status) => $status->value);
+
         $open = $approvals
-            ->whereNotIn('state',$statusClass::getPendingStatuses())
-            ->whereNotIn('state',$statusClass::getDeclinedStatuses())
-            ->whereNotIn('state',$statusClass::getApprovedStatuses())
+            ->whereNotIn('status',$notOpenStatuses)
             ->isNotEmpty();
+
+
         if($open) return ApprovalState::OPEN;
         else return ApprovalState::APPROVED;
     }

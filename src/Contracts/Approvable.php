@@ -24,9 +24,12 @@ interface Approvable
 
 
     public function approvalStatistics(?array $categories = null, ?array $keys = null): array;
+    public function getFilteredApprovalFlow(?array $categories = null, ?array $keys = null): array;
 
 
-    public function approved(?array $categories = null, ?array $keys = null, bool $failOnNotReachAtLeast = true): ApprovalState;
-    public function anyDenied(?array $categories = null, ?array $keys = null): bool;
+    public function approved(?array $categories = null, ?array $keys = null): ApprovalState;
+
+    public function isApproved(?array $categories = null, ?array $keys = null): bool;
+    public function isDenied(?array $categories = null, ?array $keys = null): bool;
 
 }
