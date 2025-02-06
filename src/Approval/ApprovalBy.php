@@ -153,31 +153,31 @@ class ApprovalBy
         $flow = $this->getApprovalFlow($approvable, $key);
         $statusClass = $flow->getStatusEnumClass();
 
+        $deniedStatuses = collect($statusClass::getDeniedStatuses())->map(fn ($status) => $status->value);
+
+
         $denied = $approvals
-            ->whereIn('state',$statusClass::getDeniedStatuses())
+            ->whereIn('status',$deniedStatuses)
             ->isNotEmpty();
         if($denied) return ApprovalState::DENIED;
 
 
+        $pendingStatuses= collect($statusClass::getPendingStatuses())->map(fn ($status) => $status->value);
+
         $pending = $approvals
-            ->whereIn('state',$statusClass::getPendingStatuses())
+            ->whereIn('state', $pendingStatuses)
             ->isNotEmpty();
         if($pending) return ApprovalState::PENDING;
 
 
         if(!$this->reachAtLeast($approvable, $key)) return ApprovalState::OPEN;
 
-        $notOpenStatuses = array_merge(
-            $statusClass::getPendingStatuses(),
-            $statusClass::getDeniedStatuses(),
-            $statusClass::getApprovedStatuses()
-        );
-        $notOpenStatuses =collect($notOpenStatuses)->map(fn ($status) => $status->value);
+
+        $approvedStatuses = collect($statusClass::getApprovedStatuses())->map(fn ($status) => $status->value);
 
         $open = $approvals
-            ->whereNotIn('status',$notOpenStatuses)
+            ->whereNotIn('status',$approvedStatuses)
             ->isNotEmpty();
-
 
         if($open) return ApprovalState::OPEN;
         else return ApprovalState::APPROVED;
