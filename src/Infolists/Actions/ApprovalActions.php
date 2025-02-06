@@ -6,6 +6,7 @@ use Ffhs\Approvals\Approval\ApprovalFlow;
 use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Traits\HasApprovalActionModifications;
 use Ffhs\Approvals\Traits\HasApprovals;
+use Filament\Actions\Concerns\HasSize;
 use Filament\Infolists\ComponentContainer;
 use Filament\Infolists\Components\Component;
 use Filament\Infolists\Concerns\HasColumns;
@@ -20,6 +21,7 @@ class ApprovalActions extends Component
     use HasVerticalAlignment;
     use HasApprovalActionModifications;
     use HasColumns; //ToDo implement
+    use HasSize;
 
 
     protected bool | Closure $isFullWidth = false;
@@ -105,14 +107,16 @@ class ApprovalActions extends Component
         foreach ($this->getApprovalStatus() as $status){
             $label = $labelMap[$status->value] ?? $status->value;
 
-            $actions[] = ApprovalAction::make($approvalBy->getName() . '-' . $status->value)
+            $actions[] = ApprovalSingleStateAction::make($approvalBy->getName() . '-' . $status->value)
                 ->approvalFlow($this->getApprovalFlow())
                 ->requiresConfirmation($this->isRequiresConfirmation())
                 ->colorSelected($this->getApprovalActionsSelectColor())
                 ->colorNotSelected($this->getApprovalActionsColor())
+                ->approvalIcons($this->getApprovalActionsIcons())
                 ->approvalKey($this->getApprovalKey())
-                ->approvalBy($approvalBy)
                 ->label($label)
+                ->size($this->getSize())
+                ->approvalBy($approvalBy)
                 ->actionStatus($status)
                 ->toInfolistComponent();
         }

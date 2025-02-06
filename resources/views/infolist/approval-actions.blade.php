@@ -9,7 +9,7 @@
                 </p>
 
 
-                <div class="pt-2">
+                <div class="pt-2 mb-4">
                     <x-filament::actions
                         :actions="$getChildComponentContainer($approvalBys->getName())->getComponents()"
                         :alignment="$getAlignment()"
@@ -17,8 +17,6 @@
                     />
                 </div>
 
-                <br/>
-                <br/>
             </div>
 
         @endforeach

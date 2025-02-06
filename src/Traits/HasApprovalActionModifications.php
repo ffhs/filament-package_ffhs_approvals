@@ -22,6 +22,11 @@ trait HasApprovalActionModifications
     protected string|array|null $cachedApprovalActionsSelectColor = null;
 
 
+    protected array|Closure $approvalActionsIcons= [];
+    protected ?array $cachedApprovalActionsIcons = null;
+
+
+
     protected array|Closure $statusCategoryColors= [
         'approved' => 'success',
         'declined' => 'danger',
@@ -93,6 +98,19 @@ trait HasApprovalActionModifications
         if(!is_null($this->cachedStatusCategoryColors)) return $this->statusCategoryColors;
         $this->cachedStatusCategoryColors = $this->evaluate($this->statusCategoryColors);
         return $this->cachedStatusCategoryColors;
+    }
+
+    public function approvalActionsIcons(array|Closure $approvalActionsIcons): static
+    {
+        $this->approvalActionsIcons = $approvalActionsIcons;
+        $this->cachedApprovalActionsIcons= null;
+        return $this;
+    }
+    public function getApprovalActionsIcons(): array
+    {
+        if(!is_null($this->cachedApprovalActionsIcons)) return $this->approvalActionsIcons;
+        $this->cachedApprovalActionsIcons = $this->evaluate($this->approvalActionsIcons);
+        return $this->cachedApprovalActionsIcons;
     }
 
 
