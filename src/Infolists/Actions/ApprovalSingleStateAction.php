@@ -8,6 +8,7 @@ use Ffhs\Approvals\Concerns\HandlesApprovals;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Models\Approval;
+use Ffhs\Approvals\Traits\HasNeedResetApprovalBeforeChange;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
@@ -17,12 +18,11 @@ use Illuminate\Support\Facades\Auth;
 class ApprovalSingleStateAction extends Action implements ApprovableByComponent
 {
     use HandlesApprovals;
+    use HasNeedResetApprovalBeforeChange;
 
     protected ?HasApprovalStatuses $status = null;
-    protected ApprovalBy $approvalBy;
     private string|array|null $colorSelected = null;
     private string|array|null $colorNotSelected = null;
-    private string|\Closure $approvalKey;
 
     protected array $statusCategoryColors = [
         'approved' => 'success',
@@ -69,9 +69,6 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
                 ->success()
                 ->send();
         }
-
-        dd($this->approvable()->approvalStatistics());
-
 
     }
 
@@ -159,7 +156,9 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
     public function isDisabled(): bool
     {
         if($this->evaluate($this->isDisabled) || $this->isHidden()) return true;
-        return !$this->canApprove();
+        if(!$this->canApprove()) return true;
+        if(!$this->isNeedResetApprovalBeforeChange()) return false;
+        return !is_null($this->getStatus());
     }
 
 
@@ -200,6 +199,13 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
         return parent::getColor();
     }
 
+    public function isHidden(): bool
+    {
+        if(parent::isHidden()) return true;
+        if(!$this->isNeedResetApprovalBeforeChange()) return false;
+        if(is_null($this->getStatus())) return false;
+        return $this->getStatus() !== $this->getActionStatus();
+    }
 
 
 }

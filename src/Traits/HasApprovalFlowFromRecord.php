@@ -42,7 +42,7 @@ trait HasApprovalFlowFromRecord
     }
 
 
-    public function getApprovalStatus(): array
+    public function getApprovalStatuses(): array
     {
         return $this->getApprovalFlow()->getApprovalStatus();
     }

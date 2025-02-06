@@ -4,6 +4,7 @@ namespace Ffhs\Approvals\Models;
 
 use App\Domain\Approvals\Documents\DocumentApprovalStatus;
 use Ffhs\Approvals\Contracts\Approvable;
+use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -66,7 +67,7 @@ class Approval extends Model
     }
 
 
-    protected function getStatus(): DocumentApprovalStatus
+    protected function getStatus(): HasApprovalStatuses
     {
         $value = parent::__get('status');
         try {

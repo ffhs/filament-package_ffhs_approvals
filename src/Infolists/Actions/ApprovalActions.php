@@ -2,8 +2,6 @@
 
 namespace Ffhs\Approvals\Infolists\Actions;
 
-use ErrorException;
-use Ffhs\Approvals\Approval\ApprovalFlow;
 use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Traits\HasApprovalActionModifications;
 use Ffhs\Approvals\Traits\HasApprovalFlowFromRecord;
@@ -59,15 +57,28 @@ class ApprovalActions extends Component
     }
 
 
+    public function getResetApprovalByAction(ApprovalBy $approvalBy): ApprovalByResetAction
+    {
+        return ApprovalByResetAction::make($approvalBy->getName() . '-reset_approval')
+            ->approvalKey($this->getApprovalKey())
+            ->approvalBy($approvalBy)
+            ->size($this->getSize())
+            ->visible(fn() => $this->isNeedResetApprovalBeforeChange());
+    }
+
+
+
     public function getApprovalByActions(ApprovalBy $approvalBy):array
     {
         $labelMap = $this->getApprovalActionsLabel();
 
         $actions = [];
-        foreach ($this->getApprovalStatus() as $status){
+
+        foreach ($this->getApprovalStatuses() as $status){
             $label = $labelMap[$status->value] ?? $status->value;
 
             $actions[] = ApprovalSingleStateAction::make($approvalBy->getName() . '-' . $status->value)
+                ->needResetApprovalBeforeChange($this->isNeedResetApprovalBeforeChange())
                 ->approvalFlow($this->getApprovalFlow())
                 ->requiresConfirmation($this->isRequiresConfirmation())
                 ->colorSelected($this->getApprovalActionsSelectColor())
@@ -80,6 +91,8 @@ class ApprovalActions extends Component
                 ->actionStatus($status)
                 ->toInfolistComponent();
         }
+
+        $actions[] = $this->getResetApprovalByAction($approvalBy)->toInfolistComponent();
 
         return $actions;
     }
@@ -130,5 +143,9 @@ class ApprovalActions extends Component
         if(!$withHidden && $this->isHidden()) return false;
         return sizeof($this->getApprovalFlow()->getApprovalBys()) > 0;
     }
+
+
+
+
 
 }

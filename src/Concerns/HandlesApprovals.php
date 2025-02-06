@@ -2,11 +2,11 @@
 
 namespace Ffhs\Approvals\Concerns;
 
-use DI\Definition\Exception\InvalidAttribute;
 use Ffhs\Approvals\Approval\ApprovalFlow;
 use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Models\Approval;
+use Ffhs\Approvals\Traits\HasApprovalKey;
 use Filament\Support\Facades\FilamentColor;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -16,8 +16,11 @@ use PHPUnit\Event\RuntimeException;
 
 trait HandlesApprovals
 {
-    protected ?ApprovalFlow $approvalFlow = null;
-    protected ?Collection $cachedApprovals = null;
+    use HasApprovalKey;
+
+    private ?ApprovalFlow $approvalFlow = null;
+    private ?Collection $cachedApprovals = null;
+    private ApprovalBy $approvalBy;
 
 
 
@@ -66,19 +69,6 @@ trait HandlesApprovals
     {
         return $this->approvalBy;
     }
-
-
-    public function approvalKey(string|\Closure $approvalKey): static
-    {
-        $this->approvalKey = $approvalKey;
-        return $this;
-    }
-
-    public function getApprovalKey(): string
-    {
-        return $this->evaluate($this->approvalKey);
-    }
-
     protected function hasCurrentApprovalStatus(): bool
     {
         return $this->getBoundApprovals()->count() > 0;
