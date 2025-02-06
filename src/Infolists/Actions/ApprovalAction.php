@@ -67,6 +67,8 @@ class ApprovalAction extends Action implements ApprovableByComponent
                 ->send();
         }
 
+        dd($this->approvable()->approvalStatistics());
+
 
     }
 
@@ -97,11 +99,6 @@ class ApprovalAction extends Action implements ApprovableByComponent
         return $this->getActionBoundApproval()?->status;
     }
 
-    protected function getStatusEnumClass(): ?string
-    {
-        if(!$this->getActionStatus())return null;
-        return $this->getActionStatus()::class;
-    }
 
     public function getActionBoundApproval(): ?Approval
     {
@@ -109,7 +106,7 @@ class ApprovalAction extends Action implements ApprovableByComponent
 //            ->firstWhere(function (Approval $approval) {
 //                return $approval->approver_id == Auth::id() &&
 //                    $approval->approver_type == User::class;
-//            }); ToDo Later for at least
+//            }); //ToDo Later for at least
     }
 
 
@@ -159,7 +156,7 @@ class ApprovalAction extends Action implements ApprovableByComponent
 
         $state = $this->getActionStatus();
 
-        $statusEnum = $this->getStatusEnumClass();
+        $statusEnum = $this->getApprovalFlow()->getStatusEnumClass();
         $colors = $this->getColorSelected();
 
         if(!is_null($colors)){

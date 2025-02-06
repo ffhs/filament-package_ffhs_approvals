@@ -15,8 +15,17 @@ interface Approvable
     public function approvals(): MorphMany;
 
     /**
-     * @return array<array-key, ApprovalFlow>
+     * @return array<string, ApprovalFlow>
      */
     public function getApprovalFlows(): array;
+
+
+
+
+    public function approvalStatistics(?array $categories = null, ?array $keys = null): array;
+
+
+    public function approved(?array $categories = null, ?array $keys = null, bool $failOnNotReachAtLeast = true): int;
+    public function anyDenied(?array $categories = null, ?array $keys = null): bool;
 
 }

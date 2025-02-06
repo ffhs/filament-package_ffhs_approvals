@@ -7,12 +7,14 @@ use Error;
 use Exception;
 use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\Approver;
+use Ffhs\Approvals\Enums\ApprovalState;
 use Ffhs\Approvals\Models\Approval;
 use Filament\Support\Concerns\EvaluatesClosures;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
+use LaraDumpsCore\PhpParser\Node\Expr\AssignOp\Mod;
 
 class ApprovalBy
 {
@@ -29,6 +31,8 @@ class ApprovalBy
     protected bool $any = false;
 
     protected ?Closure $canApproveUsing = null;
+
+    protected ?ApprovalFlow $approvalFlow = null;
 
     public function any(bool $any = true): static
     {
@@ -100,7 +104,7 @@ class ApprovalBy
             ]);
         }
 
-        if($this->any) return true;
+        if($this->isAny()) return true;
 
         if($approver instanceof Authenticatable){
             return Gate::allows('can_approve_by', $this);
@@ -129,6 +133,7 @@ class ApprovalBy
     }
 
 
+
     public function getApprovals(Model|Approvable $approvable,$key): Collection{
         return $approvable->approvals->where(function (Approval $approval) use ($key) {
             if ($approval->key != $key) {
@@ -140,4 +145,47 @@ class ApprovalBy
             return true;
         });
     }
+
+    public function approved(Model|Approvable $approvable, string $key): ApprovalState
+    {
+        $approvals = $this->getApprovals($approvable, $key);
+        $flow = $this->getApprovalFlow($approvable, $key);
+        $statusClass = $flow->getStatusEnumClass();
+
+        $declined = $approvals
+            ->whereIn('state',$statusClass::getDeclinedStatuses())
+            ->isNotEmpty();
+        if($declined) return ApprovalState::DECLINED;
+
+
+        $pending = $approvals
+            ->whereIn('state',$statusClass::getPendingStatuses())
+            ->isNotEmpty();
+        if($pending) return ApprovalState::PENDING;
+
+
+        if(!$this->reachAtLeast($approvable, $key)) return ApprovalState::OPEN;
+
+        $open = $approvals
+            ->whereNotIn('state',$statusClass::getPendingStatuses())
+            ->whereNotIn('state',$statusClass::getDeclinedStatuses())
+            ->whereNotIn('state',$statusClass::getApprovedStatuses())
+            ->isNotEmpty();
+        if($open) return ApprovalState::OPEN;
+        else return ApprovalState::APPROVED;
+    }
+
+
+    public function isAny(): bool
+    {
+        return $this->any;
+    }
+
+
+    public function getApprovalFlow(Model|Approvable $approvable, string $key): ?ApprovalFlow
+    {
+        return $approvable->getApprovalFlows()[$key];
+    }
+
+
 }

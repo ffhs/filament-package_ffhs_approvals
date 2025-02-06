@@ -3,6 +3,9 @@
 namespace Ffhs\Approvals\Approval;
 
 use Closure;
+use Ffhs\Approvals\Contracts\Approvable;
+use Ffhs\Approvals\Contracts\HasApprovalStatuses;
+use Ffhs\Approvals\Enums\ApprovalState;
 use Filament\Support\Concerns\EvaluatesClosures;
 use Illuminate\Database\Eloquent\Model;
 
@@ -44,6 +47,9 @@ class ApprovalFlow
         return $this;
     }
 
+    /**
+     * @return array<ApprovalBy>
+     */
     public function getApprovalBys(): array{
         return $this->evaluate($this->approvalBy);
     }
@@ -65,10 +71,37 @@ class ApprovalFlow
         return $this;
     }
 
+    /**
+     * @return array<\UnitEnum|HasApprovalStatuses>
+     */
     public function getApprovalStatus(): array{
         return $this->evaluate($this->approvalStatus);
     }
 
+
+    public function getStatusEnumClass(): ?string
+    {
+        if(empty($this->getApprovalStatus()))return null;
+        return $this->getApprovalStatus()[0]::class;
+    }
+
+
+
+    public function approved(Model|Approvable $approvable, string $key): ApprovalState
+    {
+        $isPending = false;
+        $isOpen= false;
+        foreach ($this->getApprovalBys() as $approvalBy) {
+            $approved = $approvalBy->approved($approvable, $key);
+            if($approved == ApprovalState::PENDING) $isPending = true;
+            elseif($approved == ApprovalState::OPEN) $isOpen = true;
+            elseif(ApprovalState::DECLINED) return ApprovalState::DECLINED;
+        }
+
+        if($isPending) return ApprovalState::PENDING;
+        elseif($isOpen) return ApprovalState::OPEN;
+        return ApprovalState::APPROVED;
+    }
 
 
 
