@@ -31,5 +31,8 @@ interface Approvable
 
     public function isApproved(?array $categories = null, ?array $keys = null): bool;
     public function isDenied(?array $categories = null, ?array $keys = null): bool;
+    public function isPending(?array $categories = null, ?array $keys = null): bool;
+
+
 
 }

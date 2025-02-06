@@ -165,8 +165,9 @@ class ApprovalBy
         $pendingStatuses= collect($statusClass::getPendingStatuses())->map(fn ($status) => $status->value);
 
         $pending = $approvals
-            ->whereIn('state', $pendingStatuses)
+            ->whereIn('status', $pendingStatuses)
             ->isNotEmpty();
+
         if($pending) return ApprovalState::PENDING;
 
 
