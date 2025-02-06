@@ -10,9 +10,11 @@ use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Models\Approval;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Notifications\Notification;
+use Filament\Support\Enums\IconPosition;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 
-class ApprovalAction extends Action implements ApprovableByComponent
+class ApprovalSingleStateAction extends Action implements ApprovableByComponent
 {
     use HandlesApprovals;
 
@@ -27,6 +29,7 @@ class ApprovalAction extends Action implements ApprovableByComponent
         'declined' => 'danger',
         'pending' => 'info',
     ];
+    private array $approvalIcons = [];
 
 
     public function changeApproval():void{
@@ -132,12 +135,26 @@ class ApprovalAction extends Action implements ApprovableByComponent
         return $this->evaluate($this->colorNotSelected);
     }
 
+    public function approvalIcons(array $approvalIcons): static
+    {
+        $this->approvalIcons = $approvalIcons;
+        return $this;
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->name($this->name);
         $this->action($this->changeApproval(...));
+        $this->iconPosition(IconPosition::After);
     }
+
+    public function getIcon(): string|Htmlable|null
+    {
+        $this->icon = $this->approvalIcons[$this->getActionStatus()->value] ?? null;
+        return parent::getIcon();
+    }
+
 
     public function isDisabled(): bool
     {
