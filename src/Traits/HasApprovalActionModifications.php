@@ -9,30 +9,36 @@ use Closure;
 trait HasApprovalActionModifications
 {
 
-    protected array|Closure $approvalActionsGroupLabel= [];
-    protected ?array $cachedApprovalActionsGroupLabel = null;
+    private array|Closure $approvalActionsGroupLabel= [];
+    private ?array $cachedApprovalActionsGroupLabel = null;
 
-    protected array|Closure $approvalActionsLabel= [];
-    protected ?array $cachedApprovalActionsLabel = null;
+    private array|Closure $approvalActionsLabel= [];
+    private ?array $cachedApprovalActionsLabel = null;
 
-    protected string|array|Closure $approvalActionsColor= [];
-    protected string|array|null $cachedApprovalActionsColor = null;
+    private string|array|Closure $approvalActionsColor= [];
+    private string|array|null $cachedApprovalActionsColor = null;
 
-    protected array|Closure $approvalActionsSelectColor= [];
-    protected string|array|null $cachedApprovalActionsSelectColor = null;
-
-
-    protected array|Closure $approvalActionsIcons= [];
-    protected ?array $cachedApprovalActionsIcons = null;
+    private array|Closure $approvalActionsSelectColor= [];
+    private string|array|null $cachedApprovalActionsSelectColor = null;
 
 
+    private array|Closure $approvalActionsIcons= [];
+    private ?array $cachedApprovalActionsIcons = null;
 
-    protected array|Closure $statusCategoryColors= [
+
+    private bool|Closure $isApprovalActionsDisabled= false;
+    private ?bool $cachedIsApprovalActionsDisabled = null;
+
+
+
+
+
+    private array|Closure $statusCategoryColors= [
         'approved' => 'success',
         'denied' => 'danger',
         'pending' => 'info',
     ];
-    protected string|array|null $cachedStatusCategoryColors = null;
+    private string|array|null $cachedStatusCategoryColors = null;
 
 
     public function approvalActionsGroupLabel(array|Closure $approvalActionsGroupLabel): static
@@ -95,7 +101,7 @@ trait HasApprovalActionModifications
     }
     public function getStatusCategoryColors(): array
     {
-        if(!is_null($this->cachedStatusCategoryColors)) return $this->statusCategoryColors;
+        if(!is_null($this->cachedStatusCategoryColors)) return $this->cachedStatusCategoryColors;
         $this->cachedStatusCategoryColors = $this->evaluate($this->statusCategoryColors);
         return $this->cachedStatusCategoryColors;
     }
@@ -108,11 +114,26 @@ trait HasApprovalActionModifications
     }
     public function getApprovalActionsIcons(): array
     {
-        if(!is_null($this->cachedApprovalActionsIcons)) return $this->approvalActionsIcons;
+        if(!is_null($this->cachedApprovalActionsIcons)) return $this->cachedApprovalActionsIcons;
         $this->cachedApprovalActionsIcons = $this->evaluate($this->approvalActionsIcons);
         return $this->cachedApprovalActionsIcons;
     }
 
+
+
+
+    public function disableApprovalActions(bool|Closure $isApprovalActionsDisabled = true): static
+    {
+        $this->isApprovalActionsDisabled = $isApprovalActionsDisabled;
+        $this->cachedIsApprovalActionsDisabled= null;
+        return $this;
+    }
+    public function isApprovalActionsDisabled(): bool
+    {
+        if(!is_null($this->cachedIsApprovalActionsDisabled)) return $this->cachedIsApprovalActionsDisabled;
+        $this->cachedIsApprovalActionsDisabled = $this->evaluate($this->isApprovalActionsDisabled);
+        return $this->cachedIsApprovalActionsDisabled;
+    }
 
 
 

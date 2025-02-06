@@ -60,6 +60,7 @@ class ApprovalActions extends Component
     public function getResetApprovalByAction(ApprovalBy $approvalBy): ApprovalByResetAction
     {
         return ApprovalByResetAction::make($approvalBy->getName() . '-reset_approval')
+            ->disabled($this->isApprovalActionsDisabled())
             ->approvalKey($this->getApprovalKey())
             ->approvalBy($approvalBy)
             ->size($this->getSize())
@@ -84,6 +85,7 @@ class ApprovalActions extends Component
                 ->colorSelected($this->getApprovalActionsSelectColor())
                 ->colorNotSelected($this->getApprovalActionsColor())
                 ->approvalIcons($this->getApprovalActionsIcons())
+                ->disabled($this->isApprovalActionsDisabled())
                 ->approvalKey($this->getApprovalKey())
                 ->label($label)
                 ->size($this->getSize())
