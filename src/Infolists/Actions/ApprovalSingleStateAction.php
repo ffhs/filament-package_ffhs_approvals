@@ -26,7 +26,7 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
 
     protected array $statusCategoryColors = [
         'approved' => 'success',
-        'declined' => 'danger',
+        'denied' => 'danger',
         'pending' => 'info',
     ];
     private array $approvalIcons = [];
@@ -191,8 +191,8 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
             return $this->getApprovedStatusColor();
         }
 
-        if (in_array($state, $statusEnum::getDeclinedStatuses(), true)) {
-            return $this->getDeclinedStatusColor();
+        if (in_array($state, $statusEnum::getDeniedStatuses(), true)) {
+            return $this->getDeniedStatusColor();
         }
 
         if (in_array($state, $statusEnum::getPendingStatuses(), true)) {

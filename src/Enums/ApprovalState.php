@@ -5,7 +5,7 @@ namespace Ffhs\Approvals\Enums;
 enum ApprovalState
 {
     case APPROVED;
-    case DECLINED;
+    case DENIED;
     case PENDING;
     case OPEN;
 }

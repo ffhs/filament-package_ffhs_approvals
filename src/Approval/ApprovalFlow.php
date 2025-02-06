@@ -119,7 +119,7 @@ class ApprovalFlow
             $approved = $approvalBy->approved($approvable, $key);
             if($approved == ApprovalState::PENDING) $isPending = true;
             elseif($approved == ApprovalState::OPEN) $isOpen = true;
-            elseif($approved == ApprovalState::DECLINED) return ApprovalState::DECLINED;
+            elseif($approved == ApprovalState::DENIED) return ApprovalState::DENIED;
         }
 
         if($isPending) return ApprovalState::PENDING;

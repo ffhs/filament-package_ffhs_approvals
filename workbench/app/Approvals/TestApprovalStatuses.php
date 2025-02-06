@@ -18,7 +18,7 @@ enum TestApprovalStatuses: string implements HasApprovalStatuses
       ];
     }
 
-    public static function getDeclinedStatuses(): array
+    public static function getDeniedStatuses(): array
     {
         return [
             'denied'

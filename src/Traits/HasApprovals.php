@@ -11,7 +11,7 @@ use Illuminate\Support\Arr;
 trait HasApprovals
 {
 
-    public function __get(string $key)
+    public function __get($key)
     {
         if(str_contains($key, 'is_approved_')) {
             $key = str_replace('is_approved_', '', $key);
@@ -23,7 +23,7 @@ trait HasApprovals
             $key = str_replace('is_approved_', '', $key);
             $flow =   $this->getApprovalFlows()[$key] ?? null;
             if(is_null($flow)) return parent::__get($key);
-            return $flow->approved($this, $key) == ApprovalState::DECLINED;
+            return $flow->approved($this, $key) == ApprovalState::DENIED;
         }
         return parent::__get($key);
     }
@@ -53,7 +53,7 @@ trait HasApprovals
             foreach ($flow->getApprovalStatus()[0]::getApprovedStatuses() as $status) {
                 $approvedStatisticsMap[$status->value] = 'approved';
             }
-            foreach ($flow->getApprovalStatus()[0]::getDeclinedStatuses() as $status) {
+            foreach ($flow->getApprovalStatus()[0]::getDeniedStatuses() as $status) {
                 $approvedStatisticsMap[$status->value] = 'declined';
             }
             foreach ($flow->getApprovalStatus()[0]::getPendingStatuses() as $status) {
@@ -105,7 +105,7 @@ trait HasApprovals
 
 
     public function isDenied(?array $categories = null, ?array $keys = null): bool{
-        return $this->approved($categories, $keys) == ApprovalState::DECLINED;
+        return $this->approved($categories, $keys) == ApprovalState::DENIED;
     }
 
     public function approved(?array $categories = null, ?array $keys = null): ApprovalState
@@ -118,7 +118,7 @@ trait HasApprovals
             $approved = $flow->approved($this, $key);
             if($approved == ApprovalState::PENDING) $isPending = true;
             elseif($approved == ApprovalState::OPEN) $isOpen = true;
-            elseif($approved == ApprovalState::DECLINED) return ApprovalState::DECLINED;
+            elseif($approved == ApprovalState::DENIED) return ApprovalState::DENIED;
         }
 
         if($isPending) return ApprovalState::PENDING;

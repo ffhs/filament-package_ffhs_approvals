@@ -29,7 +29,7 @@ trait HasApprovalActionModifications
 
     protected array|Closure $statusCategoryColors= [
         'approved' => 'success',
-        'declined' => 'danger',
+        'denied' => 'danger',
         'pending' => 'info',
     ];
     protected string|array|null $cachedStatusCategoryColors = null;
