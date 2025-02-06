@@ -20,7 +20,13 @@ trait HasApprovals
             return $flow->approved($this, $key) == ApprovalState::APPROVED;
         }
         if(str_contains($key, 'is_denied_')) {
-            $key = str_replace('is_approved_', '', $key);
+            $key = str_replace('is_denied_', '', $key);
+            $flow =   $this->getApprovalFlows()[$key] ?? null;
+            if(is_null($flow)) return parent::__get($key);
+            return $flow->approved($this, $key) == ApprovalState::DENIED;
+        }
+        if(str_contains($key, 'is_pending_')) {
+            $key = str_replace('is_pending_', '', $key);
             $flow =   $this->getApprovalFlows()[$key] ?? null;
             if(is_null($flow)) return parent::__get($key);
             return $flow->approved($this, $key) == ApprovalState::DENIED;
@@ -107,6 +113,13 @@ trait HasApprovals
     public function isDenied(?array $categories = null, ?array $keys = null): bool{
         return $this->approved($categories, $keys) == ApprovalState::DENIED;
     }
+
+    public function isPending(?array $categories = null, ?array $keys = null): bool{
+        return $this->approved($categories, $keys) == ApprovalState::PENDING;
+    }
+
+
+
 
     public function approved(?array $categories = null, ?array $keys = null): ApprovalState
     {
