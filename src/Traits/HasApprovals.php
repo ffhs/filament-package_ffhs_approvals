@@ -11,6 +11,23 @@ use Illuminate\Support\Arr;
 trait HasApprovals
 {
 
+    public function __get(string $key)
+    {
+        if(str_contains($key, 'is_approved_')) {
+            $key = str_replace('is_approved_', '', $key);
+            $flow =   $this->getApprovalFlows()[$key] ?? null;
+            if(is_null($flow)) return parent::__get($key);
+            return $flow->approved($this, $key) == ApprovalState::APPROVED;
+        }
+        if(str_contains($key, 'is_denied_')) {
+            $key = str_replace('is_approved_', '', $key);
+            $flow =   $this->getApprovalFlows()[$key] ?? null;
+            if(is_null($flow)) return parent::__get($key);
+            return $flow->approved($this, $key) == ApprovalState::DECLINED;
+        }
+        return parent::__get($key);
+    }
+
 
     public function approvals(): MorphMany
     {
