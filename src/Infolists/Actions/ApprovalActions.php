@@ -90,7 +90,11 @@ class ApprovalActions extends Component
     }
 
 
-
+    public function isHidden(): bool
+    {
+        if(parent::isHidden()) return true;
+        return $this->getApprovalFlow()->isApprovalDisabled();
+    }
 
 
     public function getApprovalByActions(ApprovalBy $approvalBy):array
@@ -102,6 +106,7 @@ class ApprovalActions extends Component
             $label = $labelMap[$status->value] ?? $status->value;
 
             $actions[] = ApprovalAction::make($approvalBy->getName() . '-' . $status->value)
+                ->approvalFlow($this->getApprovalFlow())
                 ->requiresConfirmation($this->isRequiresConfirmation())
                 ->colorSelected($this->getApprovalActionsSelectColor())
                 ->colorNotSelected($this->getApprovalActionsColor())

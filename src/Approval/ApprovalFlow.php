@@ -14,14 +14,36 @@ class ApprovalFlow
     use EvaluatesClosures;
     private Model|Closure|null $record;
 
-    protected array|Closure $approvalBy = [];
-    protected string|Closure $category;
-    protected array|Closure $approvalStatus;
+    private bool|Closure $approvalDisabled = false;
+
+    private array|Closure $approvalBy = [];
+    private string|Closure $category;
+    private array|Closure $approvalStatus;
 
     public static function make():static
     {
-        return app(static::class);
+        $approvalFlow = app(static::class);
+        $approvalFlow->setUp();
+        return $approvalFlow;
     }
+
+    protected function setUp()
+    {
+
+    }
+
+    public function isApprovalDisabled(): bool
+    {
+        return $this->evaluate($this->approvalDisabled);
+    }
+
+    public function approvalDisabled(bool|Closure $approvalDisabled): static
+    {
+        $this->approvalDisabled = $approvalDisabled;
+        return $this;
+    }
+
+
 
     public function approvableRecord(Model|Closure|null $record): static
     {

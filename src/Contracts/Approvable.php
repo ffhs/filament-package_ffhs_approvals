@@ -3,6 +3,7 @@
 namespace Ffhs\Approvals\Contracts;
 
 use Ffhs\Approvals\Approval\ApprovalFlow;
+use Ffhs\Approvals\Enums\ApprovalState;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 
@@ -25,7 +26,7 @@ interface Approvable
     public function approvalStatistics(?array $categories = null, ?array $keys = null): array;
 
 
-    public function approved(?array $categories = null, ?array $keys = null, bool $failOnNotReachAtLeast = true): int;
+    public function approved(?array $categories = null, ?array $keys = null, bool $failOnNotReachAtLeast = true): ApprovalState;
     public function anyDenied(?array $categories = null, ?array $keys = null): bool;
 
 }

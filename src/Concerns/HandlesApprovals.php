@@ -2,16 +2,17 @@
 
 namespace Ffhs\Approvals\Concerns;
 
+use DI\Definition\Exception\InvalidAttribute;
 use Ffhs\Approvals\Approval\ApprovalFlow;
 use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Contracts\Approvable;
-use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Models\Approval;
 use Filament\Support\Facades\FilamentColor;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use InvalidArgumentException;
+use PHPUnit\Event\InvalidArgumentException;
+use PHPUnit\Event\RuntimeException;
 
 trait HandlesApprovals
 {
@@ -35,7 +36,8 @@ trait HandlesApprovals
 
     public function getApprovalFlow(): ?ApprovalFlow
     {
-        return $this->approvalFlow;
+        if($this->approvalFlow) return $this->approvalFlow;
+        throw new RuntimeException('No approval flow was found for component'); //todo find right exeption
     }
 
 

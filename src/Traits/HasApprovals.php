@@ -84,7 +84,25 @@ trait HasApprovals
 
 
     public function anyDenied(?array $categories = null, ?array $keys = null): bool{
-        if($this->approved($categories, $keys) == ApprovalState::DECLINED) return true;
+        return $this->approved($categories, $keys) == ApprovalState::DECLINED;
+    }
+
+    public function approved(?array $categories = null, ?array $keys = null, bool $failOnNotReachAtLeast = true): ApprovalState
+    {
+        $flows = $this->getApprovalFlows();
+        $isPending = false;
+        $isOpen= false;
+        foreach ($flows as $key => $flow) {
+            $approved = $flow->approved($this, $key);
+            if($approved == ApprovalState::PENDING) $isPending = true;
+            elseif($approved == ApprovalState::OPEN) $isOpen = true;
+            elseif(ApprovalState::DECLINED) return ApprovalState::DECLINED;
+        }
+
+        if($isPending) return ApprovalState::PENDING;
+        elseif($isOpen) return ApprovalState::OPEN;
+        return ApprovalState::APPROVED;
+
     }
 
 }

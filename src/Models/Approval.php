@@ -2,11 +2,8 @@
 
 namespace Ffhs\Approvals\Models;
 
-use App\Domain\Documents\DocumentApprovalStatus;
-use Attribute;
+use App\Domain\Approvals\Documents\DocumentApprovalStatus;
 use Ffhs\Approvals\Contracts\Approvable;
-use Ffhs\Approvals\Contracts\ApprovableByComponent;
-use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
