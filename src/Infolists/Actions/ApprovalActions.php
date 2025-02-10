@@ -74,6 +74,7 @@ class ApprovalActions extends Component
         $labelMap = $this->getApprovalActionsLabel();
 
         $actions = [];
+        $toolTips = $this->getApprovalActionToolTips();
 
         foreach ($this->getApprovalStatuses() as $status){
             $label = $labelMap[$status->value] ?? $status->value;
@@ -87,6 +88,7 @@ class ApprovalActions extends Component
                 ->approvalIcons($this->getApprovalActionsIcons())
                 ->disabled($this->isApprovalActionsDisabled())
                 ->approvalKey($this->getApprovalKey())
+                ->tooltip($toolTips[$status->value] ?? null)
                 ->label($label)
                 ->size($this->getSize())
                 ->approvalBy($approvalBy)
