@@ -71,7 +71,7 @@ class Approval extends Model
     {
         $value = parent::__get('status');
         try {
-            $flow = $this->approvable->getApprovalFlows()[$this->key];
+            $flow = $this->approvable->getApprovalFlow($this->key);
             return collect($flow->getApprovalStatus())
                 ->firstWhere(fn($unitEnum) =>$unitEnum->value ==  $value);
         }catch (\Error|\Exception){

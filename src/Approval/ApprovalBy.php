@@ -193,7 +193,7 @@ class ApprovalBy
 
     public function getApprovalFlow(Model|Approvable $approvable, string $key): ?ApprovalFlow
     {
-        return $approvable->getApprovalFlows()[$key];
+        return $approvable->getApprovalFlow($key);
     }
 
 

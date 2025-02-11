@@ -27,7 +27,7 @@ trait HasApprovalFlowFromRecord
             throw new RuntimeException('Record hasn\'t an Approval Flow becoause it is not approvable (It doesn\'t implements Approvable ['.$record::class .'])');
 
         try {
-            $this->cachedApprovalFlow = $record->getApprovalFlows()[$this->getApprovalKey()] ?? null;
+            $this->cachedApprovalFlow = $record->getApprovalFlow($this->getApprovalKey());
         }catch (UndefinedFunctionError){
             throw new RuntimeException('Record hasn\'t an Approval Flow [function getApprovalFlows()]');
         }catch (ErrorException){
@@ -35,8 +35,9 @@ trait HasApprovalFlowFromRecord
         }
 
 
-        if($this->cachedApprovalFlow === null)
+        if($this->cachedApprovalFlow === null){
             throw new RuntimeException('Record hasn\'t an Approval Flow with key "'.$this->getApprovalKey().'"');
+        }
 
         return $this->cachedApprovalFlow;
     }
