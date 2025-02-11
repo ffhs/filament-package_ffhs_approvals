@@ -2,31 +2,22 @@
 
 namespace Ffhs\Approvals\Traits;
 
-use Barryvdh\Debugbar\Facades\Debugbar;
 use Ffhs\Approvals\Approval\ApprovalFlow;
 use Ffhs\Approvals\Enums\ApprovalState;
 use Ffhs\Approvals\Models\Approval;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Arr;
-use LaraDumpsCore\Safe\Exceptions\ArrayException;
-use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
+use Illuminate\Support\Collection;
 
+/**
+ * @property Collection approvals
+ */
 trait HasApprovals
 {
-
-    protected ?array $cachedApprovalFlows = null;
 
     public function approvals(): MorphMany
     {
         return $this->morphMany(config('filament-package_ffhs_approvals.models.approvals', Approval::class), 'approvable');
-    }
-
-    public function getApprovalFlows():array
-    {
-        if(is_null($this->cachedApprovalFlows)) {
-            $this->cachedApprovalFlows = $this->approvalFlows();
-        }
-        return $this->cachedApprovalFlows;
     }
 
 

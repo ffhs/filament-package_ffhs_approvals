@@ -18,8 +18,7 @@ interface Approvable
     /**
      * @return array<string, ApprovalFlow>
      */
-    function approvalFlows(): array;
-    public function getApprovalFlows(): array;
+    function getApprovalFlows(): array;
     public function getApprovalFlow(string $key): ?ApprovalFlow;
 
 
