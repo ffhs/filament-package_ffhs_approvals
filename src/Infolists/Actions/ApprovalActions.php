@@ -10,8 +10,10 @@ use Ffhs\Approvals\Traits\HasNeedResetApprovalBeforeChange;
 use Filament\Actions\Concerns\HasSize;
 use Filament\Infolists\ComponentContainer;
 use Filament\Infolists\Components\Component;
+use Filament\Infolists\Components\Concerns\EntanglesStateWithSingularRelationship;
 use Filament\Support\Concerns\HasAlignment;
 use Filament\Support\Concerns\HasVerticalAlignment;
+use Illuminate\Database\Eloquent\Model;
 use Mockery\Matcher\Closure;
 
 class ApprovalActions extends Component
@@ -22,8 +24,11 @@ class ApprovalActions extends Component
     use HasNeedResetApprovalBeforeChange;
     use HasApprovalKey;
     use HasApprovalFlowFromRecord;
+    use EntanglesStateWithSingularRelationship;
     //use HasColumns; //ToDo implement
     use HasSize;
+
+    private ?Model $record = null;
 
 
 
@@ -38,6 +43,18 @@ class ApprovalActions extends Component
     {
         $this->approvalKey($approvalKey);
         $this->statePath($this->getApprovalKey());
+    }
+
+    public function recordUsing(Closure|null|Model $record): static
+    {
+        $this->record = $record;
+        return $this;
+    }
+
+    public function getRecord(): ?Model
+    {
+        if(is_null($this->record)) return parent::getRecord();
+        return $this->evaluate($this->record, ['record' => parent::getRecord()]);
     }
 
 
@@ -74,6 +91,7 @@ class ApprovalActions extends Component
         $labelMap = $this->getApprovalActionsLabel();
 
         $actions = [];
+        $toolTips = $this->getApprovalActionToolTips();
 
         foreach ($this->getApprovalStatuses() as $status){
             $label = $labelMap[$status->value] ?? $status->value;
@@ -87,6 +105,7 @@ class ApprovalActions extends Component
                 ->approvalIcons($this->getApprovalActionsIcons())
                 ->disabled($this->isApprovalActionsDisabled())
                 ->approvalKey($this->getApprovalKey())
+                ->tooltip($toolTips[$status->value] ?? null)
                 ->label($label)
                 ->size($this->getSize())
                 ->approvalBy($approvalBy)

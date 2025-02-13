@@ -30,6 +30,9 @@ trait HasApprovalActionModifications
     private ?bool $cachedIsApprovalActionsDisabled = null;
 
 
+    private array|Closure $approvalActionToolTips= [];
+    private ?array $cacheApprovalActionToolTips = null;
+
 
 
 
@@ -117,6 +120,20 @@ trait HasApprovalActionModifications
         if(!is_null($this->cachedApprovalActionsIcons)) return $this->cachedApprovalActionsIcons;
         $this->cachedApprovalActionsIcons = $this->evaluate($this->approvalActionsIcons);
         return $this->cachedApprovalActionsIcons;
+    }
+
+
+    public function approvalActionToolTips(array|Closure $approvalActionToolTips): static
+    {
+        $this->approvalActionToolTips = $approvalActionToolTips;
+        $this->cacheApprovalActionToolTips= null;
+        return $this;
+    }
+    public function getApprovalActionToolTips(): array
+    {
+        if(!is_null($this->cacheApprovalActionToolTips)) return $this->cacheApprovalActionToolTips;
+        $this->cacheApprovalActionToolTips = $this->evaluate($this->approvalActionToolTips);
+        return $this->cacheApprovalActionToolTips;
     }
 
 

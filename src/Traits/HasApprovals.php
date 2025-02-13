@@ -7,37 +7,22 @@ use Ffhs\Approvals\Enums\ApprovalState;
 use Ffhs\Approvals\Models\Approval;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
+/**
+ * @property Collection approvals
+ */
 trait HasApprovals
 {
-
-    public function __get($key)
-    {
-        if(str_contains($key, 'is_approved_')) {
-            $key = str_replace('is_approved_', '', $key);
-            $flow =   $this->getApprovalFlows()[$key] ?? null;
-            if(is_null($flow)) return parent::__get($key);
-            return $flow->approved($this, $key) == ApprovalState::APPROVED;
-        }
-        if(str_contains($key, 'is_denied_')) {
-            $key = str_replace('is_denied_', '', $key);
-            $flow =   $this->getApprovalFlows()[$key] ?? null;
-            if(is_null($flow)) return parent::__get($key);
-            return $flow->approved($this, $key) == ApprovalState::DENIED;
-        }
-        if(str_contains($key, 'is_pending_')) {
-            $key = str_replace('is_pending_', '', $key);
-            $flow =   $this->getApprovalFlows()[$key] ?? null;
-            if(is_null($flow)) return parent::__get($key);
-            return $flow->approved($this, $key) == ApprovalState::DENIED;
-        }
-        return parent::__get($key);
-    }
-
 
     public function approvals(): MorphMany
     {
         return $this->morphMany(config('filament-package_ffhs_approvals.models.approvals', Approval::class), 'approvable');
+    }
+
+
+    public function getApprovalFlow(string $key): ?ApprovalFlow{
+        return $this->getApprovalFlows()[$key] ?? null;
     }
 
 
