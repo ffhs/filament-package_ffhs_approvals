@@ -16,6 +16,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use LaraDumpsCore\PhpParser\Node\Expr\AssignOp\Mod;
+use UnitEnum;
 
 class ApprovalBy
 {
@@ -25,7 +26,7 @@ class ApprovalBy
 
     protected ?string $role = null;
 
-    protected ?string $permission = null;
+    protected Closure|UnitEnum|string|null $permission = null;
 
     protected int $atLeast = 1;
 
@@ -72,7 +73,7 @@ class ApprovalBy
         return $this->role;
     }
 
-    public function permission(string $permission): static
+    public function permission(Closure|UnitEnum|string|null $permission): static
     {
         $this->permission = $permission;
 
@@ -81,7 +82,11 @@ class ApprovalBy
 
     public function getPermission(): ?string
     {
-        return $this->permission;
+        $permission = $this->evaluate($this->permission);
+
+        if($permission instanceof UnitEnum) $permission = $permission->value();
+
+        return $permission;
     }
 
     public function atLeast(int $atLeast): static
