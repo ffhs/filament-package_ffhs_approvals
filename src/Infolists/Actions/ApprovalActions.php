@@ -6,6 +6,7 @@ use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Traits\HasApprovalActionModifications;
 use Ffhs\Approvals\Traits\HasApprovalFlowFromRecord;
 use Ffhs\Approvals\Traits\HasApprovalKey;
+use Ffhs\Approvals\Traits\HasDisableCase;
 use Ffhs\Approvals\Traits\HasNeedResetApprovalBeforeChange;
 use Filament\Actions\Concerns\HasSize;
 use Filament\Infolists\ComponentContainer;
@@ -25,6 +26,7 @@ class ApprovalActions extends Component
     use HasApprovalKey;
     use HasApprovalFlowFromRecord;
     use EntanglesStateWithSingularRelationship;
+    use HasDisableCase;
     //use HasColumns; //ToDo implement
     use HasSize;
 
@@ -93,6 +95,8 @@ class ApprovalActions extends Component
         $actions = [];
         $toolTips = $this->getApprovalActionToolTips();
 
+        $actionsDisabled = $this->isApprovalActionsDisabled();
+
         foreach ($this->getApprovalStatuses() as $status){
             $label = $labelMap[$status->value] ?? $status->value;
 
@@ -103,7 +107,7 @@ class ApprovalActions extends Component
                 ->colorSelected($this->getApprovalActionsSelectColor())
                 ->colorNotSelected($this->getApprovalActionsColor())
                 ->approvalIcons($this->getApprovalActionsIcons())
-                ->disabled($this->isApprovalActionsDisabled())
+                ->disabled(fn() => $actionsDisabled || $this->isCaseDisabled($status->value))
                 ->approvalKey($this->getApprovalKey())
                 ->tooltip($toolTips[$status->value] ?? null)
                 ->label($label)
