@@ -7,6 +7,7 @@ use Ffhs\Approvals\Traits\HasApprovalActionModifications;
 use Ffhs\Approvals\Traits\HasApprovalFlowFromRecord;
 use Ffhs\Approvals\Traits\HasApprovalKey;
 use Ffhs\Approvals\Traits\HasDisableCase;
+use Ffhs\Approvals\Traits\HasHiddenCases;
 use Ffhs\Approvals\Traits\HasNeedResetApprovalBeforeChange;
 use Filament\Actions\Concerns\HasSize;
 use Filament\Infolists\ComponentContainer;
@@ -27,19 +28,15 @@ class ApprovalActions extends Component
     use HasApprovalFlowFromRecord;
     use EntanglesStateWithSingularRelationship;
     use HasDisableCase;
+    use HasHiddenCases;
+
     //use HasColumns; //ToDo implement
     use HasSize;
 
-    private ?Model $record = null;
-
-
-
-    protected bool | Closure $isFullWidth = false;
+    protected bool|Closure $isFullWidth = false;
     protected string $view = 'filament-package_ffhs_approvals::infolist.approval-actions';
-
-
     protected bool|Closure $requiresConfirmation = false;
-
+    private ?Model $record = null;
 
     final public function __construct(string|Closure $approvalKey)
     {
@@ -55,10 +52,35 @@ class ApprovalActions extends Component
 
     public function getRecord(): ?Model
     {
-        if(is_null($this->record)) return parent::getRecord();
+        if (is_null($this->record)) {
+            return parent::getRecord();
+        }
         return $this->evaluate($this->record, ['record' => parent::getRecord()]);
     }
 
+    public function fullWidth(bool|Closure $isFullWidth = true): static
+    {
+        $this->isFullWidth = $isFullWidth;
+
+        return $this;
+    }
+
+    public function isFullWidth(): bool
+    {
+        return (bool)$this->evaluate($this->isFullWidth);
+    }
+
+    public function getChildComponentContainers(bool $withHidden = false): array
+    {
+        $containers = [];
+        foreach ($this->getApprovalFlow()->getApprovalBys() as $approvalBy) {
+            $containers[$approvalBy->getName()] = ComponentContainer::make($this->getLivewire())
+                ->parentComponent($this)
+                ->components($this->getApprovalByActions($approvalBy));
+        }
+
+        return $containers;
+    }
 
     public static function make(string|Closure $approvalKey): static
     {
@@ -68,27 +90,7 @@ class ApprovalActions extends Component
         return $static;
     }
 
-
-    public function isHidden(): bool
-    {
-        if(parent::isHidden()) return true;
-        return $this->getApprovalFlow()->isApprovalDisabled();
-    }
-
-
-    public function getResetApprovalByAction(ApprovalBy $approvalBy): ApprovalByResetAction
-    {
-        return ApprovalByResetAction::make($approvalBy->getName() . '-reset_approval')
-            ->disabled($this->isApprovalActionsDisabled())
-            ->approvalKey($this->getApprovalKey())
-            ->approvalBy($approvalBy)
-            ->size($this->getSize())
-            ->visible(fn() => $this->isNeedResetApprovalBeforeChange());
-    }
-
-
-
-    public function getApprovalByActions(ApprovalBy $approvalBy):array
+    public function getApprovalByActions(ApprovalBy $approvalBy): array
     {
         $labelMap = $this->getApprovalActionsLabel();
 
@@ -97,7 +99,7 @@ class ApprovalActions extends Component
 
         $actionsDisabled = $this->isApprovalActionsDisabled();
 
-        foreach ($this->getApprovalStatuses() as $status){
+        foreach ($this->getApprovalStatuses() as $status) {
             $label = $labelMap[$status->value] ?? $status->value;
 
             $actions[] = ApprovalSingleStateAction::make($approvalBy->getName() . '-' . $status->value)
@@ -114,6 +116,7 @@ class ApprovalActions extends Component
                 ->size($this->getSize())
                 ->approvalBy($approvalBy)
                 ->actionStatus($status)
+                ->hidden(fn() => $this->isCaseHidden($status->value))
                 ->toInfolistComponent();
         }
 
@@ -122,55 +125,42 @@ class ApprovalActions extends Component
         return $actions;
     }
 
-
-    public function fullWidth(bool | Closure $isFullWidth = true): static
-    {
-        $this->isFullWidth = $isFullWidth;
-
-        return $this;
-    }
-
-    public function isFullWidth(): bool
-    {
-        return (bool) $this->evaluate($this->isFullWidth);
-    }
-
-
     public function requiresConfirmation(bool|Closure $requiresConfirmation = true): static
     {
         $this->requiresConfirmation = $requiresConfirmation;
         return $this;
     }
 
-
     public function isRequiresConfirmation(): bool
     {
-       return $this->evaluate($this->requiresConfirmation);
+        return $this->evaluate($this->requiresConfirmation);
     }
 
-
-
-
-    public function getChildComponentContainers(bool $withHidden = false): array
+    public function getResetApprovalByAction(ApprovalBy $approvalBy): ApprovalByResetAction
     {
-        $containers = [];
-        foreach ($this->getApprovalFlow()->getApprovalBys() as $approvalBy) {
-            $containers[$approvalBy->getName()] = ComponentContainer::make($this->getLivewire())
-                ->parentComponent($this)
-                ->components($this->getApprovalByActions($approvalBy));
-        }
-
-        return $containers;
+        return ApprovalByResetAction::make($approvalBy->getName() . '-reset_approval')
+            ->disabled($this->isApprovalActionsDisabled())
+            ->approvalKey($this->getApprovalKey())
+            ->approvalBy($approvalBy)
+            ->size($this->getSize())
+            ->visible(fn() => $this->isNeedResetApprovalBeforeChange());
     }
 
     public function hasChildComponentContainer(bool $withHidden = false): bool
     {
-        if(!$withHidden && $this->isHidden()) return false;
+        if (!$withHidden && $this->isHidden()) {
+            return false;
+        }
         return sizeof($this->getApprovalFlow()->getApprovalBys()) > 0;
     }
 
-
-
+    public function isHidden(): bool
+    {
+        if (parent::isHidden()) {
+            return true;
+        }
+        return $this->getApprovalFlow()->isApprovalDisabled();
+    }
 
 
 }
