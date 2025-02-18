@@ -17,13 +17,13 @@ trait HasHiddenCases
         if ($status instanceof HasApprovalStatuses) {
             $status = $status->value;
         }
-        $isDisabled = $this->evaluate($this->caseDisabled)[$status] ?? false;
-        return $this->evaluate($isDisabled);
+        $isDisabled = $this->evaluate($this->caseHidden)[$status] ?? false;
+        return $this->evaluate($isDisabled, ['status' => $status]);
     }
 
-    public function caseHidden(array|Closure $caseDisabled): static
+    public function caseHidden(array|Closure $caseHidden): static
     {
-        $this->caseDisabled = $caseDisabled;
+        $this->caseHidden = $caseHidden;
         return $this;
     }
 
