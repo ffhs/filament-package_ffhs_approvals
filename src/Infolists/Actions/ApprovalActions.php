@@ -6,9 +6,10 @@ use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Traits\HasApprovalActionModifications;
 use Ffhs\Approvals\Traits\HasApprovalFlowFromRecord;
 use Ffhs\Approvals\Traits\HasApprovalKey;
+use Ffhs\Approvals\Traits\HasApprovalSingleStateAction;
 use Ffhs\Approvals\Traits\HasDisableCase;
 use Ffhs\Approvals\Traits\HasHiddenCases;
-use Ffhs\Approvals\Traits\HasNeedResetApprovalBeforeChange;
+use Ffhs\Approvals\Traits\HasResetApprovalAction;
 use Filament\Actions\Concerns\HasSize;
 use Filament\Infolists\ComponentContainer;
 use Filament\Infolists\Components\Component;
@@ -23,12 +24,13 @@ class ApprovalActions extends Component
     use HasAlignment;
     use HasVerticalAlignment;
     use HasApprovalActionModifications;
-    use HasNeedResetApprovalBeforeChange;
+    use HasResetApprovalAction;
     use HasApprovalKey;
     use HasApprovalFlowFromRecord;
     use EntanglesStateWithSingularRelationship;
     use HasDisableCase;
     use HasHiddenCases;
+    use HasApprovalSingleStateAction;
 
     //use HasColumns; //ToDo implement
     use HasSize;
@@ -42,14 +44,6 @@ class ApprovalActions extends Component
     {
         $this->approvalKey($approvalKey);
         $this->statePath($this->getApprovalKey());
-    }
-
-    public static function make(string|Closure $approvalKey): static
-    {
-        $static = app(static::class, ['approvalKey' => $approvalKey]);
-        $static->configure();
-
-        return $static;
     }
 
     public function recordUsing(Closure|null|Model $record): static
@@ -93,35 +87,24 @@ class ApprovalActions extends Component
         return $containers;
     }
 
+    public static function make(string|Closure $approvalKey): static
+    {
+        $static = app(static::class, ['approvalKey' => $approvalKey]);
+        $static->configure();
+
+        return $static;
+    }
+
     public function getApprovalByActions(ApprovalBy $approvalBy): array
     {
-        $labelMap = $this->getApprovalActionsLabel();
         $actions = [];
-        $toolTips = $this->getApprovalActionToolTips();
-        $actionsDisabled = $this->isApprovalActionsDisabled();
-
         foreach ($this->getApprovalStatuses() as $status) {
-            $label = $labelMap[$status->value] ?? $status->value;
-
-            $actions[] = ApprovalSingleStateAction::make($approvalBy->getName() . '-' . $status->value)
-                ->needResetApprovalBeforeChange($this->isNeedResetApprovalBeforeChange())
-                ->approvalFlow($this->getApprovalFlow())
-                ->requiresConfirmation($this->isRequiresConfirmation())
-                ->colorSelected($this->getApprovalActionsSelectColor())
-                ->colorNotSelected($this->getApprovalActionsColor())
-                ->approvalIcons($this->getApprovalActionsIcons())
-                ->disabled(fn() => $actionsDisabled || $this->isCaseDisabled($status->value))
-                ->approvalKey($this->getApprovalKey())
-                ->tooltip($toolTips[$status->value] ?? null)
-                ->label($label)
-                ->size($this->getSize())
-                ->approvalBy($approvalBy)
-                ->actionStatus($status)
-                ->hidden(fn() => $this->isCaseHidden($status->value))
+            $actions[] = $this->getApprovalSingleStateAction($approvalBy, $status)
                 ->toInfolistComponent();
         }
 
-        $actions[] = $this->getResetApprovalByAction($approvalBy)->toInfolistComponent();
+        $actions[] = $this->getResetApprovalAction($approvalBy)
+            ->toInfolistComponent();
 
         return $actions;
     }
@@ -136,16 +119,6 @@ class ApprovalActions extends Component
     public function isRequiresConfirmation(): bool
     {
         return $this->evaluate($this->requiresConfirmation);
-    }
-
-    public function getResetApprovalByAction(ApprovalBy $approvalBy): ApprovalByResetAction
-    {
-        return ApprovalByResetAction::make($approvalBy->getName() . '-reset_approval')
-            ->disabled($this->isApprovalActionsDisabled())
-            ->approvalKey($this->getApprovalKey())
-            ->approvalBy($approvalBy)
-            ->size($this->getSize())
-            ->visible(fn() => $this->isNeedResetApprovalBeforeChange());
     }
 
     public function hasChildComponentContainer(bool $withHidden = false): bool

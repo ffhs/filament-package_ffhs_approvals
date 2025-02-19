@@ -12,23 +12,22 @@ class ApprovalByResetAction extends Action implements ApprovableByComponent
 {
     use HandlesApprovals;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this
-            ->icon('heroicon-m-arrow-uturn-left')
-            ->tooltip('Status Zurücksetzen')
-            ->color('gray')
-            ->label('')
-            ->action($this->resetByApproval(...));
-    }
 
     public function isHidden(): bool
     {
-        if(parent::isHidden()) return true;
+        if (parent::isHidden()) {
+            return true;
+        }
 
         $approval = $this->getActionApproval();
         return is_null($approval);
+    }
+
+    public function getActionApproval(): ?Approval
+    {
+        return $this->getApprovalBy()
+            ->getApprovals($this->getRecord(), $this->getApprovalKey())
+            ->first(); //ToDo only Person or Premission
     }
 
     public function resetByApproval(): void
@@ -42,11 +41,15 @@ class ApprovalByResetAction extends Action implements ApprovableByComponent
         $this->getRecord()->refresh();
     }
 
-    public function getActionApproval(): ?Approval
+    protected function setUp(): void
     {
-        return $this->getApprovalBy()
-            ->getApprovals($this->getRecord(), $this->getApprovalKey())
-            ->first(); //ToDo only Person or Premission
+        parent::setUp();
+        $this
+            ->icon('heroicon-m-arrow-uturn-left')
+            ->tooltip('Status Zurücksetzen')
+            ->color('gray')
+            ->label('')
+            ->action($this->resetByApproval(...));
     }
 
 
