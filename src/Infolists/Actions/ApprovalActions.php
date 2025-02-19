@@ -44,9 +44,18 @@ class ApprovalActions extends Component
         $this->statePath($this->getApprovalKey());
     }
 
+    public static function make(string|Closure $approvalKey): static
+    {
+        $static = app(static::class, ['approvalKey' => $approvalKey]);
+        $static->configure();
+
+        return $static;
+    }
+
     public function recordUsing(Closure|null|Model $record): static
     {
         $this->record = $record;
+
         return $this;
     }
 
@@ -55,6 +64,7 @@ class ApprovalActions extends Component
         if (is_null($this->record)) {
             return parent::getRecord();
         }
+
         return $this->evaluate($this->record, ['record' => parent::getRecord()]);
     }
 
@@ -73,6 +83,7 @@ class ApprovalActions extends Component
     public function getChildComponentContainers(bool $withHidden = false): array
     {
         $containers = [];
+
         foreach ($this->getApprovalFlow()->getApprovalBys() as $approvalBy) {
             $containers[$approvalBy->getName()] = ComponentContainer::make($this->getLivewire())
                 ->parentComponent($this)
@@ -82,21 +93,11 @@ class ApprovalActions extends Component
         return $containers;
     }
 
-    public static function make(string|Closure $approvalKey): static
-    {
-        $static = app(static::class, ['approvalKey' => $approvalKey]);
-        $static->configure();
-
-        return $static;
-    }
-
     public function getApprovalByActions(ApprovalBy $approvalBy): array
     {
         $labelMap = $this->getApprovalActionsLabel();
-
         $actions = [];
         $toolTips = $this->getApprovalActionToolTips();
-
         $actionsDisabled = $this->isApprovalActionsDisabled();
 
         foreach ($this->getApprovalStatuses() as $status) {
@@ -128,6 +129,7 @@ class ApprovalActions extends Component
     public function requiresConfirmation(bool|Closure $requiresConfirmation = true): static
     {
         $this->requiresConfirmation = $requiresConfirmation;
+
         return $this;
     }
 
@@ -151,6 +153,7 @@ class ApprovalActions extends Component
         if (!$withHidden && $this->isHidden()) {
             return false;
         }
+
         return sizeof($this->getApprovalFlow()->getApprovalBys()) > 0;
     }
 
@@ -159,8 +162,7 @@ class ApprovalActions extends Component
         if (parent::isHidden()) {
             return true;
         }
+
         return $this->getApprovalFlow()->isApprovalDisabled();
     }
-
-
 }

@@ -14,7 +14,6 @@ use Illuminate\Support\Collection;
  */
 trait HasApprovals
 {
-
     public function approvals(): MorphMany
     {
         return $this->morphMany(
@@ -23,12 +22,10 @@ trait HasApprovals
         );
     }
 
-
     public function getApprovalFlow(string $key): ?ApprovalFlow
     {
         return $this->getApprovalFlows()[$key] ?? null;
     }
-
 
     public function approvalStatistics(?array $categories = null, ?array $keys = null): array
     {
@@ -38,21 +35,21 @@ trait HasApprovals
         foreach ($flows as $key => $flow) {
             $flowStatistic = [];
             $byStatistics = [];
-
             $statusStatistics = [];
             $approvedStatistics = [];
-
             $approvedStatisticsMap = [];
+
             foreach ($flow->getApprovalStatus()[0]::getApprovedStatuses() as $status) {
                 $approvedStatisticsMap[$status->value] = 'approved';
             }
+
             foreach ($flow->getApprovalStatus()[0]::getDeniedStatuses() as $status) {
                 $approvedStatisticsMap[$status->value] = 'declined';
             }
+
             foreach ($flow->getApprovalStatus()[0]::getPendingStatuses() as $status) {
                 $approvedStatisticsMap[$status->value] = 'pending';
             }
-
 
             foreach ($flow->getApprovalBys() as $approvalBy) {
                 $states = $approvalBy->getApprovals($this, $key)->pluck('status');
@@ -60,11 +57,11 @@ trait HasApprovals
                 $states->each(function (string $value) use (&$statusStatistics) {
                     $statusStatistics[$value] = ($statusStatistics[$value] ?? 0) + 1;
                 });
+
                 $states->each(function (string $value) use ($approvedStatisticsMap, &$approvedStatistics) {
                     $key = $approvedStatisticsMap[$value];
                     $approvedStatistics[$key] = ($approvedStatistics[$key] ?? 0) + 1;
                 });
-
 
                 $byStatistics[] = [
                     'reachedAtLeast' => $approvalBy->reachAtLeast($this, $key),
@@ -79,7 +76,6 @@ trait HasApprovals
             $statistic[$key] = $flowStatistic;
         }
 
-
         return $statistic;
     }
 
@@ -91,11 +87,12 @@ trait HasApprovals
     public function approved(?array $categories = null, ?array $keys = null): ApprovalState
     {
         $flows = $this->getFilteredApprovalFlow($categories, $keys);
-
         $isPending = false;
         $isOpen = false;
+
         foreach ($flows as $key => $flow) {
             $approved = $flow->approved($this, $key);
+
             if ($approved == ApprovalState::PENDING) {
                 $isPending = true;
             } elseif ($approved == ApprovalState::OPEN) {
@@ -110,12 +107,14 @@ trait HasApprovals
         } elseif ($isOpen) {
             return ApprovalState::OPEN;
         }
+
         return ApprovalState::APPROVED;
     }
 
     public function getFilteredApprovalFlow(?array $categories = null, ?array $keys = null): array
     {
         $flows = $this->getApprovalFlows();
+
         if ($keys) {
             $flows = Arr::only($flows, $keys);
         }
@@ -125,6 +124,7 @@ trait HasApprovals
                 return in_array($value->getCategory(), $categories);
             });
         }
+
         return $flows;
     }
 
@@ -142,5 +142,4 @@ trait HasApprovals
     {
         return $this->approved($categories, $keys) == ApprovalState::OPEN;
     }
-
 }
