@@ -26,6 +26,7 @@ trait HasResetApprovalAction
     public function getResetApprovalAction(ApprovalBy $approvalBy): ApprovalByResetAction
     {
         $action = ApprovalByResetAction::make($approvalBy->getName() . '-reset_approval')
+            ->notificationOnResetApproval(fn($lastStatus) => $this->sendNotificationOnResetApproval($lastStatus))
             ->disabled($this->isApprovalActionsDisabled())
             ->approvalKey($this->getApprovalKey())
             ->approvalBy($approvalBy)

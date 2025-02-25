@@ -6,6 +6,7 @@ use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Traits\HasApprovalActionModifications;
 use Ffhs\Approvals\Traits\HasApprovalFlowFromRecord;
 use Ffhs\Approvals\Traits\HasApprovalKey;
+use Ffhs\Approvals\Traits\HasApprovalNotification;
 use Ffhs\Approvals\Traits\HasApprovalSingleStateAction;
 use Ffhs\Approvals\Traits\HasDisableCase;
 use Ffhs\Approvals\Traits\HasHiddenCases;
@@ -31,6 +32,7 @@ class ApprovalActions extends Component
     use HasDisableCase;
     use HasHiddenCases;
     use HasApprovalSingleStateAction;
+    use HasApprovalNotification;
 
     //use HasColumns; //ToDo implement
     use HasSize;
@@ -42,6 +44,15 @@ class ApprovalActions extends Component
 
     final public function __construct(string|Closure $approvalKey)
     {
+        $this->notificationOnResetApproval(
+            fn(ApprovalSingleStateAction $action) => 'Approval is reset ' . $action->getApprovalBy()->getName()
+        );
+        $this->notificationOnChangeApproval(
+            fn($lastStatus, $status) => 'change approval from ' . $lastStatus . ' to ' . $status
+        );
+        $this->notificationOnSetApproval(
+            fn($status) => 'set approval to ' . $status
+        );
         $this->approvalKey($approvalKey);
         $this->statePath($this->getApprovalKey());
     }

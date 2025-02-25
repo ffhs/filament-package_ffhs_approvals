@@ -34,6 +34,11 @@ trait HasApprovalSingleStateAction
             ->colorSelected($this->getApprovalActionsSelectColor())
             ->colorNotSelected($this->getApprovalActionsColor())
             ->approvalIcons($this->getApprovalActionsIcons())
+            ->notificationOnResetApproval(fn($lastStatus) => $this->sendNotificationOnResetApproval($lastStatus))
+            ->notificationOnSetApproval(fn($status) => $this->sendNotificationOnSetApproval($status))
+            ->notificationOnChangeApproval(
+                fn($lastStatus, $status) => $this->sendNotificationOnChangeApproval($status, $lastStatus)
+            )
             ->disabled(fn() => $this->isApprovalActionsDisabled() || $this->isCaseDisabled($status->value))
             ->approvalKey($this->getApprovalKey())
             ->tooltip($toolTips[$status->value] ?? null)

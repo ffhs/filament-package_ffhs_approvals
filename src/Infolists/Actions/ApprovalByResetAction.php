@@ -5,12 +5,13 @@ namespace Ffhs\Approvals\Infolists\Actions;
 use Ffhs\Approvals\Concerns\HandlesApprovals;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Models\Approval;
+use Ffhs\Approvals\Traits\HasApprovalNotification;
 use Filament\Infolists\Components\Actions\Action;
-use Filament\Notifications\Notification;
 
 class ApprovalByResetAction extends Action implements ApprovableByComponent
 {
     use HandlesApprovals;
+    use HasApprovalNotification;
 
 
     public function isHidden(): bool
@@ -32,11 +33,9 @@ class ApprovalByResetAction extends Action implements ApprovableByComponent
 
     public function resetByApproval(): void
     {
-        $this->getActionApproval()?->delete();
-        Notification::make()
-            ->title('Approval is reset ' . $this->getApprovalBy()->getName()) //ToDo translate
-            ->success()
-            ->send();
+        $lastStatus = $this->getActionApproval();
+        $lastStatus?->delete();
+        $this->sendNotificationOnResetApproval($lastStatus->status->value);
 
         $this->getRecord()->refresh();
     }

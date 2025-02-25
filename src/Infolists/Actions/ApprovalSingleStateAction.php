@@ -7,6 +7,7 @@ use Ffhs\Approvals\Concerns\HandlesApprovals;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Models\Approval;
+use Ffhs\Approvals\Traits\HasApprovalNotification;
 use Ffhs\Approvals\Traits\HasResetApprovalAction;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Notifications\Notification;
@@ -18,6 +19,7 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
 {
     use HandlesApprovals;
     use HasResetApprovalAction;
+    use HasApprovalNotification;
 
     protected ?HasApprovalStatuses $status = null;
     protected array $statusCategoryColors = [
@@ -57,22 +59,15 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
             'approvable_type' => $this->approvable()::class,
             'status' => $this->getActionStatus()->value,
             'key' => $this->getApprovalKey(),
-            'approval_by' => $this->getApprovalBy()->getName()
+            'approval_by' => $this->getApprovalBy()->getName(),
         ]);
 
         if ($isChange) {
-            Notification::make()
-                ->title(
-                    'change approval from ' . $oldState->value . ' to ' . $this->getActionStatus()->value
-                ) //ToDo Translate and add text state
-                ->success()
-                ->send();
+            $this->sendNotificationOnChangeApproval($this->getActionStatus()->value, $oldState->value);
         } else {
-            Notification::make()
-                ->title('set approval to ' . $this->getActionStatus()->value) //ToDo Translate and add text state
-                ->success()
-                ->send();
+            $this->sendNotificationOnSetApproval($this->getActionStatus()->value);
         }
+
         $this->getRecord()->refresh();
     }
 
@@ -97,6 +92,7 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
 
     /**
      * The Sate which the Action is bound, as example the 'approve' because it's the approval action
+     *
      * @return HasApprovalStatuses|null
      */
     public function getActionStatus(): ?HasApprovalStatuses
