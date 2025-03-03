@@ -2,14 +2,16 @@
 
 namespace Ffhs\Approvals;
 
-use Ffhs\Approvals\Testing\TestsApprovals;
+use Ffhs\Approvals\Approval\ApprovalBy;
+use Ffhs\Approvals\Contracts\Approvable;
+use Ffhs\Approvals\Policies\ApprovalByPolicy;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
-use Livewire\Features\SupportTesting\Testable;
+use Illuminate\Support\Facades\Gate;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -19,6 +21,7 @@ class ApprovalsServiceProvider extends PackageServiceProvider
     public static string $name = 'filament-package_ffhs_approvals';
 
     public static string $viewNamespace = 'filament-package_ffhs_approvals';
+
 
     public function configurePackage(Package $package): void
     {
@@ -57,6 +60,14 @@ class ApprovalsServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void {}
 
+    public function boot(): ApprovalsServiceProvider
+    {
+        parent::boot();
+        Gate::define('can_approve_by', [ApprovalByPolicy::class, 'approve']);
+        return $this;
+    }
+
+
     public function packageBooted(): void
     {
         // Asset Registration
@@ -83,7 +94,7 @@ class ApprovalsServiceProvider extends PackageServiceProvider
         }
 
         // Testing
-        Testable::mixin(new TestsApprovals());
+        // Testable::mixin(new TestsApprovals());
     }
 
     protected function getAssetPackageName(): ?string
@@ -141,7 +152,8 @@ class ApprovalsServiceProvider extends PackageServiceProvider
     {
         return [
             'create_filament_package_ffhs_approvals_table',
-            'create_filament_package_ffhs_pendings_table',
         ];
     }
+
+
 }

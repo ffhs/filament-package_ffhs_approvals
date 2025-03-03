@@ -13,14 +13,15 @@ return new class extends Migration
     {
         Schema::create(config('filament-package_ffhs_approvals.tables.approvals', 'approvals'), function (Blueprint $table) {
             $table->id();
-            $table->string('category');
+            $table->string('key');
             $table->nullableMorphs('approvable');
-            $table->string('status')->nullable();
-            $table->dateTime('status_at')->nullable();
-            $table->foreignId('approver_id')->nullable()->constrained(config('filament-package_ffhs_approvals.tables.approvers', 'users'));
-            $table->json('config');
+            $table->string('status');
+            $table->string('approval_by');
+            $table->morphs('approver');
             $table->timestamps();
             $table->softDeletes();
+
+            //$table->unique(['approvable_id','approvable_type', 'key', 'approve_by_id', 'approve_by_type']);
         });
     }
 

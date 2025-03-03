@@ -2,90 +2,151 @@
 
 namespace Ffhs\Approvals\Infolists\Actions;
 
-use BackedEnum;
-use Ffhs\Approvals\ApprovalFlow;
-use Ffhs\Approvals\Contracts\HasApprovalStatuses;
-use Filament\Infolists\Components\Actions;
-use Filament\Infolists\Components\Actions\Action;
+use Ffhs\Approvals\Approval\ApprovalBy;
+use Ffhs\Approvals\Traits\HasApprovalActionModifications;
+use Ffhs\Approvals\Traits\HasApprovalFlowFromRecord;
+use Ffhs\Approvals\Traits\HasApprovalKey;
+use Ffhs\Approvals\Traits\HasApprovalNotification;
+use Ffhs\Approvals\Traits\HasApprovalSingleStateAction;
+use Ffhs\Approvals\Traits\HasDisableCase;
+use Ffhs\Approvals\Traits\HasHiddenCases;
+use Ffhs\Approvals\Traits\HasResetApprovalAction;
+use Filament\Actions\Concerns\HasSize;
+use Filament\Infolists\ComponentContainer;
+use Filament\Infolists\Components\Component;
+use Filament\Infolists\Components\Concerns\EntanglesStateWithSingularRelationship;
+use Filament\Support\Concerns\HasAlignment;
+use Filament\Support\Concerns\HasVerticalAlignment;
+use Illuminate\Database\Eloquent\Model;
+use Mockery\Matcher\Closure;
 
-class ApprovalActions extends Actions
+class ApprovalActions extends Component
 {
-    protected ?string $category = null;
+    use HasAlignment;
+    use HasVerticalAlignment;
+    use HasApprovalActionModifications;
+    use HasResetApprovalAction;
+    use HasApprovalKey;
+    use HasApprovalFlowFromRecord;
+    use EntanglesStateWithSingularRelationship;
+    use HasDisableCase;
+    use HasHiddenCases;
+    use HasApprovalSingleStateAction;
+    use HasApprovalNotification;
 
-    protected ?ApprovalFlow $approvalFlow = null;
+    //use HasColumns; //ToDo implement
+    use HasSize;
 
-    protected $statusClass = null;
+    protected bool|Closure $isFullWidth = false;
+    protected string $view = 'filament-package_ffhs_approvals::infolist.approval-actions';
+    protected bool|Closure $requiresConfirmation = false;
+    private ?Model $record = null;
 
-    /**
-     * @param  array<HasApprovalStatuses|Action>  $options
-     */
-    public static function make(array $options): static
+    final public function __construct(string|Closure $approvalKey)
     {
-        $actions = [];
+        $this->notificationOnResetApproval(
+            fn(ApprovalSingleStateAction $action) => 'Approval is reset ' . $action->getApprovalBy()->getName()
+        );
+        $this->notificationOnChangeApproval(
+            fn($lastStatus, $status) => 'change approval from ' . $lastStatus . ' to ' . $status
+        );
+        $this->notificationOnSetApproval(
+            fn($status) => 'set approval to ' . $status
+        );
+        $this->approvalKey($approvalKey);
+        $this->statePath($this->getApprovalKey());
+    }
 
-        foreach ($options as $option) {
+    public function recordUsing(Closure|null|Model $record): static
+    {
+        $this->record = $record;
 
-            if ($option instanceof HasApprovalStatuses && $option instanceof BackedEnum) {
-                $actions[] = ApprovalAction::make($option->value)
-                    ->status($option);
+        return $this;
+    }
 
-                continue;
-            }
-
-            $actions[] = $option;
+    public function getRecord(): ?Model
+    {
+        if (is_null($this->record)) {
+            return parent::getRecord();
         }
 
-        $static = app(static::class, ['actions' => $actions, 'statusClass' => $options[0]::class]);
+        return $this->evaluate($this->record, ['record' => parent::getRecord()]);
+    }
+
+    public function fullWidth(bool|Closure $isFullWidth = true): static
+    {
+        $this->isFullWidth = $isFullWidth;
+
+        return $this;
+    }
+
+    public function isFullWidth(): bool
+    {
+        return (bool)$this->evaluate($this->isFullWidth);
+    }
+
+    public function getChildComponentContainers(bool $withHidden = false): array
+    {
+        $containers = [];
+
+        foreach ($this->getApprovalFlow()->getApprovalBys() as $approvalBy) {
+            $containers[$approvalBy->getName()] = ComponentContainer::make($this->getLivewire())
+                ->parentComponent($this)
+                ->components($this->getApprovalByActions($approvalBy));
+        }
+
+        return $containers;
+    }
+
+    public static function make(string|Closure $approvalKey): static
+    {
+        $static = app(static::class, ['approvalKey' => $approvalKey]);
         $static->configure();
 
         return $static;
     }
 
-    public function category(string $category): static
+    public function getApprovalByActions(ApprovalBy $approvalBy): array
     {
-        $this->category = $category;
-
-        foreach ($this->childComponents as $actionContainer) {
-            $actionContainer->statePath($this->category);
-
-            $action = $actionContainer->action;
-
-            if ($action instanceof ApprovalAction) {
-                $action->category($this->category);
-            }
+        $actions = [];
+        foreach ($this->getApprovalStatuses() as $status) {
+            $actions[] = $this->getApprovalSingleStateAction($approvalBy, $status)
+                ->toInfolistComponent();
         }
+
+        $actions[] = $this->getResetApprovalAction($approvalBy)
+            ->toInfolistComponent();
+
+        return $actions;
+    }
+
+    public function requiresConfirmation(bool|Closure $requiresConfirmation = true): static
+    {
+        $this->requiresConfirmation = $requiresConfirmation;
 
         return $this;
     }
 
-    public function statusCategoryColors(array $colors): static
+    public function isRequiresConfirmation(): bool
     {
-        foreach ($this->childComponents as $actionContainer) {
-            $action = $actionContainer->action;
-            if ($action instanceof ApprovalAction) {
-                $action->statusCategoryColors($colors);
-            }
-        }
-
-        return $this;
+        return $this->evaluate($this->requiresConfirmation);
     }
 
-    public function approvalFlow(ApprovalFlow $approvalFlow): static
+    public function hasChildComponentContainer(bool $withHidden = false): bool
     {
-        $this->approvalFlow = $approvalFlow;
-
-        foreach ($this->childComponents as $actionContainer) {
-            $action = $actionContainer->action;
-            if ($action instanceof ApprovalAction) {
-                $action->approvalFlow($this->approvalFlow);
-                $action->disabled(
-                    fn ($record) => $this->approvalFlow->shouldDisable($record, $this->category, $action->getStatusEnumClass())
-                );
-                $action->visible(fn () => $this->approvalFlow->shouldBeVisible());
-
-            }
+        if (!$withHidden && $this->isHidden()) {
+            return false;
         }
 
-        return $this;
+        return sizeof($this->getApprovalFlow()->getApprovalBys()) > 0;
+    }
+
+    public function isHidden(): bool
+    {
+        if (parent::isHidden()) {
+            return true;
+        }
+
+        return $this->getApprovalFlow()->isApprovalDisabled();
     }
 }
