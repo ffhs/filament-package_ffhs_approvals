@@ -8,6 +8,8 @@ use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use UnitEnum;
 
 /**
@@ -23,6 +25,7 @@ use UnitEnum;
 class Approval extends Model
 {
     use SoftDeletes;
+    use LogsActivity;
 
     protected $fillable = [
         'key',
@@ -33,6 +36,12 @@ class Approval extends Model
         'approval_by',
         'status',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnlyDirty();
+    }
 
     public function getTable()
     {
@@ -73,21 +82,20 @@ class Approval extends Model
         try {
             $flow = $this->approvable->getApprovalFlow($this->key);
             return collect($flow->getApprovalStatus())
-                ->firstWhere(fn($unitEnum) =>$unitEnum->value ==  $value);
-        }catch (\Error|\Exception){
+                ->firstWhere(fn($unitEnum) => $unitEnum->value == $value);
+        } catch (\Error|\Exception) {
             return $value;
         }
     }
 
     protected function setStatus(DocumentApprovalStatus|UnitEnum|string $status): void
     {
-      if(is_string($status)){
-          parent::__set('status', $status);
-          return;
-      }
+        if (is_string($status)) {
+            parent::__set('status', $status);
+            return;
+        }
 
         parent::__set('status', $status->value);
-
     }
 
 
