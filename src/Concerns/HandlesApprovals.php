@@ -63,14 +63,16 @@ trait HandlesApprovals
 
     public function getBoundApprovals(): ?Collection
     {
-        if (!$this->cachedApprovals) {
-            $this->cachedApprovals = $this
-                ->approvable()
-                ->approvals
-                ->where(fn(Approval $approval) => $approval->key == $this->getApprovalKey()
-                    && $approval->approval_by == $this->getApprovalBy()->getName()
-                );
+        if ($this->cachedApprovals) {
+            return $this->cachedApprovals;
         }
+
+        $this->cachedApprovals = $this
+            ->approvable()
+            ->approvals
+            ->where(fn(Approval $approval) => $approval->key == $this->getApprovalKey()
+                && $approval->approval_by == $this->getApprovalBy()->getName()
+            );
 
         return $this->cachedApprovals;
     }
