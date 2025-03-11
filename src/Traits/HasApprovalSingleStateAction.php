@@ -2,8 +2,8 @@
 
 namespace Ffhs\Approvals\Traits;
 
+use BackedEnum;
 use Closure;
-use Enum;
 use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Infolists\Actions\ApprovalSingleStateAction;
@@ -24,7 +24,7 @@ trait HasApprovalSingleStateAction
         ApprovalBy $approvalBy,
         UnitEnum|HasApprovalStatuses $status
     ): ApprovalSingleStateAction {
-        /** @var Enum $status */
+        /** @var BackedEnum $status */
         $labelMap = $this->getApprovalActionsLabel();
         $label = $labelMap[$status->value] ?? $status->value;
         $toolTips = $this->getApprovalActionToolTips();

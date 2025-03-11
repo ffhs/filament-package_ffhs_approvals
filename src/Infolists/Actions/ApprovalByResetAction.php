@@ -2,7 +2,7 @@
 
 namespace Ffhs\Approvals\Infolists\Actions;
 
-use Enum;
+use BackedEnum;
 use Ffhs\Approvals\Concerns\HandlesApprovals;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Models\Approval;
@@ -41,7 +41,7 @@ class ApprovalByResetAction extends Action implements ApprovableByComponent
         $status = $lastStatus->status;
 
         if ($status instanceof UnitEnum) {
-            /** @var Enum $status */
+            /** @var BackedEnum $status */
             $status = $status->value;
         }
 
