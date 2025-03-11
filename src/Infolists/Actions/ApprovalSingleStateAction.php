@@ -5,7 +5,6 @@ namespace Ffhs\Approvals\Infolists\Actions;
 use App\Domain\Approvals\Application\ApplicationApprovalStatus;
 use App\Domain\Approvals\Documents\DocumentApprovalStatus;
 use App\Models\User;
-use BackedEnum;
 use Ffhs\Approvals\Concerns\HandlesApprovals;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
@@ -17,6 +16,7 @@ use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
+use UnitEnum;
 
 class ApprovalSingleStateAction extends Action implements ApprovableByComponent
 {
@@ -90,15 +90,9 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
         return $this->getStatus() === $this->getActionStatus();
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): UnitEnum|string|null
     {
-        $status = $this->getActionBoundApproval()?->status;
-
-        if ($status instanceof BackedEnum) {
-            return $status->value;
-        }
-
-        return $status;
+        return $this->getActionBoundApproval()?->status;
     }
 
     public function getActionBoundApproval(): ?Approval
