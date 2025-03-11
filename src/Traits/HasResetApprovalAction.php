@@ -14,12 +14,14 @@ trait HasResetApprovalAction
     public function needResetApprovalBeforeChange(Closure|bool $needResetApprovalBeforeChange = true): static
     {
         $this->needResetApprovalBeforeChange = $needResetApprovalBeforeChange;
+
         return $this;
     }
 
     public function modifyResetApprovalActionUsing(Closure|null $modifyResetApprovalActionUsing): static
     {
         $this->modifyResetApprovalActionUsing = $modifyResetApprovalActionUsing;
+
         return $this;
     }
 

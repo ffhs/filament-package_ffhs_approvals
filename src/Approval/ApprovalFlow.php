@@ -8,28 +8,24 @@ use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Enums\ApprovalState;
 use Filament\Support\Concerns\EvaluatesClosures;
 use Illuminate\Database\Eloquent\Model;
+use UnitEnum;
 
 class ApprovalFlow
 {
     use EvaluatesClosures;
+
     private Model|Closure|null $record;
-
     private bool|Closure $approvalDisabled = false;
-
     private array|Closure $approvalBy = [];
     private string|Closure $category;
     private array|Closure $approvalStatus;
 
-    public static function make():static
+    public static function make(): static
     {
         $approvalFlow = app(static::class);
         $approvalFlow->setUp();
+
         return $approvalFlow;
-    }
-
-    protected function setUp()
-    {
-
     }
 
     public function isApprovalDisabled(): bool
@@ -40,14 +36,14 @@ class ApprovalFlow
     public function approvalDisabled(bool|Closure $approvalDisabled): static
     {
         $this->approvalDisabled = $approvalDisabled;
+
         return $this;
     }
-
-
 
     public function approvableRecord(Model|Closure|null $record): static
     {
         $this->record = $record;
+
         return $this;
     }
 
@@ -56,81 +52,100 @@ class ApprovalFlow
         return $this->evaluate($this->record);
     }
 
-    protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
-    {
-        return match ($parameterName) {
-            'record' => ['record' => $this->getApprovalRecord()]
-        };
-    }
-
     public function approvalBy(array|Closure $approvalBy): static
     {
         $this->approvalBy = $approvalBy;
+
         return $this;
     }
 
     /**
      * @return array<ApprovalBy>
      */
-    public function getApprovalBys(): array{
+    public function getApprovalBys(): array
+    {
         return $this->evaluate($this->approvalBy);
     }
 
     public function category(string|Closure $category): static
     {
         $this->category = $category;
+
         return $this;
     }
 
-    public function getCategory(): string{
+    public function getCategory(): string
+    {
         return $this->evaluate($this->category);
     }
-
 
     public function approvalStatus(array|Closure $approvalStatus): static
     {
         $this->approvalStatus = $approvalStatus;
+
         return $this;
     }
 
     /**
-     * @return array<\UnitEnum|HasApprovalStatuses>
+     * @return array<UnitEnum|HasApprovalStatuses>
      */
-    public function getApprovalStatus(): array{
+    public function getApprovalStatus(): array
+    {
         return $this->evaluate($this->approvalStatus);
     }
 
-
     public function getStatusEnumClass(): ?string
     {
-        if(empty($this->getApprovalStatus()))return null;
+        if (empty($this->getApprovalStatus())) {
+            return null;
+        }
+
         return $this->getApprovalStatus()[0]::class;
     }
 
-
-
     public function approved(Model|Approvable $approvable, string $key): ApprovalState
     {
-        if($this->isApprovalDisabled()) return ApprovalState::APPROVED;
-
-        $isPending = false;
-        $isOpen= false;
-        foreach ($this->getApprovalBys() as $approvalBy) {
-            $approved = $approvalBy->approved($approvable, $key);
-            if($approved == ApprovalState::PENDING) $isPending = true;
-            elseif($approved == ApprovalState::OPEN) $isOpen = true;
-            elseif($approved == ApprovalState::DENIED) return ApprovalState::DENIED;
+        if ($this->isApprovalDisabled()) {
+            return ApprovalState::APPROVED;
         }
 
-        if($isPending) return ApprovalState::PENDING;
-        elseif($isOpen) return ApprovalState::OPEN;
+        $isPending = false;
+        $isOpen = false;
+
+        foreach ($this->getApprovalBys() as $approvalBy) {
+            $approved = $approvalBy->approved($approvable, $key);
+
+            if ($approved == ApprovalState::PENDING) {
+                $isPending = true;
+            } elseif ($approved == ApprovalState::OPEN) {
+                $isOpen = true;
+            } elseif ($approved == ApprovalState::DENIED) {
+                return ApprovalState::DENIED;
+            }
+        }
+
+        if ($isPending) {
+            return ApprovalState::PENDING;
+        } elseif ($isOpen) {
+            return ApprovalState::OPEN;
+        }
+
         return ApprovalState::APPROVED;
     }
 
+    protected function setUp()
+    {
+    }
 
+    protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
+    {
+        return match ($parameterName) {
+            'record' => ['record' => $this->getApprovalRecord()]
+        };
+    }
+}
 
-
-
+//{
 //    use EvaluatesClosures;
 //
 //    protected bool | Closure $isChained = false;
@@ -382,5 +397,4 @@ class ApprovalFlow
 //
 //        return in_array(true, $conditions);
 //    }
-
-}
+//}

@@ -13,6 +13,7 @@ describe('Approval Model', function () {
     });
 
     it('has the correct table name from configuration', function () {
-        expect($this->approval->getTable())->toBe('test_approvals');
+        expect($this->approval->getTable())
+            ->toBe('test_approvals');
     });
 });
