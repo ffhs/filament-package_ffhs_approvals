@@ -5,6 +5,7 @@ namespace Ffhs\Approvals\Infolists\Actions;
 use App\Domain\Approvals\Application\ApplicationApprovalStatus;
 use App\Domain\Approvals\Documents\DocumentApprovalStatus;
 use App\Models\User;
+use BackedEnum;
 use Ffhs\Approvals\Concerns\HandlesApprovals;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
@@ -79,7 +80,9 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
             $this->sendNotificationOnSetApproval($state->value);
         }
 
-        $this->getRecord()->refresh();
+        $this
+            ->getRecord()
+            ->refresh();
     }
 
     public function isActionActive(): bool
@@ -87,9 +90,15 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
         return $this->getStatus() === $this->getActionStatus();
     }
 
-    public function getStatus(): string
+    public function getStatus(): ?string
     {
-        return $this->getActionBoundApproval()?->status;
+        $status = $this->getActionBoundApproval()?->status;
+
+        if ($status instanceof BackedEnum) {
+            return $status->value;
+        }
+
+        return $status;
     }
 
     public function getActionBoundApproval(): ?Approval
