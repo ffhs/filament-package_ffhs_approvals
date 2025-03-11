@@ -4,25 +4,28 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-     /**
+return new class extends Migration {
+    /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create(config('filament-package_ffhs_approvals.tables.approvals', 'approvals'), function (Blueprint $table) {
-            $table->id();
-            $table->string('key');
-            $table->nullableMorphs('approvable');
-            $table->string('status');
-            $table->string('approval_by');
-            $table->morphs('approver');
-            $table->timestamps();
-            $table->softDeletes();
+        Schema::create(
+            config('filament-package_ffhs_approvals.tables.approvals', 'approvals'),
+            function (Blueprint $table) {
+                $table->id();
+                $table->string('key');
+                $table->nullableMorphs('approvable');
+                $table->string('status');
+                $table->string('approval_by');
+                $table->morphs('approver');
 
-            //$table->unique(['approvable_id','approvable_type', 'key', 'approve_by_id', 'approve_by_type']);
-        });
+                //$table->unique(['approvable_id','approvable_type', 'key', 'approve_by_id', 'approve_by_type']);
+
+                $table->timestamps();
+                $table->softDeletes();
+            }
+        );
     }
 
     /**

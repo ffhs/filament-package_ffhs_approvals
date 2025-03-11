@@ -2,6 +2,7 @@
 
 namespace Ffhs\Approvals\Concerns;
 
+use App\Models\User;
 use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Approval\ApprovalFlow;
 use Ffhs\Approvals\Contracts\Approvable;
@@ -25,7 +26,10 @@ trait HandlesApprovals
 
     public function canApprove(): bool
     {
-        return $this->getApprovalBy()->canApprove(Auth::user(), $this->approvable());
+        /** @var User $user */
+        $user = Auth::user();
+
+        return $this->getApprovalBy()->canApprove($user, $this->approvable());
     }
 
     public function getApprovalBy(): ApprovalBy
@@ -48,6 +52,7 @@ trait HandlesApprovals
     public function approvalBy(ApprovalBy $approvalBy): static
     {
         $this->approvalBy = $approvalBy;
+
         return $this;
     }
 
@@ -58,13 +63,16 @@ trait HandlesApprovals
 
     public function getBoundApprovals(): ?Collection
     {
-        if ($this->cachedApprovals) {
-            return $this->cachedApprovals;
+        if (!$this->cachedApprovals) {
+            $this->cachedApprovals = $this
+                ->approvable()
+                ->approvals
+                ->where(fn(Approval $approval) => $approval->key == $this->getApprovalKey()
+                    && $approval->approval_by == $this->getApprovalBy()->getName()
+                );
         }
-        return $this->cachedApprovals = $this->approvable()->approvals
-            ->where(fn(Approval $approval) => $approval->key == $this->getApprovalKey() &&
-                $approval->approval_by == $this->getApprovalBy()->getName()
-            );
+
+        return $this->cachedApprovals;
     }
 
     public function getApprovedStatusColor(): string
@@ -90,13 +98,22 @@ trait HandlesApprovals
         foreach ($colors as $key => $value) {
             if (!in_array($key, $allowedKeys, true)) {
                 throw new InvalidArgumentException(
-                    "Invalid status key: {$key}. Allowed keys are: " . implode(', ', $allowedKeys)
+                    sprintf(
+                        'Invalid status key: %s. Allowed keys are: %s',
+                        $key,
+                        implode(', ', $allowedKeys)
+                    )
                 );
             }
 
             if (!in_array($value, $validColors, true)) {
                 throw new InvalidArgumentException(
-                    "Invalid color value for '{$key}': {$value}. Allowed colors are: " . implode(', ', $validColors)
+                    sprintf(
+                        'Invalid color value for \'%s\': %s. Allowed colors are:: %s',
+                        $key,
+                        $value,
+                        implode(', ', $validColors)
+                    )
                 );
             }
 
@@ -104,6 +121,15 @@ trait HandlesApprovals
         }
 
         return $this;
+    }
+
+    public function getApprovalFlow(): ?ApprovalFlow
+    {
+        if ($this->approvalFlow) {
+            return $this->approvalFlow;
+        }
+
+        throw new RuntimeException('No approval flow was found for component'); //todo find right exeption
     }
 
     protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
@@ -115,13 +141,4 @@ trait HandlesApprovals
             default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
         };
     }
-
-    public function getApprovalFlow(): ?ApprovalFlow
-    {
-        if ($this->approvalFlow) {
-            return $this->approvalFlow;
-        }
-        throw new RuntimeException('No approval flow was found for component'); //todo find right exeption
-    }
-
 }

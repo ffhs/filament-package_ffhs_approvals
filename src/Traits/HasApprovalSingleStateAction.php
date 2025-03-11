@@ -3,25 +3,28 @@
 namespace Ffhs\Approvals\Traits;
 
 use Closure;
+use Enum;
 use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Infolists\Actions\ApprovalSingleStateAction;
+use UnitEnum;
 
 trait HasApprovalSingleStateAction
 {
     private Closure|null $modifyApprovalActionUsing = null;
 
-
     public function modifyApprovalActionUsing(Closure|null $modifyApprovalActionUsing): static
     {
         $this->modifyApprovalActionUsing = $modifyApprovalActionUsing;
+
         return $this;
     }
 
     public function getApprovalSingleStateAction(
         ApprovalBy $approvalBy,
-        \UnitEnum|HasApprovalStatuses $status
+        UnitEnum|HasApprovalStatuses $status
     ): ApprovalSingleStateAction {
+        /** @var Enum $status */
         $labelMap = $this->getApprovalActionsLabel();
         $label = $labelMap[$status->value] ?? $status->value;
         $toolTips = $this->getApprovalActionToolTips();
@@ -39,14 +42,18 @@ trait HasApprovalSingleStateAction
             ->notificationOnChangeApproval(
                 fn($lastStatus, $status) => $this->sendNotificationOnChangeApproval($status, $lastStatus)
             )
-            ->disabled(fn() => $this->isApprovalActionsDisabled() || $this->isCaseDisabled($status->value))
+            ->disabled(function () use ($status) {
+                return $this->isApprovalActionsDisabled() || $this->isCaseDisabled($status->value);
+            })
             ->approvalKey($this->getApprovalKey())
             ->tooltip($toolTips[$status->value] ?? null)
             ->label($label)
             ->size($this->getSize())
             ->approvalBy($approvalBy)
             ->actionStatus($status)
-            ->hidden(fn() => $this->isCaseHidden($status->value));
+            ->hidden(function () use ($status) {
+                return $this->isCaseHidden($status->value);
+            });
 
 
         return $this->modifyApprovalSingleStateAction($action, $approvalBy, $status);
@@ -55,7 +62,7 @@ trait HasApprovalSingleStateAction
     public function modifyApprovalSingleStateAction(
         ApprovalSingleStateAction $action,
         ApprovalBy $approvalBy,
-        \UnitEnum|HasApprovalStatuses $status
+        UnitEnum|HasApprovalStatuses $status
     ): ApprovalSingleStateAction {
         if (is_null($this->modifyApprovalActionUsing)) {
             return $action;

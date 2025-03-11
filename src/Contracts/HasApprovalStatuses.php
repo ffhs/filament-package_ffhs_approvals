@@ -9,6 +9,4 @@ interface HasApprovalStatuses
     public static function getDeniedStatuses(): array;
 
     public static function getPendingStatuses(): array;
-
-
 }

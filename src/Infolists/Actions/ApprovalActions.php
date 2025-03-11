@@ -33,9 +33,9 @@ class ApprovalActions extends Component
     use HasHiddenCases;
     use HasApprovalSingleStateAction;
     use HasApprovalNotification;
+    use HasSize;
 
     //use HasColumns; //ToDo implement
-    use HasSize;
 
     protected bool|Closure $isFullWidth = false;
     protected string $view = 'filament-package_ffhs_approvals::infolist.approval-actions';
@@ -55,6 +55,14 @@ class ApprovalActions extends Component
         );
         $this->approvalKey($approvalKey);
         $this->statePath($this->getApprovalKey());
+    }
+
+    public static function make(string|Closure $approvalKey): static
+    {
+        $static = app(static::class, ['approvalKey' => $approvalKey]);
+        $static->configure();
+
+        return $static;
     }
 
     public function recordUsing(Closure|null|Model $record): static
@@ -98,23 +106,18 @@ class ApprovalActions extends Component
         return $containers;
     }
 
-    public static function make(string|Closure $approvalKey): static
-    {
-        $static = app(static::class, ['approvalKey' => $approvalKey]);
-        $static->configure();
-
-        return $static;
-    }
-
     public function getApprovalByActions(ApprovalBy $approvalBy): array
     {
         $actions = [];
+
         foreach ($this->getApprovalStatuses() as $status) {
-            $actions[] = $this->getApprovalSingleStateAction($approvalBy, $status)
+            $actions[] = $this
+                ->getApprovalSingleStateAction($approvalBy, $status)
                 ->toInfolistComponent();
         }
 
-        $actions[] = $this->getResetApprovalAction($approvalBy)
+        $actions[] = $this
+            ->getResetApprovalAction($approvalBy)
             ->toInfolistComponent();
 
         return $actions;

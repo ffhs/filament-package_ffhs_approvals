@@ -2,6 +2,8 @@
 
 namespace Ffhs\Approvals\Infolists\Actions;
 
+use App\Domain\Approvals\Application\ApplicationApprovalStatus;
+use App\Domain\Approvals\Documents\DocumentApprovalStatus;
 use App\Models\User;
 use Ffhs\Approvals\Concerns\HandlesApprovals;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
@@ -31,25 +33,34 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
     private string|array|null $colorNotSelected = null;
     private array $approvalIcons = [];
 
-
     public function changeApproval(): void
     {
         if ($this->isActionActive()) {
-            $this->getActionBoundApproval()->delete();
+            $this
+                ->getActionBoundApproval()
+                ->delete();
+
             Notification::make()
                 ->title('remove approval') //ToDo Translate and add text state
                 ->success()
                 ->send();
 
-            $this->getRecord()->refresh();
+            $this
+                ->getRecord()
+                ->refresh();
+
             return;
         }
 
         $isChange = !is_null($this->getStatus());
         $oldState = $this->getStatus();
+        /** @var ApplicationApprovalStatus|DocumentApprovalStatus $state */
+        $state = $this->getActionStatus();
 
         if ($isChange) {
-            $this->getActionBoundApproval()->delete();
+            $this
+                ->getActionBoundApproval()
+                ->delete();
         }
 
         Approval::create([
@@ -57,15 +68,15 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
             'approver_type' => User::class,
             'approvable_id' => $this->approvable()->id,
             'approvable_type' => $this->approvable()::class,
-            'status' => $this->getActionStatus()->value,
+            'status' => $state->value,
             'key' => $this->getApprovalKey(),
             'approval_by' => $this->getApprovalBy()->getName(),
         ]);
 
         if ($isChange) {
-            $this->sendNotificationOnChangeApproval($this->getActionStatus()->value, $oldState->value);
+            $this->sendNotificationOnChangeApproval($state->value, $oldState);
         } else {
-            $this->sendNotificationOnSetApproval($this->getActionStatus()->value);
+            $this->sendNotificationOnSetApproval($state->value);
         }
 
         $this->getRecord()->refresh();
@@ -76,14 +87,16 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
         return $this->getStatus() === $this->getActionStatus();
     }
 
-    public function getStatus(): ?\UnitEnum
+    public function getStatus(): string
     {
         return $this->getActionBoundApproval()?->status;
     }
 
     public function getActionBoundApproval(): ?Approval
     {
-        return $this->getBoundApprovals()->first();
+        return $this
+            ->getBoundApprovals()
+            ->first();
 //            ->firstWhere(function (Approval $approval) {
 //                return $approval->approver_id == Auth::id() &&
 //                    $approval->approver_type == User::class;
@@ -110,38 +123,43 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
     public function colorSelected(null|string|array $colorSelected): static
     {
         $this->colorSelected = $colorSelected;
+
         return $this;
     }
 
     public function colorNotSelected(null|string|array $colorNotSelected): static
     {
         $this->colorNotSelected = $colorNotSelected;
+
         return $this;
     }
 
     public function approvalIcons(array $approvalIcons): static
     {
         $this->approvalIcons = $approvalIcons;
+
         return $this;
     }
 
     public function getIcon(): string|Htmlable|null
     {
-        $this->icon = $this->approvalIcons[$this->getActionStatus()->value] ?? null;
+        /** @var ApplicationApprovalStatus|DocumentApprovalStatus $state */
+        $state = $this->getActionStatus();
+        $this->icon = $this->approvalIcons[$state->value] ?? null;
+
         return parent::getIcon();
     }
 
     public function isDisabled(): bool
     {
-        if ($this->evaluate($this->isDisabled) || $this->isHidden()) {
+        if (($this->evaluate($this->isDisabled) || $this->isHidden()) || !$this->canApprove()) {
             return true;
         }
-        if (!$this->canApprove()) {
-            return true;
-        }
+
         if (!$this->isNeedResetApprovalBeforeChange()) {
             return false;
         }
+
         return !is_null($this->getStatus());
     }
 
@@ -150,28 +168,33 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
         if (parent::isHidden()) {
             return true;
         }
-        if (!$this->isNeedResetApprovalBeforeChange()) {
+
+        if (!$this->isNeedResetApprovalBeforeChange() || is_null($this->getStatus())) {
             return false;
         }
-        if (is_null($this->getStatus())) {
-            return false;
-        }
+
         return $this->getStatus() !== $this->getActionStatus();
     }
 
     public function getColor(): string|array|null
     {
+        /** @var ApplicationApprovalStatus|DocumentApprovalStatus $state */
+        $state = $this->getActionStatus();
+
         if (!$this->isActionActive()) {
             $colors = $this->getColorNotSelected();
+
             if (!is_array($colors)) {
                 return $colors ?? 'gray';
             }
-            return $colors[$this->getActionStatus()->value] ?? 'gray';
+
+            return $colors[$state->value] ?? 'gray';
         }
 
-        $state = $this->getActionStatus();
-
-        $statusEnum = $this->getApprovalFlow()->getStatusEnumClass();
+        /** @var HasApprovalStatuses $statusEnum */
+        $statusEnum = $this
+            ->getApprovalFlow()
+            ->getStatusEnumClass();
         $colors = $this->getColorSelected();
 
         if (!is_null($colors)) {
@@ -211,10 +234,9 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->name($this->name);
         $this->action($this->changeApproval(...));
         $this->iconPosition(IconPosition::After);
     }
-
-
 }

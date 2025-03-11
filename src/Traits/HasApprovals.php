@@ -29,7 +29,7 @@ trait HasApprovals
 
     public function approvalStatistics(?array $categories = null, ?array $keys = null): array
     {
-        $flows = $this->getFiltertApprovalFlow($categories, $keys);
+        $flows = $this->getFilteredApprovalFlow($categories, $keys);
         $statistic = [];
 
         foreach ($flows as $key => $flow) {
@@ -120,9 +120,7 @@ trait HasApprovals
         }
 
         if ($categories) {
-            $flows = Arr::where($flows, function (ApprovalFlow $value, $key) use ($categories) {
-                return in_array($value->getCategory(), $categories);
-            });
+            $flows = Arr::where($flows, fn(ApprovalFlow $value) => in_array($value->getCategory(), $categories));
         }
 
         return $flows;

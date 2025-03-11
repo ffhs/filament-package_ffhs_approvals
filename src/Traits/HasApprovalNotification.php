@@ -2,31 +2,33 @@
 
 namespace Ffhs\Approvals\Traits;
 
+use Closure;
 use Filament\Notifications\Notification;
-
 
 trait HasApprovalNotification
 {
+    protected null|string|Closure|Notification $notificationOnChangeApproval;
+    protected null|string|Closure|Notification $notificationOnResetApproval;
+    protected null|string|Closure|Notification $notificationOnSetApproval;
 
-    protected null|string|\Closure|Notification $notificationOnChangeApproval;
-    protected null|string|\Closure|Notification $notificationOnResetApproval;
-    protected null|string|\Closure|Notification $notificationOnSetApproval;
-
-    public function notificationOnChangeApproval(null|string|\Closure|Notification $notificationOnChangeApproval
-    ): static {
+    public function notificationOnChangeApproval(null|string|Closure|Notification $notificationOnChangeApproval): static
+    {
         $this->notificationOnChangeApproval = $notificationOnChangeApproval;
+
         return $this;
     }
 
-    public function notificationOnResetApproval(null|string|\Closure|Notification $notificationOnResetApproval): static
+    public function notificationOnResetApproval(null|string|Closure|Notification $notificationOnResetApproval): static
     {
         $this->notificationOnResetApproval = $notificationOnResetApproval;
+
         return $this;
     }
 
-    public function notificationOnSetApproval(null|string|\Closure|Notification $notificationOnSetApproval): static
+    public function notificationOnSetApproval(null|string|Closure|Notification $notificationOnSetApproval): static
     {
         $this->notificationOnSetApproval = $notificationOnSetApproval;
+
         return $this;
     }
 
@@ -38,13 +40,19 @@ trait HasApprovalNotification
             'lastStatus' => $last,
         ]);
 
-        if ($notification == null) return;
+        if ($notification == null) {
+            return;
+        }
+
         if ($notification instanceof Notification) {
             $notification->send();
             return;
         }
 
-        Notification::make()->title($notification)->success()->send();
+        Notification::make()
+            ->title($notification)
+            ->success()
+            ->send();
     }
 
     public function sendNotificationOnResetApproval(string $last): void
@@ -53,13 +61,19 @@ trait HasApprovalNotification
             'lastStatus' => $last,
         ]);
 
-        if ($notification == null) return;
+        if ($notification == null) {
+            return;
+        }
+
         if ($notification instanceof Notification) {
             $notification->send();
             return;
         }
 
-        Notification::make()->title($notification)->success()->send();
+        Notification::make()
+            ->title($notification)
+            ->success()
+            ->send();
     }
 
     public function sendNotificationOnSetApproval(string $status): void
@@ -68,14 +82,18 @@ trait HasApprovalNotification
             'status' => $status,
         ]);
 
-        if ($notification == null) return;
+        if ($notification == null) {
+            return;
+        }
+
         if ($notification instanceof Notification) {
             $notification->send();
             return;
         }
 
-        Notification::make()->title($notification)->success()->send();
+        Notification::make()
+            ->title($notification)
+            ->success()
+            ->send();
     }
-
-
 }

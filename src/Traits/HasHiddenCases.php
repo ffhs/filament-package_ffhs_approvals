@@ -3,6 +3,7 @@
 namespace Ffhs\Approvals\Traits;
 
 use Closure;
+use Enum;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 
 trait HasHiddenCases
@@ -12,6 +13,7 @@ trait HasHiddenCases
     public function isCaseHidden(string|HasApprovalStatuses $status): bool
     {
         if ($status instanceof HasApprovalStatuses) {
+            /** @var Enum $status */
             $status = $status->value;
         }
 

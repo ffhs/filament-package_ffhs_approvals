@@ -2,8 +2,6 @@
 
 namespace Ffhs\Approvals;
 
-use Ffhs\Approvals\Approval\ApprovalBy;
-use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Policies\ApprovalByPolicy;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
@@ -19,7 +17,6 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 class ApprovalsServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'filament-package_ffhs_approvals';
-
     public static string $viewNamespace = 'filament-package_ffhs_approvals';
 
 
@@ -41,7 +38,7 @@ class ApprovalsServiceProvider extends PackageServiceProvider
 
         $configFileName = $package->shortName();
 
-        if (file_exists($package->basePath("/../config/{$configFileName}.php"))) {
+        if (file_exists($package->basePath('/../config/' . $configFileName . '.php'))) {
             $package->hasConfigFile();
         }
 
@@ -58,12 +55,16 @@ class ApprovalsServiceProvider extends PackageServiceProvider
         }
     }
 
-    public function packageRegistered(): void {}
+    public function packageRegistered(): void
+    {
+    }
 
     public function boot(): ApprovalsServiceProvider
     {
         parent::boot();
+
         Gate::define('can_approve_by', [ApprovalByPolicy::class, 'approve']);
+
         return $this;
     }
 
@@ -88,7 +89,7 @@ class ApprovalsServiceProvider extends PackageServiceProvider
         if (app()->runningInConsole()) {
             foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
                 $this->publishes([
-                    $file->getRealPath() => base_path("stubs/filament-package_ffhs_approvals/{$file->getFilename()}"),
+                    $file->getRealPath() => base_path('stubs/filament-package_ffhs_approvals/' . $file->getFilename()),
                 ], 'filament-package_ffhs_approvals-stubs');
             }
         }
@@ -108,8 +109,14 @@ class ApprovalsServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            Css::make('filament-package_ffhs_approvals-styles', __DIR__ . '/../resources/dist/filament-package_ffhs_approvals.css'),
-            Js::make('filament-package_ffhs_approvals-scripts', __DIR__ . '/../resources/dist/filament-package_ffhs_approvals.js'),
+            Css::make(
+                'filament-package_ffhs_approvals-styles',
+                __DIR__ . '/../resources/dist/filament-package_ffhs_approvals.css'
+            ),
+            Js::make(
+                'filament-package_ffhs_approvals-scripts',
+                __DIR__ . '/../resources/dist/filament-package_ffhs_approvals.js'
+            ),
         ];
     }
 
@@ -154,6 +161,4 @@ class ApprovalsServiceProvider extends PackageServiceProvider
             'create_filament_package_ffhs_approvals_table',
         ];
     }
-
-
 }
