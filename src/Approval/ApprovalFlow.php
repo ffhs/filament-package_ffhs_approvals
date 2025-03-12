@@ -14,7 +14,6 @@ class ApprovalFlow
 {
     use EvaluatesClosures;
 
-    private Model|Closure|null $record;
     private bool|Closure $approvalDisabled = false;
     private array|Closure $approvalBy = [];
     private string|Closure $category;
@@ -28,9 +27,8 @@ class ApprovalFlow
         return $approvalFlow;
     }
 
-    public function isApprovalDisabled(): bool
+    protected function setUp()
     {
-        return $this->evaluate($this->approvalDisabled);
     }
 
     public function approvalDisabled(bool|Closure $approvalDisabled): static
@@ -40,31 +38,11 @@ class ApprovalFlow
         return $this;
     }
 
-    public function approvableRecord(Model|Closure|null $record): static
-    {
-        $this->record = $record;
-
-        return $this;
-    }
-
-    public function getApprovalRecord(): Model
-    {
-        return $this->evaluate($this->record);
-    }
-
     public function approvalBy(array|Closure $approvalBy): static
     {
         $this->approvalBy = $approvalBy;
 
         return $this;
-    }
-
-    /**
-     * @return array<ApprovalBy>
-     */
-    public function getApprovalBys(): array
-    {
-        return $this->evaluate($this->approvalBy);
     }
 
     public function category(string|Closure $category): static
@@ -86,14 +64,6 @@ class ApprovalFlow
         return $this;
     }
 
-    /**
-     * @return array<UnitEnum|HasApprovalStatuses>
-     */
-    public function getApprovalStatus(): array
-    {
-        return $this->evaluate($this->approvalStatus);
-    }
-
     public function getStatusEnumClass(): ?string
     {
         if (empty($this->getApprovalStatus())) {
@@ -101,6 +71,14 @@ class ApprovalFlow
         }
 
         return $this->getApprovalStatus()[0]::class;
+    }
+
+    /**
+     * @return array<UnitEnum|HasApprovalStatuses>
+     */
+    public function getApprovalStatus(): array
+    {
+        return $this->evaluate($this->approvalStatus);
     }
 
     public function approved(Model|Approvable $approvable, string $key): ApprovalState
@@ -133,15 +111,17 @@ class ApprovalFlow
         return ApprovalState::APPROVED;
     }
 
-    protected function setUp()
+    public function isApprovalDisabled(): bool
     {
+        return $this->evaluate($this->approvalDisabled);
     }
 
-    protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
+    /**
+     * @return array<ApprovalBy>
+     */
+    public function getApprovalBys(): array
     {
-        return match ($parameterName) {
-            'record' => ['record' => $this->getApprovalRecord()]
-        };
+        return $this->evaluate($this->approvalBy);
     }
 }
 
