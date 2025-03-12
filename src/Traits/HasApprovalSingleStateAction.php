@@ -7,10 +7,19 @@ use Closure;
 use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Infolists\Actions\ApprovalSingleStateAction;
+use Filament\Actions\Concerns\CanBeDisabled;
+use Filament\Actions\Concerns\HasSize;
 use UnitEnum;
 
 trait HasApprovalSingleStateAction
 {
+    use HasCasesToolTips;
+    use HasCasesDisable;
+    use HasCasesHidden;
+    use HasCasesIcons;
+    use HasSize;
+    use CanBeDisabled;
+
     private Closure|null $modifyApprovalActionUsing = null;
 
     public function modifyApprovalActionUsing(Closure|null $modifyApprovalActionUsing): static
@@ -41,7 +50,7 @@ trait HasApprovalSingleStateAction
                 fn($lastStatus, $status) => $this->sendNotificationOnChangeApproval($status, $lastStatus)
             )
             ->disabled(function () use ($approvalCase) {
-                return $this->isApprovalActionsDisabled() || $this->isCaseDisabled($approvalCase->value);
+                return $this->isDisabled() || $this->isCaseDisabled($approvalCase->value);
             })
             ->approvalKey($this->getApprovalKey())
             ->tooltip($this->getCaseTooltip($approvalCase))
@@ -80,4 +89,6 @@ trait HasApprovalSingleStateAction
             ]
         );
     }
+
+
 }
