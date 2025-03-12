@@ -8,11 +8,9 @@ use Ffhs\Approvals\Approval\ApprovalFlow;
 use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Traits\HasApprovalKey;
-use Filament\Support\Facades\FilamentColor;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use PHPUnit\Event\InvalidArgumentException;
 use PHPUnit\Event\RuntimeException;
 
 trait HandlesApprovals
@@ -77,52 +75,14 @@ trait HandlesApprovals
         return $this->cachedApprovals;
     }
 
-    public function getApprovedStatusColor(): string
+    protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
     {
-        return $this->statusCategoryColors['approved'] ?? 'green';
-    }
-
-    public function getDeniedStatusColor(): string
-    {
-        return $this->statusCategoryColors['denied'] ?? 'red';
-    }
-
-    public function getPendingStatusColor(): string
-    {
-        return $this->statusCategoryColors['pending'] ?? 'blue';
-    }
-
-    public function statusCategoryColors(array $colors): static
-    {
-        $allowedKeys = ['approved', 'denied', 'pending'];
-        $validColors = array_keys(FilamentColor::getColors());
-
-        foreach ($colors as $key => $value) {
-            if (!in_array($key, $allowedKeys, true)) {
-                throw new InvalidArgumentException(
-                    sprintf(
-                        'Invalid status key: %s. Allowed keys are: %s',
-                        $key,
-                        implode(', ', $allowedKeys)
-                    )
-                );
-            }
-
-            if (!in_array($value, $validColors, true)) {
-                throw new InvalidArgumentException(
-                    sprintf(
-                        'Invalid color value for \'%s\': %s. Allowed colors are:: %s',
-                        $key,
-                        $value,
-                        implode(', ', $validColors)
-                    )
-                );
-            }
-
-            $this->statusCategoryColors[$key] = $value;
-        }
-
-        return $this;
+        return match ($parameterName) {
+            'approvals' => $this->getBoundApprovals(),
+            'approvalFlow' => $this->getApprovalFlow(),
+            'approvalBy' => $this->getApprovalBy(),
+            default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
+        };
     }
 
     public function getApprovalFlow(): ?ApprovalFlow
@@ -132,15 +92,5 @@ trait HandlesApprovals
         }
 
         throw new RuntimeException('No approval flow was found for component'); //todo find right exeption
-    }
-
-    protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
-    {
-        return match ($parameterName) {
-            'approvals' => $this->getBoundApprovals(),
-            'approvalFlow' => $this->getApprovalFlow(),
-            'approvalBy' => $this->getApprovalBy(),
-            default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
-        };
     }
 }

@@ -73,22 +73,22 @@ trait HasApprovalStatusColor
         return $this->getOpenStatusColor();
     }
 
-    public function getApprovedStatusColor(): string
+    public function getApprovedStatusColor(): mixed
     {
         return $this->statusCategoryColors['approved'] ?? 'green';
     }
 
-    public function getDeniedStatusColor(): string
+    public function getDeniedStatusColor(): mixed
     {
         return $this->statusCategoryColors['denied'] ?? 'red';
     }
 
-    public function getPendingStatusColor(): string
+    public function getPendingStatusColor(): mixed
     {
         return $this->statusCategoryColors['pending'] ?? 'blue';
     }
 
-    public function getOpenStatusColor(): string
+    public function getOpenStatusColor(): mixed
     {
         return $this->statusCategoryColors['open'] ?? 'white';
     }

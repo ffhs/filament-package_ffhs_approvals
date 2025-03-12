@@ -2,7 +2,6 @@
 
 namespace Ffhs\Approvals\Traits;
 
-use ErrorException;
 use Ffhs\Approvals\Approval\ApprovalFlow;
 use Ffhs\Approvals\Contracts\Approvable;
 use RuntimeException;
@@ -12,7 +11,10 @@ trait HasApprovalFlowFromRecord
 {
     private ApprovalFlow|null $cachedApprovalFlow = null;
 
-    abstract public function getApprovalKey(): string;
+    public function getApprovalStatuses(): array
+    {
+        return $this->getApprovalFlow()->getApprovalStatus();
+    }
 
     public function getApprovalFlow(): ApprovalFlow
     {
@@ -33,9 +35,10 @@ trait HasApprovalFlowFromRecord
             $this->cachedApprovalFlow = $record->getApprovalFlow($this->getApprovalKey());
         } catch (UndefinedFunctionError) {
             throw new RuntimeException('Record hasn\'t an Approval Flow [function getApprovalFlows()]');
-        } catch (ErrorException) {
-            throw new RuntimeException('The key ' . $this->getApprovalKey() . ' doesnt exist');
         }
+//        catch (ErrorException) {
+//            throw new RuntimeException('The key ' . $this->getApprovalKey() . ' doesnt exist');
+//        }
 
         if ($this->cachedApprovalFlow === null) {
             throw new RuntimeException('Record hasn\'t an Approval Flow with key "' . $this->getApprovalKey() . '"');
@@ -44,8 +47,5 @@ trait HasApprovalFlowFromRecord
         return $this->cachedApprovalFlow;
     }
 
-    public function getApprovalStatuses(): array
-    {
-        return $this->getApprovalFlow()->getApprovalStatus();
-    }
+    abstract public function getApprovalKey(): string;
 }

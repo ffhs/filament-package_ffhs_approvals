@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 
 /**
  * @property Collection approvals
+ * @property int id
  */
 interface Approvable
 {
