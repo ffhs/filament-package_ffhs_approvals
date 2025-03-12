@@ -5,7 +5,7 @@ namespace Ffhs\Approvals\Traits;
 use BackedEnum;
 use Closure;
 
-trait HasDisableCase
+trait HasCasesDisable
 {
     private array|Closure $casesDisabled = [];
 
