@@ -3,15 +3,12 @@
 namespace Ffhs\Approvals\Infolists\Actions;
 
 use Ffhs\Approvals\Approval\ApprovalBy;
-use Ffhs\Approvals\Traits\HasApprovalActionModifications;
 use Ffhs\Approvals\Traits\HasApprovalFlowFromRecord;
 use Ffhs\Approvals\Traits\HasApprovalKey;
 use Ffhs\Approvals\Traits\HasApprovalNotification;
 use Ffhs\Approvals\Traits\HasApprovalSingleStateAction;
-use Ffhs\Approvals\Traits\HasDisableCase;
-use Ffhs\Approvals\Traits\HasHiddenCases;
+use Ffhs\Approvals\Traits\HasGroupLabels;
 use Ffhs\Approvals\Traits\HasResetApprovalAction;
-use Filament\Actions\Concerns\HasSize;
 use Filament\Infolists\ComponentContainer;
 use Filament\Infolists\Components\Component;
 use Filament\Infolists\Components\Concerns\EntanglesStateWithSingularRelationship;
@@ -24,18 +21,15 @@ class ApprovalActions extends Component
 {
     use HasAlignment;
     use HasVerticalAlignment;
-    use HasApprovalActionModifications;
-    use HasResetApprovalAction;
+    use HasGroupLabels;
     use HasApprovalKey;
     use HasApprovalFlowFromRecord;
     use EntanglesStateWithSingularRelationship;
-    use HasDisableCase;
-    use HasHiddenCases;
-    use HasApprovalSingleStateAction;
     use HasApprovalNotification;
+    use HasApprovalSingleStateAction;
+    use HasResetApprovalAction;
 
     //use HasColumns; //ToDo implement
-    use HasSize;
 
     protected bool|Closure $isFullWidth = false;
     protected string $view = 'filament-package_ffhs_approvals::infolist.approval-actions';
@@ -109,12 +103,15 @@ class ApprovalActions extends Component
     public function getApprovalByActions(ApprovalBy $approvalBy): array
     {
         $actions = [];
+
         foreach ($this->getApprovalStatuses() as $status) {
-            $actions[] = $this->getApprovalSingleStateAction($approvalBy, $status)
+            $actions[] = $this
+                ->getApprovalSingleStateAction($approvalBy, $status)
                 ->toInfolistComponent();
         }
 
-        $actions[] = $this->getResetApprovalAction($approvalBy)
+        $actions[] = $this
+            ->getResetApprovalAction($approvalBy)
             ->toInfolistComponent();
 
         return $actions;
@@ -146,7 +143,6 @@ class ApprovalActions extends Component
         if (parent::isHidden()) {
             return true;
         }
-
         return $this->getApprovalFlow()->isApprovalDisabled();
     }
 }

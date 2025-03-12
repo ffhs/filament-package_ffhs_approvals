@@ -14,5 +14,4 @@ class ApprovalByPolicy
     {
         return $approvalBy->canApproveFromPermissions($user);
     }
-
 }

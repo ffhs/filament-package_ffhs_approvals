@@ -2,60 +2,78 @@
 
 namespace Ffhs\Approvals\Traits;
 
+use BackedEnum;
 use Closure;
 use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Infolists\Actions\ApprovalSingleStateAction;
+use Filament\Actions\Concerns\CanBeDisabled;
+use Filament\Actions\Concerns\HasSize;
+use UnitEnum;
 
 trait HasApprovalSingleStateAction
 {
-    private Closure|null $modifyApprovalActionUsing = null;
+    use HasCasesToolTips;
+    use HasCasesDisable;
+    use HasCasesHidden;
+    use HasCasesIcons;
+    use HasSize;
+    use HasCasesLabels;
+    use CanBeDisabled;
+    use HasCasesColors;
 
+    private Closure|null $modifyApprovalActionUsing = null;
 
     public function modifyApprovalActionUsing(Closure|null $modifyApprovalActionUsing): static
     {
         $this->modifyApprovalActionUsing = $modifyApprovalActionUsing;
+
         return $this;
     }
 
     public function getApprovalSingleStateAction(
         ApprovalBy $approvalBy,
-        \UnitEnum|HasApprovalStatuses $status
+        UnitEnum|HasApprovalStatuses $approvalCase
     ): ApprovalSingleStateAction {
-        $labelMap = $this->getApprovalActionsLabel();
-        $label = $labelMap[$status->value] ?? $status->value;
-        $toolTips = $this->getApprovalActionToolTips();
+        /** @var BackedEnum|HasApprovalStatuses $approvalCase */
 
 
-        $action = ApprovalSingleStateAction::make($approvalBy->getName() . '-' . $status->value)
+        $action = ApprovalSingleStateAction::make($approvalBy->getName() . '-' . $approvalCase->value)
             ->needResetApprovalBeforeChange($this->isNeedResetApprovalBeforeChange())
             ->approvalFlow($this->getApprovalFlow())
             ->requiresConfirmation($this->isRequiresConfirmation())
-            ->colorSelected($this->getApprovalActionsSelectColor())
-            ->colorNotSelected($this->getApprovalActionsColor())
-            ->approvalIcons($this->getApprovalActionsIcons())
+            ->color(function (ApprovalSingleStateAction $action) use ($approvalCase) {
+                return $this->getFinalCaseColor(
+                    $approvalCase,
+                    $action->getStatus(),
+                    $this->getApprovalFlow()
+                );
+            })
+            ->icon($this->getCaseIcon($approvalCase))
             ->notificationOnResetApproval(fn($lastStatus) => $this->sendNotificationOnResetApproval($lastStatus))
             ->notificationOnSetApproval(fn($status) => $this->sendNotificationOnSetApproval($status))
             ->notificationOnChangeApproval(
                 fn($lastStatus, $status) => $this->sendNotificationOnChangeApproval($status, $lastStatus)
             )
-            ->disabled(fn() => $this->isApprovalActionsDisabled() || $this->isCaseDisabled($status->value))
+            ->disabled(function () use ($approvalCase) {
+                return $this->isDisabled() || $this->isCaseDisabled($approvalCase->value);
+            })
+            ->hidden(fn() => $this->isCaseHidden($approvalCase->value))
+            ->tooltip($this->getCaseTooltip($approvalCase))
+            ->label($this->getCaseLabel($approvalCase))
             ->approvalKey($this->getApprovalKey())
-            ->tooltip($toolTips[$status->value] ?? null)
-            ->label($label)
-            ->size($this->getSize())
+            ->actionStatus($approvalCase)
             ->approvalBy($approvalBy)
-            ->actionStatus($status)
-            ->hidden(fn() => $this->isCaseHidden($status->value));
+            ->size($this->getSize());
 
 
-        return $this->modifyApprovalSingleStateAction($action, $approvalBy, $status);
+        return $this->modifyApprovalSingleStateAction($action, $approvalBy, $approvalCase);
     }
 
     public function modifyApprovalSingleStateAction(
         ApprovalSingleStateAction $action,
         ApprovalBy $approvalBy,
-        \UnitEnum|HasApprovalStatuses $status
+        UnitEnum|HasApprovalStatuses $status
     ): ApprovalSingleStateAction {
         if (is_null($this->modifyApprovalActionUsing)) {
             return $action;
@@ -75,4 +93,6 @@ trait HasApprovalSingleStateAction
             ]
         );
     }
+
+
 }

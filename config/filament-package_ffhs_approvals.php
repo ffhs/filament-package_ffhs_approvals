@@ -1,6 +1,6 @@
 <?php
 
-use Ffhs\Approvals\Models\Approval;;
+use Ffhs\Approvals\Models\Approval;
 
 return [
     'models' => [

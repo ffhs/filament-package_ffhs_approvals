@@ -1,8 +1,9 @@
 <?php
 
-it('load actions', function (){
-    $response = $this->get('/admin/approvable');
-    $response->assertStatus(200);
+it('load actions', function () {
+    $this
+        ->get('/admin/approvable')
+        ->assertStatus(200);
 })->todo('');
 
 it('load right actions')->todo();

@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 
 /**
  * @property Collection approvals
+ * @property int id
  */
 interface Approvable
 {
@@ -34,5 +35,4 @@ interface Approvable
     public function isPending(?array $categories = null, ?array $keys = null): bool;
 
     public function isOpen(?array $categories = null, ?array $keys = null): bool;
-
 }
