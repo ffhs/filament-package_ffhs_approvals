@@ -3,11 +3,11 @@
 namespace Ffhs\Approvals\Infolists\Actions;
 
 use Ffhs\Approvals\Approval\ApprovalBy;
-use Ffhs\Approvals\Traits\HasApprovalActionModifications;
 use Ffhs\Approvals\Traits\HasApprovalFlowFromRecord;
 use Ffhs\Approvals\Traits\HasApprovalKey;
 use Ffhs\Approvals\Traits\HasApprovalNotification;
 use Ffhs\Approvals\Traits\HasApprovalSingleStateAction;
+use Ffhs\Approvals\Traits\HasGroupLabels;
 use Ffhs\Approvals\Traits\HasResetApprovalAction;
 use Filament\Infolists\ComponentContainer;
 use Filament\Infolists\Components\Component;
@@ -21,7 +21,7 @@ class ApprovalActions extends Component
 {
     use HasAlignment;
     use HasVerticalAlignment;
-    use HasApprovalActionModifications;
+    use HasGroupLabels;
     use HasApprovalKey;
     use HasApprovalFlowFromRecord;
     use EntanglesStateWithSingularRelationship;
