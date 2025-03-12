@@ -2,14 +2,13 @@
 
 namespace Ffhs\Approvals\Approval;
 
-use App\Domain\Approvals\Application\ApplicationApprovalStatus;
-use App\Domain\Approvals\Documents\DocumentApprovalStatus;
 use Closure;
 use Enum;
 use Error;
 use Exception;
 use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\Approver;
+use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Enums\ApprovalState;
 use Ffhs\Approvals\Models\Approval;
 use Filament\Support\Concerns\EvaluatesClosures;
@@ -62,33 +61,11 @@ class ApprovalBy
         return $this;
     }
 
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function getRole(): ?string
-    {
-        return $this->role;
-    }
-
     public function permission(Closure|UnitEnum|string|null $permission): static
     {
         $this->permission = $permission;
 
         return $this;
-    }
-
-    public function getPermission(): ?string
-    {
-        $permission = $this->evaluate($this->permission);
-
-        if ($permission instanceof UnitEnum) {
-            /** @var Enum $permission */
-            $permission = $permission->value;
-        }
-
-        return $permission;
     }
 
     public function atLeast(int $atLeast): static
@@ -108,7 +85,7 @@ class ApprovalBy
         if ($this->canApproveUsing) {
             return $this->evaluate($this->canApproveUsing, [
                 'approver' => $approver,
-                'approvable' => $approvable
+                'approvable' => $approvable,
             ]);
         }
 
@@ -121,6 +98,11 @@ class ApprovalBy
         }
 
         return $this->canApproveFromPermissions($approver);
+    }
+
+    public function isAny(): bool
+    {
+        return $this->any;
     }
 
     public function canApproveFromPermissions(Approver|Model $approver): bool
@@ -140,26 +122,28 @@ class ApprovalBy
         return false;
     }
 
-    public function reachAtLeast(Approvable|Model $approvable, $key): bool
+    public function getRole(): ?string
     {
-        $approvals = $this->getApprovals($approvable, $key);
-
-        return $approvals->count() >= $this->atLeast;
+        return $this->role;
     }
 
-
-    public function getApprovals(Model|Approvable $approvable, $key): Collection
+    public function getPermission(): ?string
     {
-        return $approvable
-            ->approvals
-            ->where(fn(Approval $approval) => $approval->key == $key && $approval->approval_by == $this->getName());
+        $permission = $this->evaluate($this->permission);
+
+        if ($permission instanceof UnitEnum) {
+            /** @var Enum $permission */
+            $permission = $permission->value;
+        }
+
+        return $permission;
     }
 
     public function approved(Model|Approvable $approvable, string $key): ApprovalState
     {
         $approvals = $this->getApprovals($approvable, $key);
         $flow = $this->getApprovalFlow($approvable, $key);
-        /** @var ApplicationApprovalStatus|DocumentApprovalStatus $statusClass */
+        /** @var HasApprovalStatuses $statusClass */
         $statusClass = $flow->getStatusEnumClass();
 
         $deniedStatuses = collect($statusClass::getDeniedStatuses())->map(fn($status) => $status->value);
@@ -196,13 +180,27 @@ class ApprovalBy
         return ApprovalState::APPROVED;
     }
 
-    public function isAny(): bool
+    public function getApprovals(Model|Approvable $approvable, $key): Collection
     {
-        return $this->any;
+        return $approvable
+            ->approvals
+            ->where(fn(Approval $approval) => $approval->key == $key && $approval->approval_by == $this->getName());
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
     }
 
     public function getApprovalFlow(Model|Approvable $approvable, string $key): ?ApprovalFlow
     {
         return $approvable->getApprovalFlow($key);
+    }
+
+    public function reachAtLeast(Approvable|Model $approvable, $key): bool
+    {
+        $approvals = $this->getApprovals($approvable, $key);
+
+        return $approvals->count() >= $this->atLeast;
     }
 }

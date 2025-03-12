@@ -145,4 +145,11 @@ class ApprovalActions extends Component
         }
         return $this->getApprovalFlow()->isApprovalDisabled();
     }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+    }
+
+
 }

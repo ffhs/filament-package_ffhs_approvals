@@ -20,6 +20,7 @@ trait HasApprovalSingleStateAction
     use HasSize;
     use HasCasesLabels;
     use CanBeDisabled;
+    use HasCasesColors;
 
     private Closure|null $modifyApprovalActionUsing = null;
 
@@ -34,14 +35,20 @@ trait HasApprovalSingleStateAction
         ApprovalBy $approvalBy,
         UnitEnum|HasApprovalStatuses $approvalCase
     ): ApprovalSingleStateAction {
-        /** @var BackedEnum $approvalCase */
+        /** @var BackedEnum|HasApprovalStatuses $approvalCase */
+
 
         $action = ApprovalSingleStateAction::make($approvalBy->getName() . '-' . $approvalCase->value)
             ->needResetApprovalBeforeChange($this->isNeedResetApprovalBeforeChange())
             ->approvalFlow($this->getApprovalFlow())
             ->requiresConfirmation($this->isRequiresConfirmation())
-            ->colorSelected($this->getApprovalActionsSelectColor())
-            ->colorNotSelected($this->getApprovalActionsColor())
+            ->color(function (ApprovalSingleStateAction $action) use ($approvalCase) {
+                return $this->getFinalCaseColor(
+                    $approvalCase,
+                    $action->getStatus(),
+                    $this->getApprovalFlow()
+                );
+            })
             ->icon($this->getCaseIcon($approvalCase))
             ->notificationOnResetApproval(fn($lastStatus) => $this->sendNotificationOnResetApproval($lastStatus))
             ->notificationOnSetApproval(fn($status) => $this->sendNotificationOnSetApproval($status))
@@ -51,15 +58,13 @@ trait HasApprovalSingleStateAction
             ->disabled(function () use ($approvalCase) {
                 return $this->isDisabled() || $this->isCaseDisabled($approvalCase->value);
             })
-            ->approvalKey($this->getApprovalKey())
+            ->hidden(fn() => $this->isCaseHidden($approvalCase->value))
             ->tooltip($this->getCaseTooltip($approvalCase))
             ->label($this->getCaseLabel($approvalCase))
-            ->size($this->getSize())
-            ->approvalBy($approvalBy)
+            ->approvalKey($this->getApprovalKey())
             ->actionStatus($approvalCase)
-            ->hidden(function () use ($approvalCase) {
-                return $this->isCaseHidden($approvalCase->value);
-            });
+            ->approvalBy($approvalBy)
+            ->size($this->getSize());
 
 
         return $this->modifyApprovalSingleStateAction($action, $approvalBy, $approvalCase);

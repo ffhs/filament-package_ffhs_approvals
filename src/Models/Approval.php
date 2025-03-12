@@ -2,7 +2,6 @@
 
 namespace Ffhs\Approvals\Models;
 
-use App\Domain\Approvals\Documents\DocumentApprovalStatus;
 use Eloquent;
 use Error;
 use Exception;
@@ -124,7 +123,7 @@ class Approval extends Model
         }
     }
 
-    protected function setStatus(DocumentApprovalStatus|UnitEnum|string $status): void
+    protected function setStatus(UnitEnum|string $status): void
     {
         if (is_string($status)) {
             parent::__set('status', $status);

@@ -2,9 +2,8 @@
 
 namespace Ffhs\Approvals\Infolists\Actions;
 
-use App\Domain\Approvals\Application\ApplicationApprovalStatus;
-use App\Domain\Approvals\Documents\DocumentApprovalStatus;
 use App\Models\User;
+use BackedEnum;
 use Ffhs\Approvals\Concerns\HandlesApprovals;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
@@ -24,13 +23,7 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
     use HasApprovalNotification;
 
     protected ?HasApprovalStatuses $status = null;
-    protected array $statusCategoryColors = [
-        'approved' => 'success',
-        'denied' => 'danger',
-        'pending' => 'info',
-    ];
-    private string|array|null $colorSelected = null;
-    private string|array|null $colorNotSelected = null;
+
 
     public function changeApproval(): void
     {
@@ -53,7 +46,7 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
 
         $isChange = !is_null($this->getStatus());
         $oldState = $this->getStatus();
-        /** @var ApplicationApprovalStatus|DocumentApprovalStatus $state */
+        /** @var HasApprovalStatuses|BackedEnum $state */
         $state = $this->getActionStatus();
 
         if ($isChange) {
@@ -121,20 +114,6 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
         return $this;
     }
 
-    public function colorSelected(null|string|array $colorSelected): static
-    {
-        $this->colorSelected = $colorSelected;
-
-        return $this;
-    }
-
-    public function colorNotSelected(null|string|array $colorNotSelected): static
-    {
-        $this->colorNotSelected = $colorNotSelected;
-
-        return $this;
-    }
-
 
     public function isDisabled(): bool
     {
@@ -160,61 +139,6 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
         }
 
         return $this->getStatus() !== $this->getActionStatus();
-    }
-
-    public function getColor(): string|array|null
-    {
-        /** @var ApplicationApprovalStatus|DocumentApprovalStatus $state */
-        $state = $this->getActionStatus();
-
-        if (!$this->isActionActive()) {
-            $colors = $this->getColorNotSelected();
-
-            if (!is_array($colors)) {
-                return $colors ?? 'gray';
-            }
-
-            return $colors[$state->value] ?? 'gray';
-        }
-
-        /** @var HasApprovalStatuses $statusEnum */
-        $statusEnum = $this
-            ->getApprovalFlow()
-            ->getStatusEnumClass();
-        $colors = $this->getColorSelected();
-
-        if (!is_null($colors)) {
-            if (!is_array($colors)) {
-                return $colors;
-            }
-            if (array_key_exists($state->value, $colors)) {
-                return $colors[$state->value];
-            }
-        }
-
-        if (in_array($state, $statusEnum::getApprovedStatuses(), true)) {
-            return $this->getApprovedStatusColor();
-        }
-
-        if (in_array($state, $statusEnum::getDeniedStatuses(), true)) {
-            return $this->getDeniedStatusColor();
-        }
-
-        if (in_array($state, $statusEnum::getPendingStatuses(), true)) {
-            return $this->getPendingStatusColor();
-        }
-
-        return parent::getColor();
-    }
-
-    public function getColorNotSelected(): string|array|null
-    {
-        return $this->evaluate($this->colorNotSelected);
-    }
-
-    public function getColorSelected(): null|string|array
-    {
-        return $this->evaluate($this->colorSelected);
     }
 
     protected function setUp(): void

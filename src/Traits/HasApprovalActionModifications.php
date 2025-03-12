@@ -8,18 +8,7 @@ trait HasApprovalActionModifications
 {
     private array|Closure $approvalActionsGroupLabel = [];
     private ?array $cachedApprovalActionsGroupLabel = null;
-    private array|Closure $approvalActionsLabel = [];
-    private ?array $cachedApprovalActionsLabel = null;
-    private string|array|Closure $approvalActionsColor = [];
-    private string|array|null $cachedApprovalActionsColor = null;
-    private array|Closure $approvalActionsSelectColor = [];
-    private string|array|null $cachedApprovalActionsSelectColor = null;
-    private array|Closure $statusCategoryColors = [
-        'approved' => 'success',
-        'denied' => 'danger',
-        'pending' => 'info',
-    ];
-    private string|array|null $cachedStatusCategoryColors = null;
+
 
     public function approvalActionsGroupLabel(array|Closure $approvalActionsGroupLabel): static
     {
@@ -38,64 +27,6 @@ trait HasApprovalActionModifications
         $this->cachedApprovalActionsGroupLabel = $this->evaluate($this->approvalActionsGroupLabel);
 
         return $this->cachedApprovalActionsGroupLabel;
-    }
-
-
-    public function approvalActionsColor(string|array|Closure $approvalActionsColor): static
-    {
-        $this->approvalActionsColor = $approvalActionsColor;
-        $this->cachedApprovalActionsColor = null;
-
-        return $this;
-    }
-
-    public function getApprovalActionsColor(): array
-    {
-        if (!is_null($this->cachedApprovalActionsColor)) {
-            return $this->cachedApprovalActionsColor;
-        }
-
-        $this->cachedApprovalActionsColor = $this->evaluate($this->approvalActionsColor);
-
-        return $this->cachedApprovalActionsColor;
-    }
-
-    public function approvalActionsSelectColor(string|array|Closure $approvalActionsSelectColor): static
-    {
-        $this->approvalActionsSelectColor = $approvalActionsSelectColor;
-        $this->cachedApprovalActionsSelectColor = null;
-
-        return $this;
-    }
-
-    public function getApprovalActionsSelectColor(): array
-    {
-        if (!is_null($this->cachedApprovalActionsSelectColor)) {
-            return $this->cachedApprovalActionsSelectColor;
-        }
-
-        $this->cachedApprovalActionsSelectColor = $this->evaluate($this->approvalActionsSelectColor);
-
-        return $this->cachedApprovalActionsSelectColor;
-    }
-
-    public function statusCategoryColors(string|array|Closure $statusCategoryColors): static
-    {
-        $this->statusCategoryColors = $statusCategoryColors;
-        $this->cachedStatusCategoryColors = null;
-
-        return $this;
-    }
-
-    public function getStatusCategoryColors(): array
-    {
-        if (!is_null($this->cachedStatusCategoryColors)) {
-            return $this->cachedStatusCategoryColors;
-        }
-
-        $this->cachedStatusCategoryColors = $this->evaluate($this->statusCategoryColors);
-
-        return $this->cachedStatusCategoryColors;
     }
 
 
