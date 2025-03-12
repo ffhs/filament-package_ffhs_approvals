@@ -37,7 +37,7 @@ trait HasCasesDisable
         if (!is_string($approvalCase)) {
             $approvalCase = $approvalCase->value;
         }
-        $this->caseDisabled[$approvalCase] = $caseDisabled;
+        $this->casesDisabled[$approvalCase] = $caseDisabled;
 
         return $this;
     }

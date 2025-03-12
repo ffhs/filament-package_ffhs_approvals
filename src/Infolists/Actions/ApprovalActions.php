@@ -11,6 +11,7 @@ use Ffhs\Approvals\Traits\HasApprovalSingleStateAction;
 use Ffhs\Approvals\Traits\HasCasesDisable;
 use Ffhs\Approvals\Traits\HasCasesHidden;
 use Ffhs\Approvals\Traits\HasCasesIcons;
+use Ffhs\Approvals\Traits\HasCasesToolTips;
 use Ffhs\Approvals\Traits\HasResetApprovalAction;
 use Filament\Actions\Concerns\HasSize;
 use Filament\Infolists\ComponentContainer;
@@ -36,6 +37,7 @@ class ApprovalActions extends Component
     use HasApprovalSingleStateAction;
     use HasApprovalNotification;
     use HasSize;
+    use HasCasesToolTips;
 
     //use HasColumns; //ToDo implement
 

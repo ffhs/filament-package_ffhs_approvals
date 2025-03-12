@@ -16,8 +16,6 @@ trait HasApprovalActionModifications
     private string|array|null $cachedApprovalActionsSelectColor = null;
     private bool|Closure $isApprovalActionsDisabled = false;
     private ?bool $cachedIsApprovalActionsDisabled = null;
-    private array|Closure $approvalActionToolTips = [];
-    private ?array $cacheApprovalActionToolTips = null;
     private array|Closure $statusCategoryColors = [
         'approved' => 'success',
         'denied' => 'danger',
@@ -118,26 +116,6 @@ trait HasApprovalActionModifications
         $this->cachedStatusCategoryColors = $this->evaluate($this->statusCategoryColors);
 
         return $this->cachedStatusCategoryColors;
-    }
-
-
-    public function approvalActionToolTips(array|Closure $approvalActionToolTips): static
-    {
-        $this->approvalActionToolTips = $approvalActionToolTips;
-        $this->cacheApprovalActionToolTips = null;
-
-        return $this;
-    }
-
-    public function getApprovalActionToolTips(): array
-    {
-        if (!is_null($this->cacheApprovalActionToolTips)) {
-            return $this->cacheApprovalActionToolTips;
-        }
-
-        $this->cacheApprovalActionToolTips = $this->evaluate($this->approvalActionToolTips);
-
-        return $this->cacheApprovalActionToolTips;
     }
 
 

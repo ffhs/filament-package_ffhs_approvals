@@ -27,8 +27,6 @@ trait HasApprovalSingleStateAction
         /** @var BackedEnum $approvalCase */
         $labelMap = $this->getApprovalActionsLabel();
         $label = $labelMap[$approvalCase->value] ?? $approvalCase->value;
-        $toolTips = $this->getApprovalActionToolTips();
-
 
         $action = ApprovalSingleStateAction::make($approvalBy->getName() . '-' . $approvalCase->value)
             ->needResetApprovalBeforeChange($this->isNeedResetApprovalBeforeChange())
@@ -46,7 +44,7 @@ trait HasApprovalSingleStateAction
                 return $this->isApprovalActionsDisabled() || $this->isCaseDisabled($approvalCase->value);
             })
             ->approvalKey($this->getApprovalKey())
-            ->tooltip($toolTips[$approvalCase->value] ?? null)
+            ->tooltip($this->getCaseTooltip($approvalCase))
             ->label($label)
             ->size($this->getSize())
             ->approvalBy($approvalBy)
