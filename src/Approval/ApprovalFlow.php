@@ -10,7 +10,7 @@ use Filament\Support\Concerns\EvaluatesClosures;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
-class ApprovalFlow
+class ApprovalFlow implements \Ffhs\Approvals\Contracts\ApprovalFlow
 {
     use EvaluatesClosures;
 

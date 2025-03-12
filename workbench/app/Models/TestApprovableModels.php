@@ -19,8 +19,8 @@ class TestApprovableModels extends Model implements Approvable
             'test-key-1' => ApprovalFlow::make()
                 ->approvalStatus(TestApprovalStatuses::cases())
                 ->approvalBy([
-                    ApprovalBy::make('admin')->atLeast(1)
-                ])
+                    ApprovalBy::make('admin')->atLeast(1),
+                ]),
 
         ];
     }

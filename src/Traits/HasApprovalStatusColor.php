@@ -4,7 +4,7 @@ namespace Ffhs\Approvals\Traits;
 
 use BackedEnum;
 use Closure;
-use Ffhs\Approvals\Approval\ApprovalFlow;
+use Ffhs\Approvals\Contracts\ApprovalFlow;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Enums\ApprovalState;
 

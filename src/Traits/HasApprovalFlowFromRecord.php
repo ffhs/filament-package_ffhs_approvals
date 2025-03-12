@@ -2,8 +2,8 @@
 
 namespace Ffhs\Approvals\Traits;
 
-use Ffhs\Approvals\Approval\ApprovalFlow;
 use Ffhs\Approvals\Contracts\Approvable;
+use Ffhs\Approvals\Contracts\ApprovalFlow;
 use RuntimeException;
 use Symfony\Component\ErrorHandler\Error\UndefinedFunctionError;
 
