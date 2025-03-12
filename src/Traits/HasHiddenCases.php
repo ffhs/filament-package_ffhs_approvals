@@ -4,27 +4,41 @@ namespace Ffhs\Approvals\Traits;
 
 use BackedEnum;
 use Closure;
-use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 
 trait HasHiddenCases
 {
-    private array|Closure $caseHidden = [];
+    private array|Closure $casesHidden = [];
 
-    public function isCaseHidden(string|HasApprovalStatuses $status): bool
+    public function isCaseHidden(BackedEnum|string $approvalCase): bool
     {
-        if ($status instanceof HasApprovalStatuses) {
-            /** @var BackedEnum $status */
-            $status = $status->value;
+        if (!is_string($approvalCase)) {
+            $approvalCase = $approvalCase->value;
         }
 
-        $isDisabled = $this->evaluate($this->caseHidden)[$status] ?? false;
-
-        return $this->evaluate($isDisabled, ['status' => $status]);
+        return $this->evaluate($this->getCasesHidden()[$approvalCase] ?? false);
     }
 
-    public function caseHidden(array|Closure $caseHidden): static
+
+    public function getCasesHidden(): array
     {
-        $this->caseHidden = $caseHidden;
+        return $this->evaluate($this->casesHidden);
+    }
+
+    public function casesHidden(array|Closure $caseHidden): static
+    {
+        $this->casesHidden = $caseHidden;
+        return $this;
+    }
+
+    public function caseHidden(BackedEnum|string $approvalCase, bool|Closure $caseHidden = true): static
+    {
+        if ($this->casesHidden instanceof Closure) {
+            $this->casesHidden = [];
+        }
+        if (!is_string($approvalCase)) {
+            $approvalCase = $approvalCase->value;
+        }
+        $this->casesHidden[$approvalCase] = $caseHidden;
 
         return $this;
     }
