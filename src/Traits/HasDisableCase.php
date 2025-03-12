@@ -31,8 +31,8 @@ trait HasDisableCase
 
     public function caseDisabled(BackedEnum|string $approvalCase, bool|Closure $caseDisabled = true): static
     {
-        if ($this->caseDisabled instanceof Closure) {
-            $this->caseDisabled = [];
+        if ($this->casesDisabled instanceof Closure) {
+            $this->casesDisabled = [];
         }
         if (!is_string($approvalCase)) {
             $approvalCase = $approvalCase->value;

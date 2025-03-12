@@ -14,8 +14,6 @@ trait HasApprovalActionModifications
     private string|array|null $cachedApprovalActionsColor = null;
     private array|Closure $approvalActionsSelectColor = [];
     private string|array|null $cachedApprovalActionsSelectColor = null;
-    private array|Closure $approvalActionsIcons = [];
-    private ?array $cachedApprovalActionsIcons = null;
     private bool|Closure $isApprovalActionsDisabled = false;
     private ?bool $cachedIsApprovalActionsDisabled = null;
     private array|Closure $approvalActionToolTips = [];
@@ -122,24 +120,6 @@ trait HasApprovalActionModifications
         return $this->cachedStatusCategoryColors;
     }
 
-    public function approvalActionsIcons(array|Closure $approvalActionsIcons): static
-    {
-        $this->approvalActionsIcons = $approvalActionsIcons;
-        $this->cachedApprovalActionsIcons = null;
-
-        return $this;
-    }
-
-    public function getApprovalActionsIcons(): array
-    {
-        if (!is_null($this->cachedApprovalActionsIcons)) {
-            return $this->cachedApprovalActionsIcons;
-        }
-
-        $this->cachedApprovalActionsIcons = $this->evaluate($this->approvalActionsIcons);
-
-        return $this->cachedApprovalActionsIcons;
-    }
 
     public function approvalActionToolTips(array|Closure $approvalActionToolTips): static
     {

@@ -14,7 +14,6 @@ use Ffhs\Approvals\Traits\HasResetApprovalAction;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
-use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 use UnitEnum;
 
@@ -32,7 +31,6 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
     ];
     private string|array|null $colorSelected = null;
     private string|array|null $colorNotSelected = null;
-    private array $approvalIcons = [];
 
     public function changeApproval(): void
     {
@@ -137,21 +135,6 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
         return $this;
     }
 
-    public function approvalIcons(array $approvalIcons): static
-    {
-        $this->approvalIcons = $approvalIcons;
-
-        return $this;
-    }
-
-    public function getIcon(): string|Htmlable|null
-    {
-        /** @var ApplicationApprovalStatus|DocumentApprovalStatus $state */
-        $state = $this->getActionStatus();
-        $this->icon = $this->approvalIcons[$state->value] ?? null;
-
-        return parent::getIcon();
-    }
 
     public function isDisabled(): bool
     {

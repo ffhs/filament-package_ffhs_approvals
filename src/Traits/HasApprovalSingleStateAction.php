@@ -22,41 +22,41 @@ trait HasApprovalSingleStateAction
 
     public function getApprovalSingleStateAction(
         ApprovalBy $approvalBy,
-        UnitEnum|HasApprovalStatuses $status
+        UnitEnum|HasApprovalStatuses $approvalCase
     ): ApprovalSingleStateAction {
-        /** @var BackedEnum $status */
+        /** @var BackedEnum $approvalCase */
         $labelMap = $this->getApprovalActionsLabel();
-        $label = $labelMap[$status->value] ?? $status->value;
+        $label = $labelMap[$approvalCase->value] ?? $approvalCase->value;
         $toolTips = $this->getApprovalActionToolTips();
 
 
-        $action = ApprovalSingleStateAction::make($approvalBy->getName() . '-' . $status->value)
+        $action = ApprovalSingleStateAction::make($approvalBy->getName() . '-' . $approvalCase->value)
             ->needResetApprovalBeforeChange($this->isNeedResetApprovalBeforeChange())
             ->approvalFlow($this->getApprovalFlow())
             ->requiresConfirmation($this->isRequiresConfirmation())
             ->colorSelected($this->getApprovalActionsSelectColor())
             ->colorNotSelected($this->getApprovalActionsColor())
-            ->approvalIcons($this->getApprovalActionsIcons())
+            ->icon($this->getCaseIcon($approvalCase))
             ->notificationOnResetApproval(fn($lastStatus) => $this->sendNotificationOnResetApproval($lastStatus))
             ->notificationOnSetApproval(fn($status) => $this->sendNotificationOnSetApproval($status))
             ->notificationOnChangeApproval(
                 fn($lastStatus, $status) => $this->sendNotificationOnChangeApproval($status, $lastStatus)
             )
-            ->disabled(function () use ($status) {
-                return $this->isApprovalActionsDisabled() || $this->isCaseDisabled($status->value);
+            ->disabled(function () use ($approvalCase) {
+                return $this->isApprovalActionsDisabled() || $this->isCaseDisabled($approvalCase->value);
             })
             ->approvalKey($this->getApprovalKey())
-            ->tooltip($toolTips[$status->value] ?? null)
+            ->tooltip($toolTips[$approvalCase->value] ?? null)
             ->label($label)
             ->size($this->getSize())
             ->approvalBy($approvalBy)
-            ->actionStatus($status)
-            ->hidden(function () use ($status) {
-                return $this->isCaseHidden($status->value);
+            ->actionStatus($approvalCase)
+            ->hidden(function () use ($approvalCase) {
+                return $this->isCaseHidden($approvalCase->value);
             });
 
 
-        return $this->modifyApprovalSingleStateAction($action, $approvalBy, $status);
+        return $this->modifyApprovalSingleStateAction($action, $approvalBy, $approvalCase);
     }
 
     public function modifyApprovalSingleStateAction(

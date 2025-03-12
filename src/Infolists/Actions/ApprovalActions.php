@@ -8,6 +8,7 @@ use Ffhs\Approvals\Traits\HasApprovalFlowFromRecord;
 use Ffhs\Approvals\Traits\HasApprovalKey;
 use Ffhs\Approvals\Traits\HasApprovalNotification;
 use Ffhs\Approvals\Traits\HasApprovalSingleStateAction;
+use Ffhs\Approvals\Traits\HasCasesIcons;
 use Ffhs\Approvals\Traits\HasDisableCase;
 use Ffhs\Approvals\Traits\HasHiddenCases;
 use Ffhs\Approvals\Traits\HasResetApprovalAction;
@@ -31,6 +32,7 @@ class ApprovalActions extends Component
     use EntanglesStateWithSingularRelationship;
     use HasDisableCase;
     use HasHiddenCases;
+    use HasCasesIcons;
     use HasApprovalSingleStateAction;
     use HasApprovalNotification;
     use HasSize;
@@ -55,14 +57,6 @@ class ApprovalActions extends Component
         );
         $this->approvalKey($approvalKey);
         $this->statePath($this->getApprovalKey());
-    }
-
-    public static function make(string|Closure $approvalKey): static
-    {
-        $static = app(static::class, ['approvalKey' => $approvalKey]);
-        $static->configure();
-
-        return $static;
     }
 
     public function recordUsing(Closure|null|Model $record): static
@@ -104,6 +98,14 @@ class ApprovalActions extends Component
         }
 
         return $containers;
+    }
+
+    public static function make(string|Closure $approvalKey): static
+    {
+        $static = app(static::class, ['approvalKey' => $approvalKey]);
+        $static->configure();
+
+        return $static;
     }
 
     public function getApprovalByActions(ApprovalBy $approvalBy): array
