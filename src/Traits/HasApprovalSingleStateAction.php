@@ -18,6 +18,7 @@ trait HasApprovalSingleStateAction
     use HasCasesHidden;
     use HasCasesIcons;
     use HasSize;
+    use HasCasesLabels;
     use CanBeDisabled;
 
     private Closure|null $modifyApprovalActionUsing = null;
@@ -34,8 +35,6 @@ trait HasApprovalSingleStateAction
         UnitEnum|HasApprovalStatuses $approvalCase
     ): ApprovalSingleStateAction {
         /** @var BackedEnum $approvalCase */
-        $labelMap = $this->getApprovalActionsLabel();
-        $label = $labelMap[$approvalCase->value] ?? $approvalCase->value;
 
         $action = ApprovalSingleStateAction::make($approvalBy->getName() . '-' . $approvalCase->value)
             ->needResetApprovalBeforeChange($this->isNeedResetApprovalBeforeChange())
@@ -54,7 +53,7 @@ trait HasApprovalSingleStateAction
             })
             ->approvalKey($this->getApprovalKey())
             ->tooltip($this->getCaseTooltip($approvalCase))
-            ->label($label)
+            ->label($this->getCaseLabel($approvalCase))
             ->size($this->getSize())
             ->approvalBy($approvalBy)
             ->actionStatus($approvalCase)

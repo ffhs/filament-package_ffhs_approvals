@@ -40,24 +40,6 @@ trait HasApprovalActionModifications
         return $this->cachedApprovalActionsGroupLabel;
     }
 
-    public function approvalActionsLabel(array|Closure $approvalActionsLabel): static
-    {
-        $this->approvalActionsLabel = $approvalActionsLabel;
-        $this->cachedApprovalActionsLabel = null;
-
-        return $this;
-    }
-
-    public function getApprovalActionsLabel(): array
-    {
-        if (!is_null($this->cachedApprovalActionsLabel)) {
-            return $this->cachedApprovalActionsLabel;
-        }
-
-        $this->cachedApprovalActionsLabel = $this->evaluate($this->approvalActionsLabel);
-
-        return $this->cachedApprovalActionsLabel;
-    }
 
     public function approvalActionsColor(string|array|Closure $approvalActionsColor): static
     {
