@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 interface ApprovalFlow
 {
-    public function approvalDisabled(bool|Closure $approvalDisabled): static;
+    public function disabled(bool|Closure $approvalDisabled): static;
 
     public function approvalBy(array|Closure $approvalBy): static;
 
@@ -29,7 +29,7 @@ interface ApprovalFlow
 
     public function approved(Model|Approvable $approvable, string $key): ApprovalState;
 
-    public function isApprovalDisabled(): bool;
+    public function isDisabled(): bool;
 
     /**
      * @return array<ApprovalBy>
