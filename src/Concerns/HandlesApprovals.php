@@ -7,7 +7,7 @@ use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\ApprovalBy;
 use Ffhs\Approvals\Contracts\ApprovalFlow;
 use Ffhs\Approvals\Models\Approval;
-use Ffhs\Approvals\Traits\HasApprovalKey;
+use Ffhs\Approvals\Traits\Filament\HasApprovalKey;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;

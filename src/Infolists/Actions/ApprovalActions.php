@@ -3,12 +3,12 @@
 namespace Ffhs\Approvals\Infolists\Actions;
 
 use Ffhs\Approvals\Contracts\ApprovalBy;
-use Ffhs\Approvals\Traits\HasApprovalFlowFromRecord;
-use Ffhs\Approvals\Traits\HasApprovalKey;
-use Ffhs\Approvals\Traits\HasApprovalNotification;
-use Ffhs\Approvals\Traits\HasApprovalSingleStateAction;
-use Ffhs\Approvals\Traits\HasGroupLabels;
-use Ffhs\Approvals\Traits\HasResetApprovalAction;
+use Ffhs\Approvals\Traits\Filament\HasApprovalFlowFromRecord;
+use Ffhs\Approvals\Traits\Filament\HasApprovalKey;
+use Ffhs\Approvals\Traits\Filament\HasApprovalNotification;
+use Ffhs\Approvals\Traits\Filament\HasApprovalSingleStateAction;
+use Ffhs\Approvals\Traits\Filament\HasGroupLabels;
+use Ffhs\Approvals\Traits\Filament\HasResetApprovalAction;
 use Filament\Infolists\ComponentContainer;
 use Filament\Infolists\Components\Component;
 use Filament\Infolists\Components\Concerns\EntanglesStateWithSingularRelationship;
