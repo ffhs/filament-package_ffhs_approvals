@@ -1,10 +1,10 @@
 <?php
 
-namespace Ffhs\Approvals\Traits;
+namespace Ffhs\Approvals\Traits\Filament;
 
 use BackedEnum;
 use Closure;
-use Ffhs\Approvals\Approval\ApprovalFlow;
+use Ffhs\Approvals\Contracts\ApprovalFlow;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 
 trait HasCasesColors

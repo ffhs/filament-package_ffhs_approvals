@@ -2,7 +2,6 @@
 
 namespace Ffhs\Approvals\Contracts;
 
-use Ffhs\Approvals\Approval\ApprovalFlow;
 use Ffhs\Approvals\Enums\ApprovalState;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
