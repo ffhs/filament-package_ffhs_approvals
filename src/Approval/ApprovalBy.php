@@ -192,7 +192,7 @@ class ApprovalBy
         return $this->name;
     }
 
-    public function getApprovalFlow(Model|Approvable $approvable, string $key): ?ApprovalFlow
+    public function getApprovalFlow(Model|Approvable $approvable, string $key): ?SimpleApprovalFlow
     {
         return $approvable->getApprovalFlow($key);
     }
