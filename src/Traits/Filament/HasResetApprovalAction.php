@@ -1,9 +1,9 @@
 <?php
 
-namespace Ffhs\Approvals\Traits;
+namespace Ffhs\Approvals\Traits\Filament;
 
 use Closure;
-use Ffhs\Approvals\Approval\ApprovalBy;
+use Ffhs\Approvals\Contracts\ApprovalBy;
 use Ffhs\Approvals\Infolists\Actions\ApprovalByResetAction;
 
 trait HasResetApprovalAction

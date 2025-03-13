@@ -1,6 +1,6 @@
 <?php
 
-namespace Ffhs\Approvals\Traits;
+namespace Ffhs\Approvals\Traits\Filament;
 
 use Closure;
 
