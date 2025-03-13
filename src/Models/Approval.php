@@ -8,14 +8,10 @@ use Exception;
 use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Models\Activity;
-use Spatie\Activitylog\Traits\LogsActivity;
 use UnitEnum;
 
 /**
@@ -32,8 +28,6 @@ use UnitEnum;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- * @property-read Collection<int, Activity> $activities
- * @property-read int|null $activities_count
  * @property-read Model|Eloquent|null $approvable
  * @property-read Model|Eloquent $approver
  * @method static Builder<static>|Approval newModelQuery()
@@ -58,7 +52,6 @@ use UnitEnum;
 class Approval extends Model
 {
     use SoftDeletes;
-    use LogsActivity;
 
     protected $fillable = [
         'key',
@@ -69,12 +62,6 @@ class Approval extends Model
         'approval_by',
         'status',
     ];
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnlyDirty();
-    }
 
     public function getTable()
     {
