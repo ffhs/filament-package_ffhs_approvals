@@ -2,8 +2,6 @@
 
 namespace Ffhs\Approvals\Approval;
 
-use BackedEnum;
-use Closure;
 use Error;
 use Exception;
 use Ffhs\Approvals\Contracts\Approvable;
@@ -13,6 +11,11 @@ use Ffhs\Approvals\Contracts\Approver;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Enums\ApprovalState;
 use Ffhs\Approvals\Models\Approval;
+use Ffhs\Approvals\Traits\Approval\CanBeAny;
+use Ffhs\Approvals\Traits\Approval\HasApproveUsing;
+use Ffhs\Approvals\Traits\Approval\HasAtLeast;
+use Ffhs\Approvals\Traits\Approval\HasPermissions;
+use Ffhs\Approvals\Traits\Approval\HasRoles;
 use Filament\Support\Concerns\EvaluatesClosures;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User;
@@ -22,14 +25,15 @@ use Spatie\Permission\Models\Role;
 
 class SimpleApprovalBy implements ApprovalBy
 {
+    use HasPermissions;
     use EvaluatesClosures;
+    use CanBeAny;
+    use HasRoles;
+    use CanBeAny;
+    use HasAtLeast;
+    use HasApproveUsing;
 
     protected ?string $name = null;
-    protected string|Closure|BackedEnum|null $role = null;
-    protected string|Closure|BackedEnum|null $permission = null;
-    protected int|Closure $atLeast = 1;
-    protected bool|Closure $any = false;
-    protected ?Closure $canApproveUsing = null;
 
     final public function __construct(string $name)
     {
@@ -41,45 +45,11 @@ class SimpleApprovalBy implements ApprovalBy
         return app(static::class, ['name' => $name]);
     }
 
-    public function any(bool $any = true): static
-    {
-        $this->any = $any;
-
-        return $this;
-    }
-
-    public function canApproveUsing(Closure $canApproveUsing): static
-    {
-        $this->canApproveUsing = $canApproveUsing;
-
-        return $this;
-    }
-
-    public function role(string|Closure|BackedEnum|null $role): static
-    {
-        $this->role = $role;
-
-        return $this;
-    }
-
-    public function permission(string|Closure|BackedEnum|null $permission): static
-    {
-        $this->permission = $permission;
-
-        return $this;
-    }
-
-    public function atLeast(int|Closure $atLeast): static
-    {
-        $this->atLeast = $atLeast;
-
-        return $this;
-    }
-
     public function canApprove(Approver|Model $approver, Approvable $approvable): bool
     {
-        if ($this->canApproveUsing) {
-            return $this->evaluate($this->canApproveUsing, [
+        $canApproveUsing = $this->getCanApproveUsing();
+        if ($canApproveUsing) {
+            return $this->evaluate($canApproveUsing, [
                 'approver' => $approver,
                 'approvable' => $approvable,
             ]);
@@ -94,11 +64,6 @@ class SimpleApprovalBy implements ApprovalBy
         }
 
         return $this->canApproveFromPermissions($approver);
-    }
-
-    public function isAny(): bool
-    {
-        return $this->any;
     }
 
     public function canApproveFromPermissions(Approver|Model $approver): bool
@@ -118,27 +83,12 @@ class SimpleApprovalBy implements ApprovalBy
         return false;
     }
 
-    public function getRole(): ?string
-    {
-        return $this->role;
-    }
-
-    public function getPermission(): ?string
-    {
-        $permission = $this->evaluate($this->permission);
-        if ($permission instanceof BackedEnum) {
-            $permission = $permission->value;
-        }
-
-        return $permission;
-    }
-
     public function approved(Model|Approvable $approvable, string $key): ApprovalState
     {
         $approvals = $this->getApprovals($approvable, $key);
         $flow = $this->getApprovalFlow($approvable, $key);
         /** @var HasApprovalStatuses $statusClass */
-        $statusClass = $flow->getStatusEnumClass();
+        $statusClass = $flow?->getStatusEnumClass();
 
         $deniedStatuses = collect($statusClass::getDeniedStatuses())->map(fn($status) => $status->value);
         $denied = $approvals
@@ -178,7 +128,7 @@ class SimpleApprovalBy implements ApprovalBy
     {
         return $approvable
             ->approvals
-            ->where(fn(Approval $approval) => $approval->key == $key && $approval->approval_by == $this->getName());
+            ->where(fn(Approval $approval) => $approval->key === $key && $approval->approval_by === $this->getName());
     }
 
     public function getName(): string
@@ -196,10 +146,5 @@ class SimpleApprovalBy implements ApprovalBy
         $approvals = $this->getApprovals($approvable, $key);
 
         return $approvals->count() >= $this->getAtLeast();
-    }
-
-    public function getAtLeast(): int
-    {
-        return $this->evaluate($this->atLeast);
     }
 }

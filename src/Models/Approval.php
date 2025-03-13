@@ -117,7 +117,7 @@ class Approval extends Model
             $flow = $approvable->getApprovalFlow($this->key);
 
             return collect($flow->getApprovalStatus())
-                ->firstWhere(fn($unitEnum) => $unitEnum->value == $value);
+                ->firstWhere(fn($unitEnum) => $unitEnum->value === $value);
         } catch (Error|Exception) {
             return $value;
         }
@@ -133,24 +133,4 @@ class Approval extends Model
 
         parent::__set('status', $status->value);
     }
-
-//    public static function userHasApproved(Model $record, string $statusClass, string $category): bool ToDo ???
-//    {
-//        return self::where('category', $category)
-//            ->where('approvable_type', get_class($record))
-//            ->where('approvable_id', $record->getKey())
-//            ->where('approver_id', auth()->id())
-//            ->whereIn('status', $statusClass::getApprovedStatuses())
-//            ->exists();
-//    }
-
-//    public static function userHasResponded(Model $record, string $category): bool
-//    {
-//        return self::where('category', $category)
-//            ->where('approvable_type', get_class($record))
-//            ->where('approvable_id', $record->getKey())
-//            ->where('approver_id', auth()->id())
-//            ->whereNot('status', null)
-//            ->exists();
-//    }
 }
