@@ -4,7 +4,6 @@ namespace Ffhs\Approvals\Contracts;
 
 use BackedEnum;
 use Closure;
-use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Enums\ApprovalState;
 use Illuminate\Database\Eloquent\Model;
 

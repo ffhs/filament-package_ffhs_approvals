@@ -3,7 +3,7 @@
 namespace Ffhs\Approvals\Traits;
 
 use Closure;
-use Ffhs\Approvals\Approval\ApprovalBy;
+use Ffhs\Approvals\Contracts\ApprovalBy;
 use Ffhs\Approvals\Infolists\Actions\ApprovalByResetAction;
 
 trait HasResetApprovalAction

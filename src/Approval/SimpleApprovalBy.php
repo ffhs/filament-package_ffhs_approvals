@@ -2,32 +2,33 @@
 
 namespace Ffhs\Approvals\Approval;
 
+use BackedEnum;
 use Closure;
-use Enum;
 use Error;
 use Exception;
 use Ffhs\Approvals\Contracts\Approvable;
+use Ffhs\Approvals\Contracts\ApprovalBy;
+use Ffhs\Approvals\Contracts\ApprovalFlow;
 use Ffhs\Approvals\Contracts\Approver;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Enums\ApprovalState;
 use Ffhs\Approvals\Models\Approval;
 use Filament\Support\Concerns\EvaluatesClosures;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Role;
-use UnitEnum;
 
-class ApprovalBy
+class SimpleApprovalBy implements ApprovalBy
 {
     use EvaluatesClosures;
 
     protected ?string $name = null;
-    protected ?string $role = null;
-    protected Closure|UnitEnum|string|null $permission = null;
-    protected int $atLeast = 1;
-    protected bool $any = false;
+    protected string|Closure|BackedEnum|null $role = null;
+    protected string|Closure|BackedEnum|null $permission = null;
+    protected int|Closure $atLeast = 1;
+    protected bool|Closure $any = false;
     protected ?Closure $canApproveUsing = null;
 
     final public function __construct(string $name)
@@ -54,30 +55,25 @@ class ApprovalBy
         return $this;
     }
 
-    public function role(string $role): static
+    public function role(string|Closure|BackedEnum|null $role): static
     {
         $this->role = $role;
 
         return $this;
     }
 
-    public function permission(Closure|UnitEnum|string|null $permission): static
+    public function permission(string|Closure|BackedEnum|null $permission): static
     {
         $this->permission = $permission;
 
         return $this;
     }
 
-    public function atLeast(int $atLeast): static
+    public function atLeast(int|Closure $atLeast): static
     {
         $this->atLeast = $atLeast;
 
         return $this;
-    }
-
-    public function getAtLeast(): int
-    {
-        return $this->atLeast;
     }
 
     public function canApprove(Approver|Model $approver, Approvable $approvable): bool
@@ -93,7 +89,7 @@ class ApprovalBy
             return true;
         }
 
-        if ($approver instanceof Authenticatable) {
+        if ($approver instanceof User) {
             return Gate::allows('can_approve_by', $this);
         }
 
@@ -130,9 +126,7 @@ class ApprovalBy
     public function getPermission(): ?string
     {
         $permission = $this->evaluate($this->permission);
-
-        if ($permission instanceof UnitEnum) {
-            /** @var Enum $permission */
+        if ($permission instanceof BackedEnum) {
             $permission = $permission->value;
         }
 
@@ -192,7 +186,7 @@ class ApprovalBy
         return $this->name;
     }
 
-    public function getApprovalFlow(Model|Approvable $approvable, string $key): ?SimpleApprovalFlow
+    public function getApprovalFlow(Model|Approvable $approvable, string $key): ?ApprovalFlow
     {
         return $approvable->getApprovalFlow($key);
     }
@@ -201,6 +195,11 @@ class ApprovalBy
     {
         $approvals = $this->getApprovals($approvable, $key);
 
-        return $approvals->count() >= $this->atLeast;
+        return $approvals->count() >= $this->getAtLeast();
+    }
+
+    public function getAtLeast(): int
+    {
+        return $this->evaluate($this->atLeast);
     }
 }

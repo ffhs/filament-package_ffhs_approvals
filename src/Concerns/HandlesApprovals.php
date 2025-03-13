@@ -3,8 +3,8 @@
 namespace Ffhs\Approvals\Concerns;
 
 use App\Models\User;
-use Ffhs\Approvals\Approval\ApprovalBy;
 use Ffhs\Approvals\Contracts\Approvable;
+use Ffhs\Approvals\Contracts\ApprovalBy;
 use Ffhs\Approvals\Contracts\ApprovalFlow;
 use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Traits\HasApprovalKey;

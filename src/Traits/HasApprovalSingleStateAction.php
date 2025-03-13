@@ -4,7 +4,7 @@ namespace Ffhs\Approvals\Traits;
 
 use BackedEnum;
 use Closure;
-use Ffhs\Approvals\Approval\ApprovalBy;
+use Ffhs\Approvals\Contracts\ApprovalBy;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Infolists\Actions\ApprovalSingleStateAction;
 use Filament\Actions\Concerns\CanBeDisabled;

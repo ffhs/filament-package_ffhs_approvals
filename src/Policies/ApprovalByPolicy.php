@@ -3,7 +3,7 @@
 namespace Ffhs\Approvals\Policies;
 
 use App\Models\User;
-use Ffhs\Approvals\Approval\ApprovalBy;
+use Ffhs\Approvals\Contracts\ApprovalBy;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ApprovalByPolicy
