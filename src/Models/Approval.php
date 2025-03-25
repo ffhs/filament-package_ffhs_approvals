@@ -2,17 +2,18 @@
 
 namespace Ffhs\Approvals\Models;
 
+use BackedEnum;
 use Eloquent;
 use Error;
 use Exception;
 use Ffhs\Approvals\Contracts\Approvable;
+use Ffhs\Approvals\Contracts\ApprovalFlow;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
-use UnitEnum;
 
 /**
  *
@@ -28,7 +29,7 @@ use UnitEnum;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- * @property-read Model|Eloquent|null $approvable
+ * @property-read Approvable| Model|Eloquent|null $approvable
  * @property-read Model|Eloquent $approver
  * @method static Builder<static>|Approval newModelQuery()
  * @method static Builder<static>|Approval newQuery()
@@ -94,14 +95,16 @@ class Approval extends Model
         };
     }
 
-    protected function getStatus(): HasApprovalStatuses
+    protected function getStatus(): string|HasApprovalStatuses
     {
         $value = parent::__get('status');
 
         try {
-            /** @var Approvable $approvable */
-            $approvable = $this->approvable;
-            $flow = $approvable->getApprovalFlow($this->key);
+            $flow = $this->getApprovalFlow($this->key);
+
+            if (is_null($flow)) {
+                return $value;
+            }
 
             return collect($flow->getApprovalStatus())
                 ->firstWhere(fn($unitEnum) => $unitEnum->value === $value);
@@ -110,7 +113,12 @@ class Approval extends Model
         }
     }
 
-    protected function setStatus(UnitEnum|string $status): void
+    public function getApprovalFlow(string $key): ?ApprovalFlow
+    {
+        return $this->approvable->getApprovalFlow($key);
+    }
+
+    protected function setStatus(BackedEnum|HasApprovalStatuses|string $status): void
     {
         if (is_string($status)) {
             parent::__set('status', $status);
