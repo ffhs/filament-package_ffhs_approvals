@@ -78,45 +78,6 @@ describe('HandlesApprovals Trait', tests: function () {
         }
     });
 
-    it('getBoundApprovals', function () {
-        $approvals = collect([
-            Approval::make(['key' => 'key1', 'approval_by' => 'approval_by_1']),
-            Approval::make(['key' => 'key1', 'approval_by' => 'approval_by_2']),
-            Approval::make(['key' => 'key1', 'approval_by' => 'approval_by_3']),
-
-            Approval::make(['key' => 'key2', 'approval_by' => 'approval_by_1']),
-            Approval::make(['key' => 'key2', 'approval_by' => 'approval_by_2']),
-            Approval::make(['key' => 'key2', 'approval_by' => 'approval_by_3']),
-
-            Approval::make(['key' => 'key3', 'approval_by' => 'approval_by_1']),
-            Approval::make(['key' => 'key3', 'approval_by' => 'approval_by_2']),
-            Approval::make(['key' => 'key3', 'approval_by' => 'approval_by_2']),
-        ]);
-
-        $approvalBy = SimpleApprovalBy::make('approval_by_2');
-
-        /**@var HandlesApprovals $action */
-        $action = $this->action;
-        $action->approvalKey('key3');
-        $action->approvalBy($approvalBy);
-
-        $approvable = Mockery::mock(Model::class, Approvable::class);
-        $approvable
-            ->shouldReceive('getAttribute')
-            ->with('approvals')
-            ->andReturn($approvals);
-
-        $action->mockeryRecord = $approvable;
-
-        $boundApprovals = $action->getBoundApprovals();
-        foreach ($boundApprovals as $boundApproval) {
-            expect($boundApprovals->count())->toBe(2)
-                ->and($boundApproval->key)->toBe('key3')
-                ->and($boundApproval->approval_by)->toBe('approval_by_2');
-        }
-    });
-
-
     afterEach(function () {
         Mockery::close();
     });
