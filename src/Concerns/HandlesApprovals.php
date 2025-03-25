@@ -8,8 +8,8 @@ use Ffhs\Approvals\Contracts\ApprovalBy;
 use Ffhs\Approvals\Contracts\ApprovalFlow;
 use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Traits\Filament\HasApprovalKey;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Event\RuntimeException;
 
@@ -59,7 +59,7 @@ trait HandlesApprovals
         return $this->getBoundApprovals()->count() > 0;
     }
 
-    public function getBoundApprovals(): ?Collection
+    public function getBoundApprovals(): Collection
     {
         if ($this->cachedApprovals) {
             return $this->cachedApprovals;
@@ -68,8 +68,8 @@ trait HandlesApprovals
         $this->cachedApprovals = $this
             ->approvable()
             ->approvals
-            ->where(fn(Approval $approval) => $approval->key == $this->getApprovalKey()
-                && $approval->approval_by == $this->getApprovalBy()->getName()
+            ->where(fn(Approval $approval) => $approval->key === $this->getApprovalKey()
+                && $approval->approval_by === $this->getApprovalBy()->getName()
             );
 
         return $this->cachedApprovals;
@@ -85,12 +85,12 @@ trait HandlesApprovals
         };
     }
 
-    public function getApprovalFlow(): ?ApprovalFlow
+    public function getApprovalFlow(): ApprovalFlow
     {
-        if ($this->approvalFlow) {
-            return $this->approvalFlow;
+        if (!$this->approvalFlow) {
+            throw new RuntimeException('No approval flow was found for component'); //todo find right exception
         }
 
-        throw new RuntimeException('No approval flow was found for component'); //todo find right exeption
+        return $this->approvalFlow;
     }
 }
