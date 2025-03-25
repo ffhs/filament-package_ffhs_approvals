@@ -6,7 +6,6 @@ use App\Models\User;
 use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\ApprovalBy;
 use Ffhs\Approvals\Contracts\ApprovalFlow;
-use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Traits\Filament\HasApprovalKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -61,16 +60,13 @@ trait HandlesApprovals
 
     public function getBoundApprovals(): Collection
     {
-        if ($this->cachedApprovals) {
-            return $this->cachedApprovals;
+        if (!$this->cachedApprovals) {
+            $this->cachedApprovals = $this->getApprovalBy()
+                ->getApprovals(
+                    $this->approvable(),
+                    $this->getApprovalKey()
+                );
         }
-
-        $this->cachedApprovals = $this
-            ->approvable()
-            ->approvals
-            ->where(fn(Approval $approval) => $approval->key === $this->getApprovalKey()
-                && $approval->approval_by === $this->getApprovalBy()->getName()
-            );
 
         return $this->cachedApprovals;
     }

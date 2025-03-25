@@ -71,6 +71,8 @@ describe('HandlesApprovals Trait', tests: function () {
         $action->mockeryRecord = $approvable;
 
         $boundApprovals = $action->getBoundApprovals();
+        expect($boundApprovals)
+            ->toHaveCount(2);
         foreach ($boundApprovals as $boundApproval) {
             expect($boundApprovals->count())->toBe(2)
                 ->and($boundApproval->key)->toBe('key3')
