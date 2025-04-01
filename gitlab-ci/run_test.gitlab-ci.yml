@@ -1,8 +1,6 @@
 test:
   stage: test
-  image:
-    name: chainguard/laravel
-    entrypoint: [ "" ]  # Override the default entrypoint
+  image: composer:latest
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /internal/' # Only for external GitLab URLs
       when: never
@@ -10,9 +8,6 @@ test:
       when: always
     - when: never
   variables:
-    # Prevent Laravel from starting the web server
-    LARAVEL_OCTANE: "0"
-    LARAVEL_SAIL: "0"
     # Xdebug configuration
     XDEBUG_MODE: coverage
   before_script:
