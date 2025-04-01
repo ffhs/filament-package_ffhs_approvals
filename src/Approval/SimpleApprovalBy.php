@@ -112,15 +112,6 @@ class SimpleApprovalBy implements ApprovalBy
             return ApprovalState::OPEN;
         }
 
-        $approvedStatuses = collect($statusClass::getApprovedStatuses())->map(fn($status) => $status->value);
-        $open = $approvals
-            ->whereNotIn('status', $approvedStatuses)
-            ->isNotEmpty();
-
-        if ($open) {
-            return ApprovalState::OPEN;
-        }
-
         return ApprovalState::APPROVED;
     }
 

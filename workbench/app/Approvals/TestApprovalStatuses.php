@@ -13,22 +13,22 @@ enum TestApprovalStatuses: string implements HasApprovalStatuses
 
     public static function getApprovedStatuses(): array
     {
-      return [
-          'approved'
-      ];
+        return [
+            self::APPROVED,
+        ];
     }
 
     public static function getDeniedStatuses(): array
     {
         return [
-            'denied'
+            self::DENIED,
         ];
     }
 
     public static function getPendingStatuses(): array
     {
         return [
-            'pending'
+            self::PENDING,
         ];
     }
 }
