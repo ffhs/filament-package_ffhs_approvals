@@ -7,13 +7,18 @@ test:
     - if: $CI_MERGE_REQUEST_ID
       when: always
     - when: never
-
+  variables:
+    # Prevent Laravel from starting the web server
+    LARAVEL_OCTANE: "0"
+    LARAVEL_SAIL: "0"
+    # Xdebug configuration
+    XDEBUG_MODE: coverage
   before_script:
     - echo xdebug.mode=coverage >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-  script:
     - composer install
     - ./vendor/bin/testbench vendor:publish --tag="filament-package_ffhs_approvals-migrations"
     - ./vendor/bin/testbench workbench:build
+  script:
     - php vendor/bin/pest --coverage
   coverage: /Total:\s*([^%]+)/
 
