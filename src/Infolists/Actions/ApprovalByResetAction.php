@@ -6,7 +6,7 @@ use BackedEnum;
 use Ffhs\Approvals\Concerns\HandlesApprovals;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Models\Approval;
-use Ffhs\Approvals\Traits\HasApprovalNotification;
+use Ffhs\Approvals\Traits\Filament\HasApprovalNotification;
 use Filament\Infolists\Components\Actions\Action;
 use UnitEnum;
 

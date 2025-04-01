@@ -2,33 +2,38 @@
 
 namespace Ffhs\Approvals\Approval;
 
-use Closure;
-use Enum;
 use Error;
 use Exception;
 use Ffhs\Approvals\Contracts\Approvable;
+use Ffhs\Approvals\Contracts\ApprovalBy;
+use Ffhs\Approvals\Contracts\ApprovalFlow;
 use Ffhs\Approvals\Contracts\Approver;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Enums\ApprovalState;
 use Ffhs\Approvals\Models\Approval;
+use Ffhs\Approvals\Traits\Approval\CanBeAny;
+use Ffhs\Approvals\Traits\Approval\HasApproveUsing;
+use Ffhs\Approvals\Traits\Approval\HasAtLeast;
+use Ffhs\Approvals\Traits\Approval\HasPermissions;
+use Ffhs\Approvals\Traits\Approval\HasRoles;
 use Filament\Support\Concerns\EvaluatesClosures;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Role;
-use UnitEnum;
 
-class ApprovalBy
+class SimpleApprovalBy implements ApprovalBy
 {
+    use HasPermissions;
     use EvaluatesClosures;
+    use CanBeAny;
+    use HasRoles;
+    use CanBeAny;
+    use HasAtLeast;
+    use HasApproveUsing;
 
     protected ?string $name = null;
-    protected ?string $role = null;
-    protected Closure|UnitEnum|string|null $permission = null;
-    protected int $atLeast = 1;
-    protected bool $any = false;
-    protected ?Closure $canApproveUsing = null;
 
     final public function __construct(string $name)
     {
@@ -40,50 +45,11 @@ class ApprovalBy
         return app(static::class, ['name' => $name]);
     }
 
-    public function any(bool $any = true): static
-    {
-        $this->any = $any;
-
-        return $this;
-    }
-
-    public function canApproveUsing(Closure $canApproveUsing): static
-    {
-        $this->canApproveUsing = $canApproveUsing;
-
-        return $this;
-    }
-
-    public function role(string $role): static
-    {
-        $this->role = $role;
-
-        return $this;
-    }
-
-    public function permission(Closure|UnitEnum|string|null $permission): static
-    {
-        $this->permission = $permission;
-
-        return $this;
-    }
-
-    public function atLeast(int $atLeast): static
-    {
-        $this->atLeast = $atLeast;
-
-        return $this;
-    }
-
-    public function getAtLeast(): int
-    {
-        return $this->atLeast;
-    }
-
     public function canApprove(Approver|Model $approver, Approvable $approvable): bool
     {
-        if ($this->canApproveUsing) {
-            return $this->evaluate($this->canApproveUsing, [
+        $canApproveUsing = $this->getCanApproveUsing();
+        if ($canApproveUsing) {
+            return $this->evaluate($canApproveUsing, [
                 'approver' => $approver,
                 'approvable' => $approvable,
             ]);
@@ -93,16 +59,11 @@ class ApprovalBy
             return true;
         }
 
-        if ($approver instanceof Authenticatable) {
+        if ($approver instanceof User) {
             return Gate::allows('can_approve_by', $this);
         }
 
         return $this->canApproveFromPermissions($approver);
-    }
-
-    public function isAny(): bool
-    {
-        return $this->any;
     }
 
     public function canApproveFromPermissions(Approver|Model $approver): bool
@@ -122,29 +83,12 @@ class ApprovalBy
         return false;
     }
 
-    public function getRole(): ?string
-    {
-        return $this->role;
-    }
-
-    public function getPermission(): ?string
-    {
-        $permission = $this->evaluate($this->permission);
-
-        if ($permission instanceof UnitEnum) {
-            /** @var Enum $permission */
-            $permission = $permission->value;
-        }
-
-        return $permission;
-    }
-
     public function approved(Model|Approvable $approvable, string $key): ApprovalState
     {
         $approvals = $this->getApprovals($approvable, $key);
         $flow = $this->getApprovalFlow($approvable, $key);
         /** @var HasApprovalStatuses $statusClass */
-        $statusClass = $flow->getStatusEnumClass();
+        $statusClass = $flow?->getStatusEnumClass();
 
         $deniedStatuses = collect($statusClass::getDeniedStatuses())->map(fn($status) => $status->value);
         $denied = $approvals
@@ -184,7 +128,7 @@ class ApprovalBy
     {
         return $approvable
             ->approvals
-            ->where(fn(Approval $approval) => $approval->key == $key && $approval->approval_by == $this->getName());
+            ->where(fn(Approval $approval) => $approval->key === $key && $approval->approval_by === $this->getName());
     }
 
     public function getName(): string
@@ -201,6 +145,6 @@ class ApprovalBy
     {
         $approvals = $this->getApprovals($approvable, $key);
 
-        return $approvals->count() >= $this->atLeast;
+        return $approvals->count() >= $this->getAtLeast();
     }
 }

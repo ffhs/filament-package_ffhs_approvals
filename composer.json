@@ -15,13 +15,13 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Matthew Ballou",
-            "email": "mballou@kirschbaumdevelopment.com",
+            "name": "Kromer Luc",
+            "email": "luc.kromer@ffhs.ch",
             "role": "Developer"
         },
         {
-            "name": "Kromer Luc",
-            "email": "luc.kromer@ffhs.ch",
+            "name": "Matthew Ballou",
+            "email": "mballou@kirschbaumdevelopment.com",
             "role": "Developer"
         }
     ],
@@ -41,8 +41,7 @@
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0",
-        "spatie/laravel-ray": "^1.26",
-        "spatie/laravel-activitylog": "^4.7"
+        "spatie/laravel-ray": "^1.26"
     },
     "autoload": {
         "psr-4": {

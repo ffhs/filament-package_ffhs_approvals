@@ -2,21 +2,18 @@
 
 namespace Ffhs\Approvals\Models;
 
+use BackedEnum;
 use Eloquent;
 use Error;
 use Exception;
 use Ffhs\Approvals\Contracts\Approvable;
+use Ffhs\Approvals\Contracts\ApprovalFlow;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Models\Activity;
-use Spatie\Activitylog\Traits\LogsActivity;
-use UnitEnum;
 
 /**
  *
@@ -32,9 +29,7 @@ use UnitEnum;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- * @property-read Collection<int, Activity> $activities
- * @property-read int|null $activities_count
- * @property-read Model|Eloquent|null $approvable
+ * @property-read Approvable| Model|Eloquent|null $approvable
  * @property-read Model|Eloquent $approver
  * @method static Builder<static>|Approval newModelQuery()
  * @method static Builder<static>|Approval newQuery()
@@ -58,7 +53,6 @@ use UnitEnum;
 class Approval extends Model
 {
     use SoftDeletes;
-    use LogsActivity;
 
     protected $fillable = [
         'key',
@@ -69,12 +63,6 @@ class Approval extends Model
         'approval_by',
         'status',
     ];
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnlyDirty();
-    }
 
     public function getTable()
     {
@@ -107,23 +95,30 @@ class Approval extends Model
         };
     }
 
-    protected function getStatus(): HasApprovalStatuses
+    protected function getStatus(): string|HasApprovalStatuses
     {
         $value = parent::__get('status');
 
         try {
-            /** @var Approvable $approvable */
-            $approvable = $this->approvable;
-            $flow = $approvable->getApprovalFlow($this->key);
+            $flow = $this->getApprovalFlow($this->key);
+
+            if (is_null($flow)) {
+                return $value;
+            }
 
             return collect($flow->getApprovalStatus())
-                ->firstWhere(fn($unitEnum) => $unitEnum->value == $value);
+                ->firstWhere(fn($unitEnum) => $unitEnum->value === $value);
         } catch (Error|Exception) {
             return $value;
         }
     }
 
-    protected function setStatus(UnitEnum|string $status): void
+    public function getApprovalFlow(string $key): ?ApprovalFlow
+    {
+        return $this->approvable->getApprovalFlow($key);
+    }
+
+    protected function setStatus(BackedEnum|HasApprovalStatuses|string $status): void
     {
         if (is_string($status)) {
             parent::__set('status', $status);
@@ -133,24 +128,4 @@ class Approval extends Model
 
         parent::__set('status', $status->value);
     }
-
-//    public static function userHasApproved(Model $record, string $statusClass, string $category): bool ToDo ???
-//    {
-//        return self::where('category', $category)
-//            ->where('approvable_type', get_class($record))
-//            ->where('approvable_id', $record->getKey())
-//            ->where('approver_id', auth()->id())
-//            ->whereIn('status', $statusClass::getApprovedStatuses())
-//            ->exists();
-//    }
-
-//    public static function userHasResponded(Model $record, string $category): bool
-//    {
-//        return self::where('category', $category)
-//            ->where('approvable_type', get_class($record))
-//            ->where('approvable_id', $record->getKey())
-//            ->where('approver_id', auth()->id())
-//            ->whereNot('status', null)
-//            ->exists();
-//    }
 }

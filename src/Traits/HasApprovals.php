@@ -2,7 +2,7 @@
 
 namespace Ffhs\Approvals\Traits;
 
-use Ffhs\Approvals\Approval\ApprovalFlow;
+use Ffhs\Approvals\Contracts\ApprovalFlow;
 use Ffhs\Approvals\Enums\ApprovalState;
 use Ffhs\Approvals\Models\Approval;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -79,6 +79,21 @@ trait HasApprovals
         return $statistic;
     }
 
+    public function getFilteredApprovalFlow(?array $categories = null, ?array $keys = null): array
+    {
+        $flows = $this->getApprovalFlows();
+
+        if ($keys) {
+            $flows = Arr::only($flows, $keys);
+        }
+
+        if ($categories) {
+            $flows = Arr::where($flows, fn(ApprovalFlow $value) => in_array($value->getCategory(), $categories));
+        }
+
+        return $flows;
+    }
+
     public function isDenied(?array $categories = null, ?array $keys = null): bool
     {
         return $this->approved($categories, $keys) == ApprovalState::DENIED;
@@ -111,33 +126,18 @@ trait HasApprovals
         return ApprovalState::APPROVED;
     }
 
-    public function getFilteredApprovalFlow(?array $categories = null, ?array $keys = null): array
-    {
-        $flows = $this->getApprovalFlows();
-
-        if ($keys) {
-            $flows = Arr::only($flows, $keys);
-        }
-
-        if ($categories) {
-            $flows = Arr::where($flows, fn(ApprovalFlow $value) => in_array($value->getCategory(), $categories));
-        }
-
-        return $flows;
-    }
-
     public function isPending(?array $categories = null, ?array $keys = null): bool
     {
-        return $this->approved($categories, $keys) == ApprovalState::PENDING;
+        return $this->approved($categories, $keys) === ApprovalState::PENDING;
     }
 
     public function isApproved(?array $categories = null, ?array $keys = null): bool
     {
-        return $this->approved($categories, $keys) == ApprovalState::APPROVED;
+        return $this->approved($categories, $keys) === ApprovalState::APPROVED;
     }
 
     public function isOpen(?array $categories = null, ?array $keys = null): bool
     {
-        return $this->approved($categories, $keys) == ApprovalState::OPEN;
+        return $this->approved($categories, $keys) === ApprovalState::OPEN;
     }
 }
