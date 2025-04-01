@@ -1,6 +1,8 @@
 test:
   stage: test
-  image: chainguard/laravel
+  image:
+    name: chainguard/laravel
+    entrypoint: [ "" ]  # Override the default entrypoint
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /internal/' # Only for external GitLab URLs
       when: never
