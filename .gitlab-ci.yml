@@ -1,0 +1,13 @@
+stages:
+  - test
+  - deploy
+
+always_pass:
+  script:
+    - 'echo pass'
+  rules:
+    - when: never
+
+include:
+  - local: gitlab-ci/run_test.gitlab-ci.yml
+  - local: gitlab-ci/intern_publish.gitlab-ci.yml

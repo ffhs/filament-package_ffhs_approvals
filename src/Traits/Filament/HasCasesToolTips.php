@@ -25,7 +25,7 @@ trait HasCasesToolTips
         return $this->casesToolTips;
     }
 
-    public function caseTooltip(BackedEnum|string $approvalCase, bool|Closure $caseToolTip = true): static
+    public function caseTooltip(BackedEnum|string $approvalCase, string|Closure $caseToolTip): static
     {
         if ($this->casesToolTips instanceof Closure) {
             $this->casesToolTips = [];

@@ -128,16 +128,16 @@ trait HasApprovals
 
     public function isPending(?array $categories = null, ?array $keys = null): bool
     {
-        return $this->approved($categories, $keys) == ApprovalState::PENDING;
+        return $this->approved($categories, $keys) === ApprovalState::PENDING;
     }
 
     public function isApproved(?array $categories = null, ?array $keys = null): bool
     {
-        return $this->approved($categories, $keys) == ApprovalState::APPROVED;
+        return $this->approved($categories, $keys) === ApprovalState::APPROVED;
     }
 
     public function isOpen(?array $categories = null, ?array $keys = null): bool
     {
-        return $this->approved($categories, $keys) == ApprovalState::OPEN;
+        return $this->approved($categories, $keys) === ApprovalState::OPEN;
     }
 }
