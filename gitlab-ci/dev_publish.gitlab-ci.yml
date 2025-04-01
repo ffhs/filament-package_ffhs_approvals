@@ -7,10 +7,13 @@ publish:
       when: never
     - if: '$CI_COMMIT_BRANCH =~ /^development\/.*$/ && $CI_PIPELINE_SOURCE == "push"' # Runs only on push after MR merge
   script:
+    - 'apk add --no-cache git'
     - TAG_NAME=$(echo $CI_COMMIT_BRANCH | sed 's/^development\///')-dev
     - 'echo "Tag to create: $TAG_NAME"'
     - 'git config --global user.email "ci@example.com"'  # Set user email for git tagging
     - 'git config --global user.name "GitLab CI"'  # Set user name for git tagging
-    - 'git tag $TAG_NAME'  # Create the tag locally
-    - 'git push origin $TAG_NAME'  # Push the tag to the remote repository
+    - 'git tag -d $TAG_NAME || true'  # Delete the tag locally if it exists (no error if tag doesn't exist)
+    - 'git push --delete origin $TAG_NAME || true'  # Delete the remote tag if it exists (no error if tag doesn't exist)
+    - 'git tag $TAG_NAME  # Create the tag locally'
+    - 'git push origin $TAG_NAME  # Push the tag to the remote repository'
     - 'curl --fail-with-body --header "Job-Token: $CI_JOB_TOKEN" --data tag=$TAG_NAME "${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/composer"'
