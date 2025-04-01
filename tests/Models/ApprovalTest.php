@@ -26,6 +26,7 @@ describe('Approval Model', function () {
         $approval = $this->approval;
         $approval->status = $status;
 
+
         try {
             $jsonArray = json_decode(json_encode($approval, JSON_THROW_ON_ERROR), true, 4, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
