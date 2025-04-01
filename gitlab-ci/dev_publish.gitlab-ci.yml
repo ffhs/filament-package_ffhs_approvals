@@ -14,5 +14,5 @@ publish:
     - 'git tag -d $TAG_NAME || true'  # Delete the tag locally if it exists (no error if tag doesn't exist)
     - 'git push --delete origin $TAG_NAME || true'  # Delete the remote tag if it exists (no error if tag doesn't exist)
     - 'git tag $TAG_NAME  # Create the tag locally'
-    - 'git push https://oauth2:$CI_JOB_TOKEN@${CI_SERVER_HOST}/$CI_PROJECT_PATH.git $TAG_NAME'  # Use CI_JOB_TOKEN to authenticate
+    - 'git push https://oauth2:${CI_ACCESS_TOKEN}@${CI_SERVER_HOST}/$CI_PROJECT_PATH.git $TAG_NAME'  # Use CI_JOB_TOKEN to authenticate
     - 'curl --fail-with-body --header "Job-Token: $CI_JOB_TOKEN" --data tag=$TAG_NAME "${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/composer"'
