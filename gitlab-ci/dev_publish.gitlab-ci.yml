@@ -7,5 +7,6 @@ publish:
       when: never
     - if: '$CI_COMMIT_BRANCH =~ /^development\/.*$/ && $CI_PIPELINE_SOURCE == "push"' # Runs only on push after MR merge
   script:
+    - echo $CI_COMMIT_BRANCH
     - TAG_NAME=$(echo $CI_COMMIT_BRANCH | sed 's/^development\///')-dev
     - 'curl --fail-with-body --header "Job-Token: $CI_JOB_TOKEN" --data tag=$TAG_NAME "${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/composer"'
