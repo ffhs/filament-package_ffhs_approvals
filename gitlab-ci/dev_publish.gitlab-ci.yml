@@ -1,6 +1,6 @@
 # Publishes a tag/branch to Composer Packages of the current project
 publish:
-  image: curlimages/curl:latest
+  image: node:latest
   stage: deploy
   rules:
     - if: '$CI_MERGE_REQUEST_ID' # Ensures the job does not run in MR pipelines
