@@ -17,32 +17,31 @@
     "prepare": "@php vendor/bin/testbench package:discover --ansi",
     "build": "@php vendor/bin/testbench workbench:build --ansi",
     "serve": [
-      "Composer\\Config::disableProcessTimeout",
-      "@build",
-      "@php vendor/bin/testbench serve --ansi"
+        "Composer\\Config::disableProcessTimeout",
+        "@build",
+        "@php vendor/bin/testbench serve --ansi"
     ],
     "lint": [
-      "@php vendor/bin/pint --ansi",
-      "@php vendor/bin/phpstan analyse --verbose --ansi"
-    ]
-  },
-  "config": {
-    "sort-packages": true,
-    "allow-plugins": {
-      "pestphp/pest-plugin": true,
-      "phpstan/extension-installer": true
-    }
-  },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "Ffhs\\Approvals\\ApprovalsServiceProvider"
-      ],
-      "aliases": {
-        "Approvals": "Ffhs\\Approvals\\Facades\\Approvals"
-      }
-    }
-  },
-  "minimum-stability": "stable",
-  "prefer-stable": true
+        "@php vendor/bin/pint --ansi",
+        "@php vendor/bin/phpstan analyse --verbose --ansi"
+    ],
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Ffhs\\Approvals\\ApprovalsServiceProvider"
+            ],
+            "aliases": {
+                "Approvals": "Ffhs\\Approvals\\Facades\\Approvals"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
