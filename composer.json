@@ -8,97 +8,41 @@
         "laravel",
         "filament-package_ffhs_approvals"
     ],
-    "homepage": "https://github.com/ffhs/filament-package_ffhs_approvals",
-    "support": {
-        "issues": "https://github.com/ffhs/filament-package_ffhs_approvals/issues",
-        "source": "https://github.com/ffhs/filament-package_ffhs_approvals"
-    },
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Kromer Luc",
-            "email": "luc.kromer@ffhs.ch",
-            "role": "Developer"
-        },
-        {
-            "name": "Matthew Ballou",
-            "email": "mballou@kirschbaumdevelopment.com",
-            "role": "Developer"
-        }
+    "analyse": "vendor/bin/phpstan analyse",
+    "test": "vendor/bin/pest --parallel",
+    "test-coverage": "vendor/bin/pest --parallel --coverage",
+    "fix-style": "vendor/bin/pint",
+    "check-style": "vendor/bin/pint --test",
+    "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+    "prepare": "@php vendor/bin/testbench package:discover --ansi",
+    "build": "@php vendor/bin/testbench workbench:build --ansi",
+    "serve": [
+      "Composer\\Config::disableProcessTimeout",
+      "@build",
+      "@php vendor/bin/testbench serve --ansi"
     ],
-    "require": {
-        "php": "^8.2",
-        "filament/filament": "^3.0",
-        "spatie/laravel-package-tools": "^1.15.0"
-    },
-    "require-dev": {
-        "larastan/larastan": "^3.0",
-        "laravel/pint": "^1.0",
-        "nunomaduro/collision": "^8.0",
-        "orchestra/testbench": "^9.9",
-        "pestphp/pest": "^3.7",
-        "pestphp/pest-plugin-arch": "^3.0",
-        "pestphp/pest-plugin-laravel": "^3.0",
-        "phpstan/extension-installer": "^1.1",
-        "phpstan/phpstan-deprecation-rules": "^2.0",
-        "phpstan/phpstan-phpunit": "^2.0",
-        "spatie/laravel-ray": "^1.26"
-    },
-    "autoload": {
-        "psr-4": {
-            "Ffhs\\Approvals\\": "src/",
-            "Ffhs\\Approvals\\Database\\Factories\\": "database/factories/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Ffhs\\Approvals\\Tests\\": "tests/",
-            "App\\": "workbench/app/",
-            "Database\\Factories\\": "workbench/database/factories/",
-            "Database\\Seeders\\": "workbench/database/seeders/"
-        }
-    },
-    "scripts": {
-        "post-autoload-dump": [
-            "@clear",
-            "@prepare",
-            "@php ./vendor/bin/testbench package:discover --ansi"
-        ],
-        "analyse": "vendor/bin/phpstan analyse",
-        "test": "vendor/bin/pest --parallel",
-        "test-coverage": "vendor/bin/pest --parallel --coverage",
-        "fix-style": "vendor/bin/pint",
-        "check-style": "vendor/bin/pint --test",
-        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
-        "prepare": "@php vendor/bin/testbench package:discover --ansi",
-        "build": "@php vendor/bin/testbench workbench:build --ansi",
-        "serve": [
-            "Composer\\Config::disableProcessTimeout",
-            "@build",
-            "@php vendor/bin/testbench serve --ansi"
-        ],
-        "lint": [
-            "@php vendor/bin/pint --ansi",
-            "@php vendor/bin/phpstan analyse --verbose --ansi"
-        ]
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "phpstan/extension-installer": true
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Ffhs\\Approvals\\ApprovalsServiceProvider"
-            ],
-            "aliases": {
-                "Approvals": "Ffhs\\Approvals\\Facades\\Approvals"
-            }
-        }
-    },
-    "minimum-stability": "stable",
-    "prefer-stable": true
+    "lint": [
+      "@php vendor/bin/pint --ansi",
+      "@php vendor/bin/phpstan analyse --verbose --ansi"
+    ]
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true,
+      "phpstan/extension-installer": true
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Ffhs\\Approvals\\ApprovalsServiceProvider"
+      ],
+      "aliases": {
+        "Approvals": "Ffhs\\Approvals\\Facades\\Approvals"
+      }
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
 }
