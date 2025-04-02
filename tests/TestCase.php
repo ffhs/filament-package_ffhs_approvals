@@ -20,10 +20,10 @@ abstract class TestCase extends Orchestra
     protected $enablesPackageDiscoveries = true;
     protected string $seeder = DatabaseSeeder::class;
 
-    protected function getEnvironmentSetUp($app)
+    protected function getEnvironmentSetUp($app): void
     {
 //        $loader = AliasLoader::getInstance();
-//        $migration = include __DIR__.'/../workbench/database/migrations/0_create_test_approvable_model.php';
+//        $migration = include __DIR__ . '/../workbench/database/migrations/0_create_test_approvable_model.php';
 //        $migration->up();
     }
 
@@ -44,45 +44,3 @@ abstract class TestCase extends Orchestra
         $this->actingAs(User::query()->first());
     }
 }
-
-//class TestCase extends Orchestra
-//{
-//
-//    protected function setUp(): void
-//    {
-//        parent::setUp();
-//
-//        Factory::guessFactoryNamesUsing(
-//            fn (string $modelName) => 'Ffhs\\Approvals\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
-//        );
-//    }
-//
-//    protected function getPackageProviders($app)
-//    {
-//        return [
-//            ActionsServiceProvider::class,
-//            BladeCaptureDirectiveServiceProvider::class,
-//            BladeHeroiconsServiceProvider::class,
-//            BladeIconsServiceProvider::class,
-//            FilamentServiceProvider::class,
-//            FormsServiceProvider::class,
-//            InfolistsServiceProvider::class,
-//            LivewireServiceProvider::class,
-//            NotificationsServiceProvider::class,
-//            SupportServiceProvider::class,
-//            TablesServiceProvider::class,
-//            WidgetsServiceProvider::class,
-//            ApprovalsServiceProvider::class,
-//        ];
-//    }
-//
-//    public function getEnvironmentSetUp($app)
-//    {
-//        config()->set('database.default', 'testing');
-//
-//        /*
-//        $migration = include __DIR__.'/../database/migrations/create_filament-package_ffhs_approvals_table.php.stub';
-//        $migration->up();
-//        */
-//    }
-//}

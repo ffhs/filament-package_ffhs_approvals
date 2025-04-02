@@ -1,0 +1,15 @@
+laravel: '@testbench'
+
+migrations:
+  - workbench/database/migrations
+
+seeders:
+  - Database\Seeders\DatabaseSeeder
+
+providers:
+  - App\Providers\WorkbenchAdminPanelProvider
+  - App\Providers\WorkbenchServiceProvider
+
+workbench:
+  start: '/'
+  install: true

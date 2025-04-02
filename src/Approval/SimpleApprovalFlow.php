@@ -2,7 +2,6 @@
 
 namespace Ffhs\Approvals\Approval;
 
-use Ffhs\Approvals\Concerns\HandlesApprovalFlow;
 use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\ApprovalFlow;
 use Ffhs\Approvals\Enums\ApprovalState;
