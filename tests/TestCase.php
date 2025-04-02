@@ -5,7 +5,6 @@ namespace Ffhs\Approvals\Tests;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Filament\Facades\Filament;
-use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Orchestra\Testbench\Attributes\WithMigration;
@@ -23,9 +22,9 @@ abstract class TestCase extends Orchestra
 
     protected function getEnvironmentSetUp($app)
     {
-        $loader = AliasLoader::getInstance();
-        $migration = include __DIR__ . '/../workbench/database/migrations/0_create_test_approvable_model.php';
-        $migration->up();
+//        $loader = AliasLoader::getInstance();
+//        $migration = include __DIR__ . '/../workbench/database/migrations/0_create_test_approvable_model.php';
+//        $migration->up();
     }
 
 
