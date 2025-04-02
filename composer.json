@@ -1,14 +1,4 @@
 {
-<<<<<<< composer.json
-    "version": "0.1.0",
-    "name": "ffhs/filament-package_ffhs_approvals",
-    "description": "This is my package filament-package_ffhs_approvals",
-    "keywords": [
-        "ffhs",
-        "kirschbaum-development",
-        "laravel",
-        "filament-package_ffhs_approvals"
-=======
   "version": "0.1.1",
   "name": "ffhs/filament-package_ffhs_approvals",
   "description": "This is my package filament-package_ffhs_approvals",
