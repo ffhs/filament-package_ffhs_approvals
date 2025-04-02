@@ -9,7 +9,7 @@ set-minimum-stability:
     - git config --global user.email "ci@example.com"
     - git config --global user.name "GitLab CI"
   script:
-    - 'jq ''."minimum-stability" = "stable"'' composer.json | jq ''."prefer-stable" = true'' > composer.tmp.json '
+    - 'jq ''."minimum-stability" = "stable"'' composer.json | jq ''."prefer-stable" = true'' > composer.tmp.json'
     - mv composer.tmp.json composer.json
     - |
       if ! git diff --quiet -- composer.json; then
