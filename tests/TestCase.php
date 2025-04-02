@@ -20,7 +20,7 @@ abstract class TestCase extends Orchestra
     protected $enablesPackageDiscoveries = true;
     protected string $seeder = DatabaseSeeder::class;
 
-    protected function getEnvironmentSetUp($app)
+    protected function getEnvironmentSetUp($app): void
     {
 //        $loader = AliasLoader::getInstance();
 //        $migration = include __DIR__ . '/../workbench/database/migrations/0_create_test_approvable_model.php';
