@@ -1,6 +1,7 @@
 stages:
+  - build
   - test
-  - deploy
+  - publish
 
 always_pass:
   script:
@@ -12,3 +13,4 @@ include:
   - local: gitlab-ci/run_test.gitlab-ci.yml
   - local: gitlab-ci/intern_publish.gitlab-ci.yml
   - local: gitlab-ci/dev_publish.gitlab-ci.yml
+  - local: gitlab-ci/minimum-stability.gitlab-ci.yml
