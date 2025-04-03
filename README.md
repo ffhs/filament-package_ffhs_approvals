@@ -1,7 +1,7 @@
 # FFHS Approvals
 
 
-## Installation
+## Installation 
 
 You can install the package via composer:
 
