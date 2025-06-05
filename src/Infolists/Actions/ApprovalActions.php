@@ -8,6 +8,7 @@ use Ffhs\Approvals\Traits\Filament\HasApprovalKey;
 use Ffhs\Approvals\Traits\Filament\HasApprovalNotification;
 use Ffhs\Approvals\Traits\Filament\HasApprovalSingleStateAction;
 use Ffhs\Approvals\Traits\Filament\HasGroupLabels;
+use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
 use Ffhs\Approvals\Traits\Filament\HasResetApprovalAction;
 use Filament\Infolists\ComponentContainer;
 use Filament\Infolists\Components\Component;
@@ -28,13 +29,13 @@ class ApprovalActions extends Component
     use HasApprovalNotification;
     use HasApprovalSingleStateAction;
     use HasResetApprovalAction;
+    use HasRecordUsing;
 
     //use HasColumns; //ToDo implement
 
     protected bool|Closure $isFullWidth = false;
     protected string $view = 'filament-package_ffhs_approvals::infolist.approval-actions';
     protected bool|Closure $requiresConfirmation = false;
-    private ?Model $record = null;
 
     final public function __construct(string|Closure $approvalKey)
     {
@@ -51,20 +52,17 @@ class ApprovalActions extends Component
         $this->statePath($this->getApprovalKey());
     }
 
-    public function recordUsing(Closure|null|Model $record): static
+    public static function make(string|Closure $approvalKey): static
     {
-        $this->record = $record;
+        $static = app(static::class, ['approvalKey' => $approvalKey]);
+        $static->configure();
 
-        return $this;
+        return $static;
     }
 
     public function getRecord(): ?Model
     {
-        if (is_null($this->record)) {
-            return parent::getRecord();
-        }
-
-        return $this->evaluate($this->record, ['record' => parent::getRecord()]);
+        return $this->getRecordFromUsing();
     }
 
     public function fullWidth(bool|Closure $isFullWidth = true): static
@@ -85,19 +83,12 @@ class ApprovalActions extends Component
 
         foreach ($this->getApprovalFlow()->getApprovalBys() as $approvalBy) {
             $containers[$approvalBy->getName()] = ComponentContainer::make($this->getLivewire())
+                ->record($this->getRecordFromUsing())
                 ->parentComponent($this)
                 ->components($this->getApprovalByActions($approvalBy));
         }
 
         return $containers;
-    }
-
-    public static function make(string|Closure $approvalKey): static
-    {
-        $static = app(static::class, ['approvalKey' => $approvalKey]);
-        $static->configure();
-
-        return $static;
     }
 
     public function getApprovalByActions(ApprovalBy $approvalBy): array

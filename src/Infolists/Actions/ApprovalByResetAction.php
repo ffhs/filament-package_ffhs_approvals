@@ -7,13 +7,16 @@ use Ffhs\Approvals\Concerns\HandlesApprovals;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Traits\Filament\HasApprovalNotification;
+use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
 use Filament\Infolists\Components\Actions\Action;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class ApprovalByResetAction extends Action implements ApprovableByComponent
 {
     use HandlesApprovals;
     use HasApprovalNotification;
+    use HasRecordUsing;
 
     public function isHidden(): bool
     {
@@ -50,6 +53,11 @@ class ApprovalByResetAction extends Action implements ApprovableByComponent
         $this
             ->getRecord()
             ->refresh();
+    }
+
+    public function getRecord(): ?Model
+    {
+        return $this->getRecordFromUsing();
     }
 
     protected function setUp(): void
