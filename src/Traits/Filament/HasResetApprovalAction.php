@@ -30,6 +30,7 @@ trait HasResetApprovalAction
         $action = ApprovalByResetAction::make($approvalBy->getName() . '-reset_approval')
             ->notificationOnResetApproval(fn($lastStatus) => $this->sendNotificationOnResetApproval($lastStatus))
             ->disabled($this->isDisabled())
+            ->recordUsing(fn() => $this->getRecord())
             ->approvalKey($this->getApprovalKey())
             ->approvalBy($approvalBy)
             ->size($this->getSize())
