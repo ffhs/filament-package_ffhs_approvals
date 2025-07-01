@@ -20,6 +20,8 @@ powerful UI actions using Filament’s `Infolist` components.
 
 ## Screenshoots
 
+![](images/example_approvals.png)
+
 ## Installation
 
 You can install the package via composer:
