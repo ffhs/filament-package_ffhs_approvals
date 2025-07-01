@@ -26,12 +26,11 @@ use Spatie\Permission\Models\Role;
 
 class SimpleApprovalBy implements ApprovalBy
 {
-    use HasPermissions;
     use EvaluatesClosures;
     use CanBeAny;
     use HasRoles;
-    use CanBeAny;
     use HasAtLeast;
+    use HasPermissions;
     use HasApproveUsing;
     use HasRecordUsing;
 
