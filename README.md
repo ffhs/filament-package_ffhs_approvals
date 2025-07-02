@@ -4,8 +4,8 @@ This package allows you to easily implement approval workflows in your **Filamen
 define approval logic per model, specify who can approve (based on roles, permissions, or user logic), and expose
 powerful UI actions using Filament’s `Infolist` components.
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/ffhs/filament-package-ffhs_approvals)
-[![Total Downloads](https://img.shields.io/packagist/dt/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/ffhs/filament-package-ffhs_approvals)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/ffhs/filament-package_ffhs_approvals.svg?style=flat-square)](https://packagist.org/packages/ffhs/filament-package_ffhs_approvals)
+[![Total Downloads](https://img.shields.io/packagist/dt/ffhs/filament-package_ffhs_approvals.svg?style=flat-square)](https://packagist.org/packages/ffhs/filament-package_ffhs_approvals)
 
 ## Features:
 
