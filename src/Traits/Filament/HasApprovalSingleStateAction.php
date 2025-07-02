@@ -37,10 +37,10 @@ trait HasApprovalSingleStateAction
     ): ApprovalSingleStateAction {
         /** @var BackedEnum|HasApprovalStatuses $approvalCase */
 
-
         $action = ApprovalSingleStateAction::make($approvalBy->getName() . '-' . $approvalCase->value)
             ->needResetApprovalBeforeChange($this->isNeedResetApprovalBeforeChange())
             ->approvalFlow($this->getApprovalFlow())
+            ->recordUsing(fn() => $this->getRecord())
             ->requiresConfirmation($this->isRequiresConfirmation())
             ->color(function (ApprovalSingleStateAction $action) use ($approvalCase) {
                 return $this->getFinalCaseColor(

@@ -8,7 +8,6 @@ use Illuminate\Support\Collection;
 
 interface ApprovalBy
 {
-
     public function approved(Model|Approvable $approvable, string $key): ApprovalState;
 
     public function getApprovals(Model|Approvable $approvable, $key): Collection;

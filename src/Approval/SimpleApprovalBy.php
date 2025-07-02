@@ -16,6 +16,7 @@ use Ffhs\Approvals\Traits\Approval\HasApproveUsing;
 use Ffhs\Approvals\Traits\Approval\HasAtLeast;
 use Ffhs\Approvals\Traits\Approval\HasPermissions;
 use Ffhs\Approvals\Traits\Approval\HasRoles;
+use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
 use Filament\Support\Concerns\EvaluatesClosures;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User;
@@ -25,13 +26,13 @@ use Spatie\Permission\Models\Role;
 
 class SimpleApprovalBy implements ApprovalBy
 {
-    use HasPermissions;
     use EvaluatesClosures;
     use CanBeAny;
     use HasRoles;
-    use CanBeAny;
     use HasAtLeast;
+    use HasPermissions;
     use HasApproveUsing;
+    use HasRecordUsing;
 
     protected ?string $name = null;
 
@@ -43,6 +44,11 @@ class SimpleApprovalBy implements ApprovalBy
     public static function make(string $name): static
     {
         return app(static::class, ['name' => $name]);
+    }
+
+    public function getRecord(): ?Model
+    {
+        return $this->getRecordFromUsing();
     }
 
     public function canApprove(Approver|Model $approver, Approvable $approvable): bool

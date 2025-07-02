@@ -9,10 +9,12 @@ use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Traits\Filament\HasApprovalNotification;
+use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
 use Ffhs\Approvals\Traits\Filament\HasResetApprovalAction;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use UnitEnum;
 
@@ -21,6 +23,7 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
     use HandlesApprovals;
     use HasResetApprovalAction;
     use HasApprovalNotification;
+    use HasRecordUsing;
 
     protected ?HasApprovalStatuses $status = null;
 
@@ -74,6 +77,11 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
         $this
             ->getRecord()
             ->refresh();
+    }
+
+    public function getRecord(): ?Model
+    {
+        return $this->getRecordFromUsing();
     }
 
     public function isActionActive(): bool
