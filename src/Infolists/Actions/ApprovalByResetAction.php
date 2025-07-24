@@ -34,7 +34,12 @@ class ApprovalByResetAction extends Action implements ApprovableByComponent
         return $this
             ->getApprovalBy()
             ->getApprovals($this->getRecord(), $this->getApprovalKey())
-            ->first(); //ToDo only Person or Premission
+            ->first();
+    }
+
+    public function isDisabled(): bool
+    {
+        return ($this->evaluate($this->isDisabled) || $this->isHidden()) || !$this->canApprove();
     }
 
     public function resetByApproval(): void
