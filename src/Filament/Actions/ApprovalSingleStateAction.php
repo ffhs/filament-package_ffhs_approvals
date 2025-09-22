@@ -1,6 +1,6 @@
 <?php
 
-namespace Ffhs\Approvals\Infolists\Actions;
+namespace Ffhs\Approvals\Filament\Actions;
 
 use App\Models\User;
 use BackedEnum;
@@ -11,7 +11,7 @@ use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Traits\Filament\HasApprovalNotification;
 use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
 use Ffhs\Approvals\Traits\Filament\HasResetApprovalAction;
-use Filament\Infolists\Components\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
 use Illuminate\Database\Eloquent\Model;
