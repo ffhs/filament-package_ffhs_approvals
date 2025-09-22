@@ -2,9 +2,7 @@
 
 namespace Ffhs\Approvals\Traits\Approval;
 
-use BackedEnum;
 use Closure;
-use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 
 trait HasCategory
 {
@@ -21,5 +19,4 @@ trait HasCategory
     {
         return $this->evaluate($this->category);
     }
-
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ffhs\Approvals\Infolists\Actions;
+namespace Ffhs\Approvals\Filament\Actions;
 
 use Ffhs\Approvals\Contracts\ApprovalBy;
 use Ffhs\Approvals\Traits\Filament\HasApprovalFlowFromRecord;
@@ -10,9 +10,8 @@ use Ffhs\Approvals\Traits\Filament\HasApprovalSingleStateAction;
 use Ffhs\Approvals\Traits\Filament\HasGroupLabels;
 use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
 use Ffhs\Approvals\Traits\Filament\HasResetApprovalAction;
-use Filament\Infolists\ComponentContainer;
-use Filament\Infolists\Components\Component;
-use Filament\Infolists\Components\Concerns\EntanglesStateWithSingularRelationship;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Concerns\EntanglesStateWithSingularRelationship;
 use Filament\Support\Concerns\HasAlignment;
 use Filament\Support\Concerns\HasVerticalAlignment;
 use Illuminate\Database\Eloquent\Model;
@@ -34,7 +33,7 @@ class ApprovalActions extends Component
     //use HasColumns; //ToDo implement
 
     protected bool|Closure $isFullWidth = false;
-    protected string $view = 'filament-package_ffhs_approvals::infolist.approval-actions';
+    protected string $view = 'filament-package_ffhs_approvals::filament.approval-actions';
     protected bool|Closure $requiresConfirmation = false;
 
     final public function __construct(string|Closure $approvalKey)
@@ -77,18 +76,18 @@ class ApprovalActions extends Component
         return (bool)$this->evaluate($this->isFullWidth);
     }
 
-    public function getChildComponentContainers(bool $withHidden = false): array
+    public function getDefaultChildSchemas(): array
     {
-        $containers = [];
+        $schemas = [];
 
         foreach ($this->getApprovalFlow()->getApprovalBys() as $approvalBy) {
-            $containers[$approvalBy->getName()] = ComponentContainer::make($this->getLivewire())
+            $schemas[$approvalBy->getName()] = $this->makeChildSchema($approvalBy->getName())
+                ->components($this->getApprovalByActions($approvalBy))
                 ->record($this->getRecordFromUsing())
-                ->parentComponent($this)
-                ->components($this->getApprovalByActions($approvalBy));
+                ->parentComponent($this);
         }
 
-        return $containers;
+        return $schemas;
     }
 
     public function getApprovalByActions(ApprovalBy $approvalBy): array
@@ -126,7 +125,7 @@ class ApprovalActions extends Component
             return false;
         }
 
-        return sizeof($this->getApprovalFlow()->getApprovalBys()) > 0;
+        return count($this->getApprovalFlow()->getApprovalBys()) > 0;
     }
 
     public function isHidden(): bool

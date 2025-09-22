@@ -1,6 +1,6 @@
 <?php
 
-namespace Ffhs\Approvals\Infolists\Actions;
+namespace Ffhs\Approvals\Filament\Actions;
 
 use BackedEnum;
 use Ffhs\Approvals\Concerns\HandlesApprovals;
@@ -8,7 +8,7 @@ use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Traits\Filament\HasApprovalNotification;
 use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
-use Filament\Infolists\Components\Actions\Action;
+use Filament\Actions\Action;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 

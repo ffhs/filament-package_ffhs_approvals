@@ -8,7 +8,7 @@
 
                 <div class="pt-2 mb-4">
                     <x-filament::actions
-                        :actions="$getChildComponentContainer($approvalBys->getName())->getComponents()"
+                        :actions="$getChildSchema($approvalBys->getName())->getComponents()"
                         :alignment="$getAlignment()"
                         :full-width="$isFullWidth()"
                     />

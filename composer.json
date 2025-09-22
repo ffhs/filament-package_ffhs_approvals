@@ -1,5 +1,5 @@
 {
-    "version": "1.0.1",
+    "version": "2.0.0",
     "name": "ffhs/filament-package_ffhs_approvals",
     "description": "This is my package filament-package_ffhs_approvals",
     "keywords": [
@@ -28,7 +28,8 @@
     ],
     "require": {
         "php": "^8.2",
-        "filament/filament": "^3.0",
+        "laravel/framework": "^11|^12.0",
+        "filament/filament": "^4.0",
         "spatie/laravel-package-tools": "^1.15.0"
     },
     "require-dev": {
