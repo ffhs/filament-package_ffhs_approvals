@@ -125,7 +125,7 @@ class ApprovalActions extends Component
             return false;
         }
 
-        return sizeof($this->getApprovalFlow()->getApprovalBys()) > 0;
+        return count($this->getApprovalFlow()->getApprovalBys()) > 0;
     }
 
     public function isHidden(): bool
