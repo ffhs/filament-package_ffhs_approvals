@@ -5,7 +5,6 @@ namespace Ffhs\Approvals;
 use Ffhs\Approvals\Policies\ApprovalByPolicy;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
-use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
@@ -68,7 +67,6 @@ class ApprovalsServiceProvider extends PackageServiceProvider
         return $this;
     }
 
-
     public function packageBooted(): void
     {
         // Asset Registration
@@ -109,14 +107,7 @@ class ApprovalsServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            Css::make(
-                'filament-package_ffhs_approvals-styles',
-                __DIR__ . '/../resources/dist/filament-package_ffhs_approvals.css'
-            ),
-            Js::make(
-                'filament-package_ffhs_approvals-scripts',
-                __DIR__ . '/../resources/dist/filament-package_ffhs_approvals.js'
-            ),
+            Css::make('approvals', __DIR__ . '/../resources/dist/approvals.css')->loadedOnRequest(),
         ];
     }
 
