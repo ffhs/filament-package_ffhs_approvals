@@ -59,9 +59,9 @@ class ApprovalActions extends Component
         return $static;
     }
 
-    public function getRecord(): ?Model
+    public function getRecord(bool $withContainerRecord = true): ?Model
     {
-        return $this->getRecordFromUsing();
+        return $this->getRecordFromUsing() ?? parent::getRecord($withContainerRecord);
     }
 
     public function fullWidth(bool|Closure $isFullWidth = true): static
