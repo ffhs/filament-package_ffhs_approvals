@@ -60,7 +60,7 @@ class ApprovalByResetAction extends Action implements ApprovableByComponent
             ->refresh();
     }
 
-    public function getRecord(): ?Model
+    public function getRecord(bool $withDefault = true): ?Model
     {
         return $this->getRecordFromUsing();
     }

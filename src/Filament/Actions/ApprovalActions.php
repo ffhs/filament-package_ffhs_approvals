@@ -30,10 +30,12 @@ class ApprovalActions extends Component
     use HasResetApprovalAction;
     use HasRecordUsing;
 
+    protected string $view = 'filament-package_ffhs_approvals::filament.approval-actions';
+
+
     //use HasColumns; //ToDo implement
 
     protected bool|Closure $isFullWidth = false;
-    protected string $view = 'filament-package_ffhs_approvals::filament.approval-actions';
     protected bool|Closure $requiresConfirmation = false;
 
     final public function __construct(string|Closure $approvalKey)
@@ -96,13 +98,11 @@ class ApprovalActions extends Component
 
         foreach ($this->getApprovalStatuses() as $status) {
             $actions[] = $this
-                ->getApprovalSingleStateAction($approvalBy, $status)
-                ->toInfolistComponent();
+                ->getApprovalSingleStateAction($approvalBy, $status);
         }
 
         $actions[] = $this
-            ->getResetApprovalAction($approvalBy)
-            ->toInfolistComponent();
+            ->getResetApprovalAction($approvalBy);
 
         return $actions;
     }

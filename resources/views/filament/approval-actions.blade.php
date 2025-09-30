@@ -1,4 +1,6 @@
-<x-dynamic-component :component="$getEntryWrapperView()">
+<x-dynamic-component
+    :component="$getFieldWrapperView()"
+>
     <div>
         @foreach ($getApprovalFlow()->getApprovalBys() as $approvalBys)
             <div>
