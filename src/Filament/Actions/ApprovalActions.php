@@ -10,6 +10,7 @@ use Ffhs\Approvals\Traits\Filament\HasApprovalSingleStateAction;
 use Ffhs\Approvals\Traits\Filament\HasGroupLabels;
 use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
 use Ffhs\Approvals\Traits\Filament\HasResetApprovalAction;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Concerns\EntanglesStateWithSingularRelationship;
 use Filament\Support\Concerns\HasAlignment;
@@ -78,19 +79,37 @@ class ApprovalActions extends Component
         return (bool)$this->evaluate($this->isFullWidth);
     }
 
+
     public function getDefaultChildSchemas(): array
     {
         $schemas = [];
 
         foreach ($this->getApprovalFlow()->getApprovalBys() as $approvalBy) {
-            $schemas[$approvalBy->getName()] = $this->makeChildSchema($approvalBy->getName())
-                ->components($this->getApprovalByActions($approvalBy))
+            $schemas[$approvalBy->getName()] = $this
+                ->getChildSchema()
+                ->statePath($approvalBy->getName())
                 ->record($this->getRecordFromUsing())
-                ->parentComponent($this);
+                ->parentComponent($this)
+                ->components([
+                    Actions::make($this->getApprovalByActions($approvalBy))
+                        ->fullWidth($this->isFullWidth(...))
+                        ->alignment($this->getAlignment(...))
+                ])
+                ->getClone();
         }
 
         return $schemas;
     }
+
+    public function getChildSchemas(bool $withHidden = false): array
+    {
+        if ((!$withHidden) && $this->isHidden()) {
+            return [];
+        }
+
+        return $this->getDefaultChildSchemas();
+    }
+
 
     public function getApprovalByActions(ApprovalBy $approvalBy): array
     {
@@ -135,4 +154,6 @@ class ApprovalActions extends Component
         }
         return $this->getApprovalFlow()->isDisabled();
     }
+
+
 }
