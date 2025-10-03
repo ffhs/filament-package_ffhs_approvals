@@ -6,7 +6,7 @@ use BackedEnum;
 use Closure;
 use Ffhs\Approvals\Contracts\ApprovalBy;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
-use Ffhs\Approvals\Infolists\Actions\ApprovalSingleStateAction;
+use Ffhs\Approvals\Filament\Actions\ApprovalSingleStateAction;
 use Filament\Actions\Concerns\CanBeDisabled;
 use Filament\Actions\Concerns\HasSize;
 use UnitEnum;
@@ -45,7 +45,7 @@ trait HasApprovalSingleStateAction
             ->color(function (ApprovalSingleStateAction $action) use ($approvalCase) {
                 return $this->getFinalCaseColor(
                     $approvalCase,
-                    $action->getStatus(),
+                    $action->getApprovalStatus(),
                     $this->getApprovalFlow()
                 );
             })
@@ -68,6 +68,15 @@ trait HasApprovalSingleStateAction
 
 
         return $this->modifyApprovalSingleStateAction($action, $approvalBy, $approvalCase);
+    }
+
+    public function isDisabled(): bool
+    {
+        if ($this->evaluate($this->isDisabled)) {
+            return true;
+        }
+
+        return $this->isHidden();
     }
 
     public function modifyApprovalSingleStateAction(

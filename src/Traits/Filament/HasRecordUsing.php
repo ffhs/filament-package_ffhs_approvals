@@ -8,13 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 
 trait HasRecordUsing
 {
-
-    private null|Closure|Model $record = null;
+    private null|Closure|Model $recordUsing = null;
 
     public function getRecordFromUsing(): null|Model|Approvable
     {
-        return once(function () {
-            $recordUsing = $this->evaluate($this->record, ['record' => parent::getRecord()]);
+        return once(function (): null|Model|Approvable {
+            $recordUsing = $this->evaluate($this->recordUsing, ['record' => parent::getRecord()]);
             if (is_null($recordUsing)) {
                 return parent::getRecord();
             }
@@ -24,7 +23,7 @@ trait HasRecordUsing
 
     public function recordUsing(Closure|null|Model $record): static
     {
-        $this->record = $record;
+        $this->recordUsing = $record;
 
         return $this;
     }

@@ -4,7 +4,7 @@ namespace Ffhs\Approvals\Traits\Filament;
 
 use Closure;
 use Ffhs\Approvals\Contracts\ApprovalBy;
-use Ffhs\Approvals\Infolists\Actions\ApprovalByResetAction;
+use Ffhs\Approvals\Filament\Actions\ApprovalByResetAction;
 
 trait HasResetApprovalAction
 {
@@ -29,7 +29,7 @@ trait HasResetApprovalAction
     {
         $action = ApprovalByResetAction::make($approvalBy->getName() . '-reset_approval')
             ->notificationOnResetApproval(fn($lastStatus) => $this->sendNotificationOnResetApproval($lastStatus))
-            ->disabled($this->isDisabled())
+            ->disabled(fn() => $this->isDisabled())
             ->recordUsing(fn() => $this->getRecord())
             ->approvalKey($this->getApprovalKey())
             ->approvalBy($approvalBy)

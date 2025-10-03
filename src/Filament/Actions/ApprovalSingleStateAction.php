@@ -71,7 +71,7 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
         $this->getRecord()?->refresh();
     }
 
-    public function getRecord(): ?Model
+    public function getRecord(bool $withDefault = true): ?Model
     {
         return $this->getRecordFromUsing();
     }
