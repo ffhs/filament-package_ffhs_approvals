@@ -81,12 +81,14 @@ class SimpleApprovalBy implements ApprovalBy
     public function canApproveFromPermissions(Approver|Model $approver): bool
     {
         try {
-            if ($this->getRole() && method_exists($approver, 'hasRole')) {
+            if ($this->getRole()) {
+                /**@phpstan-ignore-next-line */
                 return $approver->hasRole($this->getRole());
             }
 
-            if ($this->getPermission() && method_exists($approver, 'hasPermissionTo')) {
+            if ($this->getPermission()) {
                 /** @var Role $approver */
+                /**@phpstan-ignore-next-line */
                 return $approver->hasPermissionTo($this->getPermission());
             }
         } catch (Error|Exception) {
