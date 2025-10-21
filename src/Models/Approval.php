@@ -3,7 +3,6 @@
 namespace Ffhs\Approvals\Models;
 
 use BackedEnum;
-use Eloquent;
 use Error;
 use Exception;
 use Ffhs\Approvals\Contracts\Approvable;
@@ -29,8 +28,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- * @property-read Approvable| Model|Eloquent|null $approvable
- * @property-read Model|Eloquent $approver
+ * @property-read Approvable| Model|null $approvable
+ * @property-read Model $approver
  * @method static Builder<static>|Approval newModelQuery()
  * @method static Builder<static>|Approval newQuery()
  * @method static Builder<static>|Approval onlyTrashed()
@@ -48,7 +47,8 @@ use Illuminate\Support\Carbon;
  * @method static Builder<static>|Approval whereUpdatedAt($value)
  * @method static Builder<static>|Approval withTrashed()
  * @method static Builder<static>|Approval withoutTrashed()
- * @mixin Eloquent
+ * @method static create(array $array)
+ * @mixin Model
  */
 class Approval extends Model
 {
@@ -95,6 +95,11 @@ class Approval extends Model
         };
     }
 
+    public function getApprovalFlow(string $key): ?ApprovalFlow
+    {
+        return $this->approvable->getApprovalFlow($key);
+    }
+
     protected function getStatus(): string|HasApprovalStatuses
     {
         $value = parent::__get('status');
@@ -111,11 +116,6 @@ class Approval extends Model
         } catch (Error|Exception) {
             return $value;
         }
-    }
-
-    public function getApprovalFlow(string $key): ?ApprovalFlow
-    {
-        return $this->approvable->getApprovalFlow($key);
     }
 
     protected function setStatus(BackedEnum|HasApprovalStatuses|string $status): void

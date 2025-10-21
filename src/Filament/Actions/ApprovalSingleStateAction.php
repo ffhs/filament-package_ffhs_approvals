@@ -3,7 +3,6 @@
 namespace Ffhs\Approvals\Filament\Actions;
 
 use App\Models\User;
-use BackedEnum;
 use Ffhs\Approvals\Concerns\HandlesApprovals;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
@@ -45,27 +44,29 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
 
         $isChange = !is_null($this->getApprovalStatus());
         $oldState = $this->getApprovalStatus();
-        /** @var HasApprovalStatuses|BackedEnum $state */
         $state = $this->getActionStatus();
 
         if ($isChange) {
             $this->getActionBoundApproval()?->delete();
         }
+        /** @phpstan-ignore-next-line */
+        $stateString = $state->value;
 
         Approval::create([
             'approver_id' => Auth::id(),
             'approver_type' => User::class,
+            /** @phpstan-ignore-next-line */
             'approvable_id' => $this->approvable()->id,
             'approvable_type' => $this->approvable()::class,
-            'status' => $state->value,
+            'status' => $stateString,
             'key' => $this->getApprovalKey(),
             'approval_by' => $this->getApprovalBy()->getName(),
         ]);
 
         if ($isChange) {
-            $this->sendNotificationOnChangeApproval($state->value, $oldState);
+            $this->sendNotificationOnChangeApproval($stateString, $oldState);
         } else {
-            $this->sendNotificationOnSetApproval($state->value);
+            $this->sendNotificationOnSetApproval($stateString);
         }
 
         $this->getRecord()?->refresh();

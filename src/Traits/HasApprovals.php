@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 /**
- * @property Collection approvals
+ * @property Collection<string|int, Approval> $approvals
  */
 trait HasApprovals
 {

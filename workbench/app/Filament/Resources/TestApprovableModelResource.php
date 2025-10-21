@@ -5,23 +5,23 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TestApprovableModelResource\Pages\IndexTestApprovableModel;
 use App\Filament\Resources\TestApprovableModelResource\Pages\ViewTestApprovableModel;
 use App\Models\TestApprovableModels;
-use Ffhs\Approvals\Infolists\Actions\ApprovalActions;
-use Filament\Infolists\Infolist;
+use Ffhs\Approvals\Filament\Actions\ApprovalActions;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 
 class TestApprovableModelResource extends Resource
 {
     protected static ?string $model = TestApprovableModels::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static bool $shouldRegisterNavigation = true;
 
     protected static ?string $slug = 'approvable';
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return $infolist->schema(
+        return $schema->schema(
             [
                 ApprovalActions::make('test-key-1')
             ]

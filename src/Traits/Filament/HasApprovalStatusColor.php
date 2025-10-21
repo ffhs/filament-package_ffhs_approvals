@@ -5,7 +5,6 @@ namespace Ffhs\Approvals\Traits\Filament;
 use BackedEnum;
 use Closure;
 use Ffhs\Approvals\Contracts\ApprovalFlow;
-use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Enums\ApprovalState;
 
 trait HasApprovalStatusColor
@@ -31,7 +30,7 @@ trait HasApprovalStatusColor
         if ($this->approvalStatusColors instanceof Closure) {
             $this->approvalStatusColors = [];
         }
-        if (!is_string($approvalState)) {
+        if ($approvalState instanceof BackedEnum) {
             $approvalState = $approvalState->value;
         }
 
@@ -56,7 +55,6 @@ trait HasApprovalStatusColor
             $approvalCase = $approvalCase->value;
         }
 
-        /** @var HasApprovalStatuses $statusEnum */
         $statusEnum = $flow->getStatusEnumClass();
         if (in_array($approvalCase, $statusEnum::getApprovedStatuses(), true)) {
             return $this->getApprovedStatusColor();

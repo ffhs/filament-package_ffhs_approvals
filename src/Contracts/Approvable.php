@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 
 /**
- * @property Collection approvals
- * @property int id
+ * @property Collection $approvals
+ * @property int $id
  */
 interface Approvable
 {
