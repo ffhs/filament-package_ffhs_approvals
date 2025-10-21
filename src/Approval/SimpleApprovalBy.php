@@ -88,7 +88,6 @@ class SimpleApprovalBy implements ApprovalBy
 
             if ($this->getPermission()) {
                 /** @var Role $approver */
-                /**@phpstan-ignore-next-line */
                 return $approver->hasPermissionTo($this->getPermission());
             }
         } catch (Error|Exception) {
