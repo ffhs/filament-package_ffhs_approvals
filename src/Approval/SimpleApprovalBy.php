@@ -8,7 +8,6 @@ use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\ApprovalBy;
 use Ffhs\Approvals\Contracts\ApprovalFlow;
 use Ffhs\Approvals\Contracts\Approver;
-use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Enums\ApprovalState;
 use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Traits\Approval\CanBeAny;
@@ -46,6 +45,13 @@ class SimpleApprovalBy implements ApprovalBy
         return app(static::class, ['name' => $name]);
     }
 
+    public function getRecordFromUsing(): null|Model|Approvable
+    {
+        return once(function (): null|Model|Approvable {
+            return $this->evaluate($this->recordUsing);
+        });
+    }
+
     public function getRecord(): ?Model
     {
         return $this->getRecordFromUsing();
@@ -75,11 +81,11 @@ class SimpleApprovalBy implements ApprovalBy
     public function canApproveFromPermissions(Approver|Model $approver): bool
     {
         try {
-            if ($this->getRole()) {
+            if ($this->getRole() && method_exists($approver, 'hasRole')) {
                 return $approver->hasRole($this->getRole());
             }
 
-            if ($this->getPermission()) {
+            if ($this->getPermission() && method_exists($approver, 'hasPermissionTo')) {
                 /** @var Role $approver */
                 return $approver->hasPermissionTo($this->getPermission());
             }
@@ -93,7 +99,6 @@ class SimpleApprovalBy implements ApprovalBy
     {
         $approvals = $this->getApprovals($approvable, $key);
         $flow = $this->getApprovalFlow($approvable, $key);
-        /** @var HasApprovalStatuses $statusClass */
         $statusClass = $flow?->getStatusEnumClass();
 
         $deniedStatuses = collect($statusClass::getDeniedStatuses())->map(fn($status) => $status->value);
@@ -123,8 +128,8 @@ class SimpleApprovalBy implements ApprovalBy
 
     public function getApprovals(Model|Approvable $approvable, $key): Collection
     {
-        return $approvable
-            ->approvals
+        /**@phpstan-ignore-next-line */
+        return $approvable->approvals
             ->where(fn(Approval $approval) => $approval->key === $key && $approval->approval_by === $this->getName());
     }
 

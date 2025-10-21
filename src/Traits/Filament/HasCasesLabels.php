@@ -14,7 +14,7 @@ trait HasCasesLabels
         if (!is_string($approvalCase)) {
             $approvalCase = $approvalCase->value;
         }
-        return $this->evaluate($this->getCaseLabels()[$approvalCase] ?? $approvalCase) ?? '';
+        return $this->evaluate($this->getCaseLabels()[$approvalCase] ?? $approvalCase);
     }
 
     public function getCaseLabels(): array

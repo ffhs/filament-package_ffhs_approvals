@@ -45,9 +45,10 @@ class ApprovalByResetAction extends Action implements ApprovableByComponent
     public function resetByApproval(): void
     {
         $lastStatus = $this->getActionApproval();
+        $status = $lastStatus?->status;
         $lastStatus?->delete();
-        $status = $lastStatus->status;
 
+        /** @phpstan-ignore-next-line */
         if ($status instanceof UnitEnum) {
             /** @var BackedEnum $status */
             $status = $status->value;

@@ -19,7 +19,10 @@ interface ApprovalFlow
     public function getCategory(): string;
 
     public function approvalStatus(array|Closure $approvalStatus): static;
-
+    
+    /**
+     * @return null|class-string<HasApprovalStatuses>
+     */
     public function getStatusEnumClass(): ?string;
 
     /**

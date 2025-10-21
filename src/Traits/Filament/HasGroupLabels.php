@@ -27,9 +27,12 @@ trait HasGroupLabels
 
     public function getGroupLabel(string $group): string
     {
-        return $this->evaluate($this->getGroupLabels()[$group] ?? $group) ?? $group;
+        return $this->evaluate($this->getGroupLabels()[$group] ?? $group);
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getGroupLabels(): array
     {
         if (!is_array($this->groupLabels)) {

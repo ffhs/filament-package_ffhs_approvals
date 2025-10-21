@@ -17,6 +17,9 @@ trait HasApprovalStatus
         return $this;
     }
 
+    /**
+     * @return null|class-string<HasApprovalStatuses>
+     */
     public function getStatusEnumClass(): ?string
     {
         if (empty($this->getApprovalStatus())) {
