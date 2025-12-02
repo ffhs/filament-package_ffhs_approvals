@@ -152,7 +152,13 @@ class ApprovalActions extends Component
         if (parent::isHidden()) {
             return true;
         }
-        return $this->getApprovalFlow()->isDisabled();
+
+        try {
+            return $this->getApprovalFlow()->isDisabled();
+        } catch (\RuntimeException $e) {
+            return true;
+        }
+
     }
 
 
