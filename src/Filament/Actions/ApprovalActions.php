@@ -5,10 +5,10 @@ namespace Ffhs\Approvals\Filament\Actions;
 use Closure;
 use Ffhs\Approvals\Contracts\ApprovalBy;
 use Ffhs\Approvals\FfhsApprovals;
+use Ffhs\Approvals\Traits\Filament\HasApprovalByLabels;
 use Ffhs\Approvals\Traits\Filament\HasApprovalFlowFromRecord;
 use Ffhs\Approvals\Traits\Filament\HasApprovalKey;
 use Ffhs\Approvals\Traits\Filament\HasApprovalSingleStateAction;
-use Ffhs\Approvals\Traits\Filament\HasGroupLabels;
 use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
 use Ffhs\Approvals\Traits\Filament\HasResetApprovalAction;
 use Filament\Actions\Action;
@@ -29,7 +29,7 @@ class ApprovalActions extends Component
     use EntanglesStateWithSingularRelationship;
     use HasAlignment;
     use HasVerticalAlignment;
-    use HasGroupLabels;
+    use HasApprovalByLabels;
     use HasApprovalKey;
     use HasApprovalFlowFromRecord;
     use HasResetApprovalAction;
@@ -76,7 +76,7 @@ class ApprovalActions extends Component
                     ->columns(fn() => $this->hasInlineLabel() ? 2 : 1)
                     ->schema([
                         TextEntry::make('title')
-                            ->state($this->getGroupLabel($approvalBy->getName())) //ToDO Rename getGroupLabel
+                            ->state($this->getApprovalByLabel($approvalBy))
                             ->alignment($this->getAlignment(...))
                             ->hiddenLabel(),
                         Actions::make([])
@@ -126,7 +126,6 @@ class ApprovalActions extends Component
 
         return $actions;
     }
-
 
     protected function setUp(): void
     {

@@ -13,6 +13,7 @@ use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Traits\Approval\CanBeAny;
 use Ffhs\Approvals\Traits\Approval\HasApproveUsing;
 use Ffhs\Approvals\Traits\Approval\HasAtLeast;
+use Ffhs\Approvals\Traits\Approval\HasLabel;
 use Ffhs\Approvals\Traits\Approval\HasPermissions;
 use Ffhs\Approvals\Traits\Approval\HasRoles;
 use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
@@ -32,6 +33,7 @@ class SimpleApprovalBy implements ApprovalBy
     use HasPermissions;
     use HasApproveUsing;
     use HasRecordUsing;
+    use HasLabel;
 
     protected ?string $name = null;
 
