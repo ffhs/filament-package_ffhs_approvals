@@ -4,6 +4,7 @@ namespace Ffhs\Approvals\Filament\Actions;
 
 use Ffhs\Approvals\Concerns\HandlesApprovals;
 use Ffhs\Approvals\Contracts\ApprovableByComponent;
+use Ffhs\Approvals\FfhsApprovals;
 use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Traits\Filament\HasApprovalNotification;
 use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
@@ -63,10 +64,10 @@ class ApprovalByResetAction extends Action implements ApprovableByComponent
 
         $this
             ->icon('heroicon-m-arrow-uturn-left')
-            ->tooltip('Status Zurücksetzen')
+            ->tooltip(FfhsApprovals::__('approval_actions.tooltips.reset_approval'))
+            ->action($this->resetByApproval(...))
             ->color('gray')
-            ->label('')
-            ->action($this->resetByApproval(...));
+            ->hiddenLabel();
     }
 
     protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
