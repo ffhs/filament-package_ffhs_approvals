@@ -79,4 +79,4 @@ update-on-github:
     - git remote add github "git@github.com:${GITHUB_REPO}.git"
 
   script:
-    - GIT_SSH_COMMAND="ssh -o BatchMode=yes" git push github HEAD:main --force
+    - GIT_SSH_COMMAND="ssh -o BatchMode=yes" git push github HEAD:refs/heads/${CI_COMMIT_BRANCH} --force
