@@ -35,8 +35,6 @@ class ApprovalActions extends Component
     use HasResetApprovalAction;
     use HasRecordUsing;
 
-    //use HasColumns; //ToDo implement
-
     protected string $view = 'filament-package_ffhs_approvals::filament.approval-actions';
 
     protected bool|Closure $isFullWidth = false;
