@@ -76,7 +76,7 @@ class ApprovalActions extends Component
                     ->columns(fn() => $this->hasInlineLabel() ? 2 : 1)
                     ->schema([
                         TextEntry::make('title')
-                            ->state($this->getApprovalByActions($approvalBy))
+                            ->state($this->getApprovalByLabel($approvalBy))
                             ->alignment($this->getAlignment(...))
                             ->hiddenLabel(),
                         Actions::make([])
@@ -102,6 +102,13 @@ class ApprovalActions extends Component
         return $this->getRecordFromUsing() ?? parent::getRecord($withContainerRecord);
     }
 
+    public function fullWidth(bool|Closure $isFullWidth = true): static
+    {
+        $this->isFullWidth = $isFullWidth;
+
+        return $this;
+    }
+
     /**
      * @param ApprovalBy $approvalBy
      * @return Action[]
@@ -118,13 +125,6 @@ class ApprovalActions extends Component
         $actions[] = $this->getResetApprovalAction($approvalBy);
 
         return $actions;
-    }
-
-    public function fullWidth(bool|Closure $isFullWidth = true): static
-    {
-        $this->isFullWidth = $isFullWidth;
-
-        return $this;
     }
 
     protected function setUp(): void
