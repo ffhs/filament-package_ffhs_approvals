@@ -11,11 +11,10 @@ use Ffhs\Approvals\Traits\Filament\HasApprovalNotification;
 use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
 use Ffhs\Approvals\Traits\Filament\HasResetApprovalAction;
 use Filament\Actions\Action;
-use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use UnitEnum;
+use RuntimeException;
 
 class ApprovalSingleStateAction extends Action implements ApprovableByComponent
 {
@@ -24,33 +23,30 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
     use HasApprovalNotification;
     use HasRecordUsing;
 
-    protected ?HasApprovalStatuses $approvalStatus = null;
+
+    protected HasApprovalStatuses $actionCase;
+    protected null|HasApprovalStatuses $approvalStatus = null;
 
 
     public function changeApproval(): void
     {
         if ($this->isActionActive()) {
+            $oldState = $this->getApprovalStatus()->value;
             $this->getActionBoundApproval()?->delete();
-
-            Notification::make()
-                ->title('remove approval') //ToDo Translate and add text state
-                ->success()
-                ->send();
-
+            $this->sendNotificationOnRemoveApproval($oldState);
             $this->getRecord()?->refresh();
 
             return;
         }
 
-        $isChange = !is_null($this->getApprovalStatus());
+        $isChanged = !is_null($this->getApprovalStatus());
         $oldState = $this->getApprovalStatus();
-        $state = $this->getActionStatus();
+        $state = $this->getActionCaste();
 
-        if ($isChange) {
+        if ($isChanged) {
             $this->getActionBoundApproval()?->delete();
         }
-        /** @phpstan-ignore-next-line */
-        $stateString = $state->value;
+        $stateString = $state?->value;
 
         Approval::create([
             'approver_id' => Auth::id(),
@@ -63,8 +59,12 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
             'approval_by' => $this->getApprovalBy()->getName(),
         ]);
 
-        if ($isChange) {
-            $this->sendNotificationOnChangeApproval($stateString, $oldState);
+        if ($isChanged) {
+            if (is_null($oldState) || is_null($state)) {
+                throw new RuntimeException('Unexpectet error happend');
+            }
+
+            $this->sendNotificationOnChangeApproval($state, $oldState);
         } else {
             $this->sendNotificationOnSetApproval($stateString);
         }
@@ -72,17 +72,12 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
         $this->getRecord()?->refresh();
     }
 
-    public function getRecord(bool $withDefault = true): ?Model
-    {
-        return $this->getRecordFromUsing();
-    }
-
     public function isActionActive(): bool
     {
-        return $this->getApprovalStatus() === $this->getActionStatus();
+        return $this->getApprovalStatus() === $this->getActionCaste();
     }
 
-    public function getApprovalStatus(): UnitEnum|string|null
+    public function getApprovalStatus(): HasApprovalStatuses|null
     {
         return $this->getActionBoundApproval()?->status;
     }
@@ -96,14 +91,15 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
 //            }); //ToDo Later for at least
     }
 
-    /**
-     * The Sate which the Action is bound, as example the 'approve' because it's the approval action
-     *
-     * @return HasApprovalStatuses|null
-     */
-    public function getActionStatus(): ?HasApprovalStatuses
+
+    public function getActionCaste(): null|HasApprovalStatuses
     {
         return $this->approvalStatus;
+    }
+
+    public function getRecord(bool $withDefault = true): ?Model
+    {
+        return $this->getRecordFromUsing();
     }
 
     public function actionStatus(HasApprovalStatuses $approvalStatus): static
@@ -137,7 +133,7 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
             return false;
         }
 
-        return $this->getApprovalStatus() !== $this->getActionStatus();
+        return $this->getApprovalStatus() !== $this->getActionCaste();
     }
 
     protected function setUp(): void
@@ -148,4 +144,20 @@ class ApprovalSingleStateAction extends Action implements ApprovableByComponent
         $this->action($this->changeApproval(...));
         $this->iconPosition(IconPosition::After);
     }
+
+    protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
+    {
+        return match ($parameterName) {
+            'actionCase' => [$this->getActionCaste()],
+            'actionCaseLabel' => [$this->getActionCaste()?->getCaseLabel($this->getActionCaste())],
+
+            'state', 'status' => [$this->getApprovalStatus()],
+            'approvalStatusLabel' => [$this->getApprovalStatus()?->getCaseLabel($this->getApprovalStatus())],
+            'approvalFlow' => [$this->getApprovalFlow()],
+            'approvalBy' => [$this->getApprovalBy()],
+            default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
+        };
+    }
+
+
 }

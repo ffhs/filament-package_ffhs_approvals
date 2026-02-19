@@ -28,7 +28,7 @@ class SimpleApprovalFlow implements ApprovalFlow
         return $approvalFlow;
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
     }
 

@@ -2,15 +2,19 @@
 
 namespace Ffhs\Approvals\Traits\Approval;
 
-use BackedEnum;
 use Closure;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 
 trait HasApprovalStatus
 {
-    protected array|Closure $approvalStatus;
+    /** @var HasApprovalStatuses[]|Closure|class-string<HasApprovalStatuses> */
+    protected array|Closure|string $approvalStatus;
 
-    public function approvalStatus(array|Closure $approvalStatus): static
+    /**
+     * @param HasApprovalStatuses[]|Closure|class-string<HasApprovalStatuses> $approvalStatus
+     * @return $this
+     */
+    public function approvalStatus(array|Closure|string $approvalStatus): static
     {
         $this->approvalStatus = $approvalStatus;
 
@@ -22,20 +26,30 @@ trait HasApprovalStatus
      */
     public function getStatusEnumClass(): ?string
     {
-        if (empty($this->getApprovalStatus())) {
+        $approvalStatus = $this->evaluate($this->approvalStatus);
+        if (empty($approvalStatus)) {
             return null;
         }
 
-        return $this->getApprovalStatus()[0]::class;
+        if (is_string($approvalStatus)) {
+            return $approvalStatus;
+        }
+
+        return $approvalStatus[0]::class;
     }
 
 
     /**
-     * @return array<BackedEnum|HasApprovalStatuses>
+     * @return HasApprovalStatuses[]
      */
     public function getApprovalStatus(): array
     {
-        return $this->evaluate($this->approvalStatus);
+        $approvalStatus = $this->evaluate($this->approvalStatus);
+
+        /**@phpstan-ignore-next-line */
+        return is_string($approvalStatus)
+            ? $approvalStatus::cases
+            : $approvalStatus;
     }
 
 }

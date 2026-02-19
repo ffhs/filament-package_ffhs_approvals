@@ -4,6 +4,7 @@ namespace Ffhs\Approvals\Traits\Filament;
 
 use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\ApprovalFlow;
+use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use RuntimeException;
 use Symfony\Component\ErrorHandler\Error\UndefinedFunctionError;
 
@@ -15,6 +16,9 @@ trait HasApprovalFlowFromRecord
 {
     private ApprovalFlow|null $cachedApprovalFlow = null;
 
+    /**
+     * @return HasApprovalStatuses[]
+     */
     public function getApprovalStatuses(): array
     {
         return $this->getApprovalFlow()->getApprovalStatus();

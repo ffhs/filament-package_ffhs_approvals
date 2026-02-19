@@ -2,56 +2,91 @@
 
 namespace Ffhs\Approvals\Filament\Actions;
 
+use Closure;
 use Ffhs\Approvals\Contracts\ApprovalBy;
+use Ffhs\Approvals\FfhsApprovals;
 use Ffhs\Approvals\Traits\Filament\HasApprovalFlowFromRecord;
 use Ffhs\Approvals\Traits\Filament\HasApprovalKey;
-use Ffhs\Approvals\Traits\Filament\HasApprovalNotification;
 use Ffhs\Approvals\Traits\Filament\HasApprovalSingleStateAction;
 use Ffhs\Approvals\Traits\Filament\HasGroupLabels;
 use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
 use Ffhs\Approvals\Traits\Filament\HasResetApprovalAction;
+use Filament\Actions\Action;
+use Filament\Actions\Concerns\CanRequireConfirmation;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Concerns\EntanglesStateWithSingularRelationship;
+use Filament\Schemas\Components\Group;
 use Filament\Support\Concerns\HasAlignment;
 use Filament\Support\Concerns\HasVerticalAlignment;
 use Illuminate\Database\Eloquent\Model;
-use Mockery\Matcher\Closure;
 
 class ApprovalActions extends Component
 {
+    use HasApprovalSingleStateAction;
+    use CanRequireConfirmation;
+    use EntanglesStateWithSingularRelationship;
     use HasAlignment;
     use HasVerticalAlignment;
     use HasGroupLabels;
     use HasApprovalKey;
     use HasApprovalFlowFromRecord;
-    use EntanglesStateWithSingularRelationship;
-    use HasApprovalNotification;
-    use HasApprovalSingleStateAction;
     use HasResetApprovalAction;
     use HasRecordUsing;
 
-    protected string $view = 'filament-package_ffhs_approvals::filament.approval-actions';
-
-
     //use HasColumns; //ToDo implement
+
+    protected string $view = 'filament-package_ffhs_approvals::filament.approval-actions';
 
     protected bool|Closure $isFullWidth = false;
     protected bool|Closure $requiresConfirmation = false;
 
     final public function __construct(string|Closure $approvalKey)
     {
-        $this->notificationOnResetApproval(
-            fn(ApprovalSingleStateAction $action) => 'Approval is reset ' . $action->getApprovalBy()->getName()
-        );
-        $this->notificationOnChangeApproval(
-            fn($lastStatus, $status) => 'change approval from ' . $lastStatus . ' to ' . $status
-        );
-        $this->notificationOnSetApproval(
-            fn($status) => 'set approval to ' . $status
-        );
-        $this->approvalKey($approvalKey);
-        $this->statePath($this->getApprovalKey());
+        $this->approvalKey = $approvalKey;
+    }
+
+    public function isVisible(): bool
+    {
+        if ($this->getApprovalFlow()->isDisabled()) {
+            return false;
+        }
+
+        return parent::isVisible();
+    }
+
+    public function isFullWidth(): bool
+    {
+        return (bool)$this->evaluate($this->isFullWidth);
+    }
+
+    /**
+     * @return Component[]
+     */
+    protected function getActionsComponents(): array
+    {
+        $actions = collect($this->getApprovalFlow()->getApprovalBys())
+            ->map(function (ApprovalBy $approvalBy) {
+                return Group::make()
+                    /** @phpstan-ignore-next-line */
+                    ->model($this->getRecord())
+                    ->statePath($approvalBy->getName())
+                    ->columnSpanFull()
+                    ->columns(fn() => $this->hasInlineLabel() ? 2 : 1)
+                    ->schema([
+                        TextEntry::make('title')
+                            ->state($this->getGroupLabel($approvalBy->getName())) //ToDO Rename getGroupLabel
+                            ->alignment($this->getAlignment(...))
+                            ->hiddenLabel(),
+                        Actions::make([])
+                            ->fullWidth($this->isFullWidth(...))
+                            ->alignment($this->getAlignment(...))
+                            ->actions($this->getApprovalByActions($approvalBy))
+                    ]);
+            });
+
+        return [...$actions];
     }
 
     public static function make(string|Closure $approvalKey): static
@@ -74,43 +109,10 @@ class ApprovalActions extends Component
         return $this;
     }
 
-    public function isFullWidth(): bool
-    {
-        return (bool)$this->evaluate($this->isFullWidth);
-    }
-
-
-    public function getDefaultChildSchemas(): array
-    {
-        $schemas = [];
-
-        foreach ($this->getApprovalFlow()->getApprovalBys() as $approvalBy) {
-            $schemas[$approvalBy->getName()] = $this
-                ->getChildSchema()
-                ->statePath($approvalBy->getName())
-                ->record($this->getRecordFromUsing())
-                ->parentComponent($this)
-                ->components([
-                    Actions::make($this->getApprovalByActions($approvalBy))
-                        ->fullWidth($this->isFullWidth(...))
-                        ->alignment($this->getAlignment(...))
-                ])
-                ->getClone();
-        }
-
-        return $schemas;
-    }
-
-    public function getChildSchemas(bool $withHidden = false): array
-    {
-        if ((!$withHidden) && $this->isHidden()) {
-            return [];
-        }
-
-        return $this->getDefaultChildSchemas();
-    }
-
-
+    /**
+     * @param ApprovalBy $approvalBy
+     * @return Action[]
+     */
     public function getApprovalByActions(ApprovalBy $approvalBy): array
     {
         $actions = [];
@@ -120,46 +122,58 @@ class ApprovalActions extends Component
                 ->getApprovalSingleStateAction($approvalBy, $status);
         }
 
-        $actions[] = $this
-            ->getResetApprovalAction($approvalBy);
+        $actions[] = $this->getResetApprovalAction($approvalBy);
 
         return $actions;
     }
 
-    public function requiresConfirmation(bool|Closure $requiresConfirmation = true): static
+
+    protected function setUp(): void
     {
-        $this->requiresConfirmation = $requiresConfirmation;
+        $this->statePath($this->getApprovalKey());
+        $this->schema($this->getActionsComponents(...));
 
-        return $this;
+        $this->notificationOnResetApproval(
+            fn(ApprovalBy $approvalBy) => FfhsApprovals::__(
+                'approval_actions.notifications.reset_approval',
+                ['approval_by' => $approvalBy->getName()]
+            )
+        );
+
+        $this->casesNotificationOnRemoveApproval(
+            fn(string $status, string $statusLabel) => [
+                $status => FfhsApprovals::__(
+                    'approval_actions.notifications.remove_approval',
+                    [
+                        'status' => $statusLabel,
+                        'status_label' => $statusLabel,
+                    ]
+                )
+            ]
+        );
+
+        $this->casesNotificationOnChangeApproval(
+            fn(string $status, string $statusLabel, string $lastStatus, string $lastStatusLabel) => [
+                $status => FfhsApprovals::__(
+                    'approval_actions.notifications.update_approval_to',
+                    [
+                        'status' => $statusLabel,
+                        'status_label' => $statusLabel,
+                        'last_status' => $lastStatus,
+                        'last_status_label' => $lastStatusLabel
+                    ]
+                )
+            ]
+        );
+
+        $this->casesNotificationOnSetApproval(
+            fn(string $status, string $statusLabel) => [
+                $status => FfhsApprovals::__(
+                    'approval_actions.notifications.set_approval_to',
+                    ['status' => $statusLabel, 'status_label' => $statusLabel]
+                )
+            ]
+        );
     }
-
-    public function isRequiresConfirmation(): bool
-    {
-        return $this->evaluate($this->requiresConfirmation);
-    }
-
-    public function hasChildComponentContainer(bool $withHidden = false): bool
-    {
-        if (!$withHidden && $this->isHidden()) {
-            return false;
-        }
-
-        return count($this->getApprovalFlow()->getApprovalBys()) > 0;
-    }
-
-    public function isHidden(): bool
-    {
-        if (parent::isHidden()) {
-            return true;
-        }
-
-        try {
-            return $this->getApprovalFlow()->isDisabled();
-        } catch (\RuntimeException $e) {
-            return true;
-        }
-
-    }
-
 
 }

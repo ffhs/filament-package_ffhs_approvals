@@ -3,6 +3,7 @@
 namespace Ffhs\Approvals\Contracts;
 
 use Closure;
+use Ffhs\Approvals\Models\Approval;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
@@ -20,5 +21,8 @@ interface ApprovableByComponent
 
     public function canApprove(): bool;
 
+    /**
+     * @return Collection<int, Approval>
+     */
     public function getBoundApprovals(): Collection;
 }

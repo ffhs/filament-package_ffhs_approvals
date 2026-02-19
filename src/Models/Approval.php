@@ -2,10 +2,8 @@
 
 namespace Ffhs\Approvals\Models;
 
-use BackedEnum;
 use Error;
 use Exception;
-use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\ApprovalFlow;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,22 +12,21 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
+
 /**
- *
- *
  * @property int $id
  * @property string $key
  * @property string|null $approvable_type
  * @property int|null $approvable_id
- * @property string $status
+ * @property HasApprovalStatuses $status
  * @property string $approval_by
  * @property string $approver_type
  * @property int $approver_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- * @property-read Approvable| Model|null $approvable
- * @property-read Model $approver
+ * @property-read \Illuminate\Database\Eloquent\Model|null $approvable
+ * @property-read \Illuminate\Database\Eloquent\Model $approver
  * @method static Builder<static>|Approval newModelQuery()
  * @method static Builder<static>|Approval newQuery()
  * @method static Builder<static>|Approval onlyTrashed()
@@ -45,10 +42,9 @@ use Illuminate\Support\Carbon;
  * @method static Builder<static>|Approval whereKey($value)
  * @method static Builder<static>|Approval whereStatus($value)
  * @method static Builder<static>|Approval whereUpdatedAt($value)
- * @method static Builder<static>|Approval withTrashed()
+ * @method static Builder<static>|Approval withTrashed(bool $withTrashed = true)
  * @method static Builder<static>|Approval withoutTrashed()
- * @method static create(array $array)
- * @mixin Model
+ * @mixin \Eloquent
  */
 class Approval extends Model
 {
@@ -69,11 +65,17 @@ class Approval extends Model
         return config('filament-package_ffhs_approvals.tables.approvals', 'approvals');
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function approver(): MorphTo
     {
         return $this->morphTo('approver');
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function approvable(): MorphTo
     {
         return $this->morphTo('approvable');
@@ -95,11 +97,6 @@ class Approval extends Model
         };
     }
 
-    public function getApprovalFlow(string $key): ?ApprovalFlow
-    {
-        return $this->approvable->getApprovalFlow($key);
-    }
-
     protected function getStatus(): string|HasApprovalStatuses
     {
         $value = parent::__get('status');
@@ -118,7 +115,13 @@ class Approval extends Model
         }
     }
 
-    protected function setStatus(BackedEnum|HasApprovalStatuses|string $status): void
+    public function getApprovalFlow(string $key): ?ApprovalFlow
+    {
+        /**@phpstan-ignore-next-line */
+        return $this->approvable->getApprovalFlow($key);
+    }
+
+    protected function setStatus(HasApprovalStatuses|string $status): void
     {
         if (is_string($status)) {
             parent::__set('status', $status);
