@@ -20,6 +20,8 @@ interface ApprovalBy
 
     public function getName(): string;
 
+    public function getLabel(): ?string;
+
     public function getApprovalFlow(Model|Approvable $approvable, string $key): ?ApprovalFlow;
 
     public function canApproveFromPermissions(Approver|Model $approver): bool;
