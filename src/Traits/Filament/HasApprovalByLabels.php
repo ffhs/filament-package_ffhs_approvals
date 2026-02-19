@@ -11,7 +11,7 @@ trait HasApprovalByLabels
     protected array|Closure $approvalByLabels = [];
 
     /**
-     * @param array<string, string|Closure|null>|Closure $approvalActionsGroupLabel
+     * @param array<string, string|Closure|null>|Closure $approvalByLabels
      * @return $this
      */
     public function approvalByLabels(array|Closure $approvalByLabels): static
