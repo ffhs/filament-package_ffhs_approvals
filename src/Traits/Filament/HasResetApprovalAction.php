@@ -8,8 +8,11 @@ use Ffhs\Approvals\Filament\Actions\ApprovalByResetAction;
 
 trait HasResetApprovalAction
 {
+    use HasApprovalResetNotification;
+
     private Closure|bool $needResetApprovalBeforeChange = false;
     private Closure|null $modifyResetApprovalActionUsing = null;
+    private Closure|bool $resetRequiresConfirmation = false;
 
     public function needResetApprovalBeforeChange(Closure|bool $needResetApprovalBeforeChange = true): static
     {
@@ -25,23 +28,24 @@ trait HasResetApprovalAction
         return $this;
     }
 
+    public function isResetRequiresConfirmation(): bool
+    {
+        return $this->evaluate($this->resetRequiresConfirmation) ?? false;
+    }
+
     public function getResetApprovalAction(ApprovalBy $approvalBy): ApprovalByResetAction
     {
         $action = ApprovalByResetAction::make($approvalBy->getName() . '-reset_approval')
-            ->notificationOnResetApproval(fn($lastStatus) => $this->sendNotificationOnResetApproval($lastStatus))
-            ->disabled(fn() => $this->isDisabled())
-            ->recordUsing(fn() => $this->getRecord())
+            ->requiresConfirmation($this->isResetRequiresConfirmation(...))
+            ->notificationOnResetApproval($this->notificationOnResetApproval)
+            ->visible($this->isNeedResetApprovalBeforeChange(...))
+            ->disabled($this->isDisabled(...))
+            ->recordUsing($this->getRecord(...))
             ->approvalKey($this->getApprovalKey())
             ->approvalBy($approvalBy)
-            ->size($this->getSize())
-            ->visible(fn() => $this->isNeedResetApprovalBeforeChange());
+            ->size($this->getSize());
 
         return $this->modifyResetApprovalAction($action, $approvalBy);
-    }
-
-    public function isNeedResetApprovalBeforeChange(): bool
-    {
-        return $this->evaluate($this->needResetApprovalBeforeChange);
     }
 
     public function modifyResetApprovalAction(
@@ -63,5 +67,10 @@ trait HasResetApprovalAction
                 ApprovalBy::class => $approvalBy,
             ]
         );
+    }
+
+    public function isNeedResetApprovalBeforeChange(): bool
+    {
+        return $this->evaluate($this->needResetApprovalBeforeChange);
     }
 }

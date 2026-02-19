@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 trait HasRecordUsing
 {
-    private null|Closure|Model $recordUsing = null;
+    private null|Closure|Model|Approvable $recordUsing = null;
 
     public function getRecordFromUsing(): null|Model|Approvable
     {
@@ -21,7 +21,7 @@ trait HasRecordUsing
         });
     }
 
-    public function recordUsing(Closure|null|Model $record): static
+    public function recordUsing(Closure|null|Model|Approvable $record): static
     {
         $this->recordUsing = $record;
 

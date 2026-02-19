@@ -2,20 +2,25 @@
 
 namespace Ffhs\Approvals\Traits\Filament;
 
-use BackedEnum;
 use Closure;
-use Ffhs\Approvals\Contracts\ApprovalFlow;
+use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Enums\ApprovalState;
+use Filament\Support\Colors\Color;
 
 trait HasApprovalStatusColor
 {
-    private array|Closure $approvalStatusColors = [
+    /**  @var array<string, mixed>|Closure|string[] */
+    protected array|Closure $approvalStatusColors = [
         'approved' => 'success',
         'denied' => 'danger',
         'pending' => 'info',
         'open' => 'white',
     ];
 
+    /**
+     * @param array<string, mixed>|Closure|string[] $statusCategoryColors
+     * @return $this
+     */
     public function approvalStatusColors(array|Closure $statusCategoryColors): static
     {
         $this->approvalStatusColors = $statusCategoryColors;
@@ -23,48 +28,30 @@ trait HasApprovalStatusColor
         return $this;
     }
 
+    /**
+     * @param ApprovalState $approvalState
+     * @param mixed|Closure $statusCategoryColors
+     * @return $this
+     */
     public function approvalStatusColor(
-        BackedEnum|ApprovalState $approvalState,
-        array|Closure $statusCategoryColors
+        ApprovalState $approvalState,
+        mixed $statusCategoryColors
     ): static {
-        if ($this->approvalStatusColors instanceof Closure) {
-            $this->approvalStatusColors = [];
-        }
-        if ($approvalState instanceof BackedEnum) {
-            $approvalState = $approvalState->value;
-        }
-
-        $this->approvalStatusColors[$approvalState] = $statusCategoryColors;
-
+        $this->approvalStatusColors[$approvalState->value] = $statusCategoryColors;
         return $this;
     }
 
-    public function getApprovalStatusColors(): array
+    public function getApprovalStatusColor(HasApprovalStatuses $actionCase): mixed
     {
-        if (is_array($this->approvalStatusColors)) {
-            $this->approvalStatusColors = $this->evaluate($this->approvalStatusColors);
-        }
-
-        return $this->approvalStatusColors;
-    }
-
-
-    public function getApprovalStatusColor(BackedEnum|string $approvalCase, ApprovalFlow $flow): mixed
-    {
-        if (!is_string($approvalCase)) {
-            $approvalCase = $approvalCase->value;
-        }
-
-        $statusEnum = $flow->getStatusEnumClass();
-        if (in_array($approvalCase, $statusEnum::getApprovedStatuses(), true)) {
+        if (in_array($actionCase, $actionCase::getApprovedStatuses(), true)) {
             return $this->getApprovedStatusColor();
         }
 
-        if (in_array($approvalCase, $statusEnum::getDeniedStatuses(), true)) {
+        if (in_array($actionCase, $actionCase::getDeniedStatuses(), true)) {
             return $this->getDeniedStatusColor();
         }
 
-        if (in_array($approvalCase, $statusEnum::getPendingStatuses(), true)) {
+        if (in_array($actionCase, $actionCase::getPendingStatuses(), true)) {
             return $this->getPendingStatusColor();
         }
 
@@ -73,22 +60,47 @@ trait HasApprovalStatusColor
 
     public function getApprovedStatusColor(): mixed
     {
-        return $this->statusCategoryColors['approved'] ?? 'green';
+        $colorRaw = $this->getApprovalStatusColors()['approved'] ?? 'success';
+
+        /**@phpstan-ignore-next-line */
+        return $this->evaluate($colorRaw) ?? 'success';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getApprovalStatusColors(): array
+    {
+        if (is_array($this->approvalStatusColors)) {
+            $this->approvalStatusColors = $this->evaluate($this->approvalStatusColors);
+        }
+
+        /**@phpstan-ignore-next-line */
+        return $this->approvalStatusColors ?? [];
     }
 
     public function getDeniedStatusColor(): mixed
     {
-        return $this->statusCategoryColors['denied'] ?? 'red';
+        $colorRaw = $this->getApprovalStatusColors()['denied'] ?? 'danger';
+
+        /**@phpstan-ignore-next-line */
+        return $this->evaluate($colorRaw) ?? 'danger';
     }
 
     public function getPendingStatusColor(): mixed
     {
-        return $this->statusCategoryColors['pending'] ?? 'blue';
+        $colorRaw = $this->getApprovalStatusColors()['pending'] ?? Color::Blue;
+
+        /**@phpstan-ignore-next-line */
+        return $this->evaluate($colorRaw) ?? Color::Blue;
     }
 
     public function getOpenStatusColor(): mixed
     {
-        return $this->statusCategoryColors['open'] ?? 'white';
+        $colorRaw = $this->getApprovalStatusColors()['open'] ?? 'gray';
+
+        /**@phpstan-ignore-next-line */
+        return $this->evaluate($colorRaw) ?? 'gray';
     }
 
 }

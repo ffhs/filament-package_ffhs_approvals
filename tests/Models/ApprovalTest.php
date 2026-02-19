@@ -21,7 +21,7 @@ describe('Approval Model', function () {
     });
 
 
-    it('set the status right', function (HasApprovalStatuses|BackedEnum $status) {
+    it('set the status right', function (HasApprovalStatuses $status) {
         /** @var Approval $approval */
         $approval = $this->approval;
         $approval->status = $status;
@@ -44,7 +44,7 @@ describe('Approval Model', function () {
         ]);
 
 
-    it('get the status right', function (HasApprovalStatuses|BackedEnum $status) {
+    it('get the status right', function (HasApprovalStatuses $status) {
         $approval = Mockery::mock(Approval::class)
             ->shouldReceive('getApprovalFlow')
             ->andReturn(

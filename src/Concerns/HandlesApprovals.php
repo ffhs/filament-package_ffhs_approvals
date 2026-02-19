@@ -6,6 +6,7 @@ use App\Models\User;
 use Ffhs\Approvals\Contracts\Approvable;
 use Ffhs\Approvals\Contracts\ApprovalBy;
 use Ffhs\Approvals\Contracts\ApprovalFlow;
+use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Traits\Filament\HasApprovalKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -16,8 +17,10 @@ trait HandlesApprovals
 {
     use HasApprovalKey;
 
-    private ?ApprovalFlow $approvalFlow = null;
+
+    /** @var Collection<int, Approval>|null */
     private ?Collection $cachedApprovals = null;
+    private ?ApprovalFlow $approvalFlow = null;
     private ApprovalBy $approvalBy;
 
 
@@ -69,16 +72,6 @@ trait HandlesApprovals
         }
 
         return $this->cachedApprovals;
-    }
-
-    protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
-    {
-        return match ($parameterName) {
-            'approvals' => $this->getBoundApprovals(),
-            'approvalFlow' => $this->getApprovalFlow(),
-            'approvalBy' => $this->getApprovalBy(),
-            default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
-        };
     }
 
     public function getApprovalFlow(): ApprovalFlow

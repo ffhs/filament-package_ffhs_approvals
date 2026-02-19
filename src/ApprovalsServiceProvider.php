@@ -36,22 +36,31 @@ class ApprovalsServiceProvider extends PackageServiceProvider
             });
 
         $configFileName = $package->shortName();
+        $package->hasTranslations();
+        $package->hasMigrations($this->getMigrations());
+        $package->hasViews(static::$viewNamespace);
 
         if (file_exists($package->basePath('/../config/' . $configFileName . '.php'))) {
             $package->hasConfigFile();
         }
+    }
 
-        if (file_exists($package->basePath('/../database/migrations'))) {
-            $package->hasMigrations($this->getMigrations());
-        }
+    /**
+     * @return array<class-string>
+     */
+    protected function getCommands(): array
+    {
+        return [];
+    }
 
-        if (file_exists($package->basePath('/../resources/lang'))) {
-            $package->hasTranslations();
-        }
-
-        if (file_exists($package->basePath('/../resources/views'))) {
-            $package->hasViews(static::$viewNamespace);
-        }
+    /**
+     * @return array<string>
+     */
+    protected function getMigrations(): array
+    {
+        return [
+            'create_filament_package_ffhs_approvals_table',
+        ];
     }
 
     public function packageRegistered(): void
@@ -96,11 +105,6 @@ class ApprovalsServiceProvider extends PackageServiceProvider
         // Testable::mixin(new TestsApprovals());
     }
 
-    protected function getAssetPackageName(): ?string
-    {
-        return 'ffhs/filament-package_ffhs_approvals';
-    }
-
     /**
      * @return array<Asset>
      */
@@ -111,10 +115,15 @@ class ApprovalsServiceProvider extends PackageServiceProvider
         ];
     }
 
+    protected function getAssetPackageName(): ?string
+    {
+        return 'ffhs/filament-package_ffhs_approvals';
+    }
+
     /**
-     * @return array<class-string>
+     * @return array<string, mixed>
      */
-    protected function getCommands(): array
+    protected function getScriptData(): array
     {
         return [];
     }
@@ -133,23 +142,5 @@ class ApprovalsServiceProvider extends PackageServiceProvider
     protected function getRoutes(): array
     {
         return [];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function getScriptData(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return array<string>
-     */
-    protected function getMigrations(): array
-    {
-        return [
-            'create_filament_package_ffhs_approvals_table',
-        ];
     }
 }

@@ -45,16 +45,16 @@ class SimpleApprovalBy implements ApprovalBy
         return app(static::class, ['name' => $name]);
     }
 
+    public function getRecord(): ?Model
+    {
+        return $this->getRecordFromUsing();
+    }
+
     public function getRecordFromUsing(): null|Model|Approvable
     {
         return once(function (): null|Model|Approvable {
             return $this->evaluate($this->recordUsing);
         });
-    }
-
-    public function getRecord(): ?Model
-    {
-        return $this->getRecordFromUsing();
     }
 
     public function canApprove(Approver|Model $approver, Approvable $approvable): bool
@@ -144,7 +144,7 @@ class SimpleApprovalBy implements ApprovalBy
         return $approvable->getApprovalFlow($key);
     }
 
-    public function reachAtLeast(Approvable|Model $approvable, $key): bool
+    public function reachAtLeast(Approvable|Model $approvable, string $key): bool
     {
         $approvals = $this->getApprovals($approvable, $key);
 

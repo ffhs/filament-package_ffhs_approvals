@@ -6,9 +6,13 @@ use Closure;
 
 trait HasGroupLabels
 {
+    /**  @var array<string, string|Closure|null>|Closure */
     private array|Closure $groupLabels = [];
 
-
+    /**
+     * @param array<string, string|Closure|null>|Closure $approvalActionsGroupLabel
+     * @return $this
+     */
     public function groupLabels(array|Closure $approvalActionsGroupLabel): static
     {
         $this->groupLabels = $approvalActionsGroupLabel;
