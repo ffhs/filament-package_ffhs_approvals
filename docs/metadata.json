@@ -8,27 +8,27 @@
         {
             "title": "Easy to use",
             "description": "Just approve your stuff",
-            "image": null
+            "image": "easy-to-use-icon.png"
         },
         {
             "title": "Translated",
             "description": "Just approve your stuff",
-            "image": null
+            "image": "translation-icon.svg"
         },
         {
-            "title": "Fully filament compatible",
+            "title": "Filament compatible",
             "description": "Just approve your stuff",
-            "image": null
+            "image": "filament-logo.png"
         },
         {
             "title": "Much to configurate",
             "description": "Just approve your stuff",
-            "image": null
+            "image": "services-icon.svg"
         },
         {
             "title": "Customizable",
             "description": "Just approve your stuff",
-            "image": null
+            "image": "light-lightbulb-icon.svg"
         }
     ]
 }
