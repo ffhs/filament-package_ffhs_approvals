@@ -2,5 +2,33 @@
     "title": "FFHS Approvals",
     "tagline": "Approve you stuff",
     "side-url": "https://your-docusaurus-site.example.com",
-    "projectName": "FFHS Approvals"
+    "projectName": "FFHS Approvals",
+    "has_index_page": true,
+    "features": [
+        {
+            "title": "Easy to use",
+            "description": "Just approve your stuff",
+            "image": null
+        },
+        {
+            "title": "Translated",
+            "description": "Just approve your stuff",
+            "image": null
+        },
+        {
+            "title": "Fully filament compatible",
+            "description": "Just approve your stuff",
+            "image": null
+        },
+        {
+            "title": "Much to configurate",
+            "description": "Just approve your stuff",
+            "image": null
+        },
+        {
+            "title": "Customizable",
+            "description": "Just approve your stuff",
+            "image": null
+        }
+    ]
 }
