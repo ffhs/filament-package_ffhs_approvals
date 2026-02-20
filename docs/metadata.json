@@ -3,7 +3,7 @@
     "tagline": "Approve you stuff",
     "side-url": "https://your-docusaurus-site.example.com",
     "projectName": "FFHS Approvals",
-    "has_index_page": false,
+    "has_index_page": true,
     "features": [
         {
             "title": "Easy to use",
