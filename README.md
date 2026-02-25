@@ -32,7 +32,7 @@ powerful UI actions using Filament’s `Infolist` components.
 
 ## Documentation
 
-**You can find the full documentation [here](https://github.com/ffhs/filament-package_ffhs_approvals).**
+**You can find the full documentation [here](https://ffhs.github.io/filament-package_ffhs_approvals/).**
 
 ---
 
