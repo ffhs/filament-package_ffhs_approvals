@@ -2,25 +2,35 @@
 
 namespace Ffhs\Approvals\Traits\Filament;
 
-use BackedEnum;
 use Closure;
 use Ffhs\Approvals\Contracts\ApprovalBy;
 use Ffhs\Approvals\Contracts\HasApprovalStatuses;
 use Ffhs\Approvals\Filament\Actions\ApprovalSingleStateAction;
+use Ffhs\Approvals\Traits\Filament\Cases\CanCasesDisable;
+use Ffhs\Approvals\Traits\Filament\Cases\CanCasesHidden;
+use Ffhs\Approvals\Traits\Filament\Cases\CanCasesRequireConfirmation;
+use Ffhs\Approvals\Traits\Filament\Cases\HasCasesApprovalNotifications;
+use Ffhs\Approvals\Traits\Filament\Cases\HasCasesIcons;
+use Ffhs\Approvals\Traits\Filament\Cases\HasCasesLabels;
+use Ffhs\Approvals\Traits\Filament\Cases\HasCasesToolTips;
+use Ffhs\Approvals\Traits\Filament\Cases\HasFinalCasesColors;
 use Filament\Actions\Concerns\CanBeDisabled;
 use Filament\Actions\Concerns\HasSize;
 use UnitEnum;
 
 trait HasApprovalSingleStateAction
 {
-    use HasCasesToolTips;
-    use HasCasesDisable;
-    use HasCasesHidden;
-    use HasCasesIcons;
-    use HasSize;
-    use HasCasesLabels;
     use CanBeDisabled;
-    use HasCasesColors;
+    use CanCasesDisable;
+    use CanCasesHidden;
+    use CanCasesRequireConfirmation;
+    use HasCasesIcons;
+    use HasCasesToolTips;
+    use HasCasesLabels;
+    use HasFinalCasesColors;
+    use HasCasesApprovalNotifications;
+
+    use HasSize;
 
     private Closure|null $modifyApprovalActionUsing = null;
 
@@ -33,41 +43,44 @@ trait HasApprovalSingleStateAction
 
     public function getApprovalSingleStateAction(
         ApprovalBy $approvalBy,
-        UnitEnum|HasApprovalStatuses $approvalCase
+        HasApprovalStatuses $actionCase
     ): ApprovalSingleStateAction {
-        /** @var BackedEnum|HasApprovalStatuses $approvalCase */
-
-        $action = ApprovalSingleStateAction::make($approvalBy->getName() . '-' . $approvalCase->value)
-            ->needResetApprovalBeforeChange($this->isNeedResetApprovalBeforeChange())
+        $actionName = $approvalBy->getName() . '-' . $actionCase->value;
+        $action = ApprovalSingleStateAction::make($actionName)
             ->approvalFlow($this->getApprovalFlow())
-            ->recordUsing(fn() => $this->getRecord())
-            ->requiresConfirmation($this->isRequiresConfirmation())
-            ->color(function (ApprovalSingleStateAction $action) use ($approvalCase) {
-                return $this->getFinalCaseColor(
-                    $approvalCase,
-                    $action->getApprovalStatus(),
-                    $this->getApprovalFlow()
-                );
-            })
-            ->icon($this->getCaseIcon($approvalCase))
-            ->notificationOnResetApproval(fn($lastStatus) => $this->sendNotificationOnResetApproval($lastStatus))
-            ->notificationOnSetApproval(fn($status) => $this->sendNotificationOnSetApproval($status))
-            ->notificationOnChangeApproval(
-                fn($lastStatus, $status) => $this->sendNotificationOnChangeApproval($status, $lastStatus)
-            )
-            ->disabled(function () use ($approvalCase) {
-                return $this->isDisabled() || $this->isCaseDisabled($approvalCase->value);
-            })
-            ->hidden(fn() => $this->isCaseHidden($approvalCase->value))
-            ->tooltip($this->getCaseTooltip($approvalCase))
-            ->label($this->getCaseLabel($approvalCase))
             ->approvalKey($this->getApprovalKey())
-            ->actionStatus($approvalCase)
-            ->approvalBy($approvalBy)
-            ->size($this->getSize());
+            ->recordUsing($this->getRecord())
+            ->actionStatus($actionCase)
+            ->approvalBy($approvalBy);
 
+        //Static Changes
+        $action = $action
+            ->needResetApprovalBeforeChange($this->isNeedResetApprovalBeforeChange(...))
+            ->size($this->getSize(...));
 
-        return $this->modifyApprovalSingleStateAction($action, $approvalBy, $approvalCase);
+        //Cases Settings
+        $action = $action
+            ->requiresConfirmation($this->isCaseRequiresConfirmation($actionCase))
+            ->disabled(function (ApprovalSingleStateAction $action) {
+                /**@phpstan-ignore-next-line */
+                return $this->isDisabled() || $action->evaluate($this->isCaseDisabled(...));
+            })
+            ->hidden(fn() => $this->isCaseHidden($actionCase))
+            ->icon($this->getCaseIcon($actionCase))
+            ->tooltip($this->getCaseTooltip($actionCase))
+            ->label($this->getCaseLabel($actionCase));
+
+        //Color
+        $action = $action
+            ->color($this->getFinalCaseColor(...));
+
+        //Notifications
+        $action = $action
+            ->notificationOnSetApproval($this->getCaseNotificationOnSetApproval(...))
+            ->notificationOnChangeApproval($this->getCaseNotificationOnChangeApproval(...))
+            ->notificationOnRemoveApproval($this->getCaseNotificationOnRemoveApproval(...));
+
+        return $this->modifyApprovalSingleStateAction($action, $approvalBy, $actionCase);
     }
 
     public function isDisabled(): bool

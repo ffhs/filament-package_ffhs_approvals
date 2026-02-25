@@ -13,6 +13,7 @@ use Ffhs\Approvals\Models\Approval;
 use Ffhs\Approvals\Traits\Approval\CanBeAny;
 use Ffhs\Approvals\Traits\Approval\HasApproveUsing;
 use Ffhs\Approvals\Traits\Approval\HasAtLeast;
+use Ffhs\Approvals\Traits\Approval\HasLabel;
 use Ffhs\Approvals\Traits\Approval\HasPermissions;
 use Ffhs\Approvals\Traits\Approval\HasRoles;
 use Ffhs\Approvals\Traits\Filament\HasRecordUsing;
@@ -32,6 +33,7 @@ class SimpleApprovalBy implements ApprovalBy
     use HasPermissions;
     use HasApproveUsing;
     use HasRecordUsing;
+    use HasLabel;
 
     protected ?string $name = null;
 
@@ -45,16 +47,16 @@ class SimpleApprovalBy implements ApprovalBy
         return app(static::class, ['name' => $name]);
     }
 
+    public function getRecord(): ?Model
+    {
+        return $this->getRecordFromUsing();
+    }
+
     public function getRecordFromUsing(): null|Model|Approvable
     {
         return once(function (): null|Model|Approvable {
             return $this->evaluate($this->recordUsing);
         });
-    }
-
-    public function getRecord(): ?Model
-    {
-        return $this->getRecordFromUsing();
     }
 
     public function canApprove(Approver|Model $approver, Approvable $approvable): bool
@@ -144,7 +146,7 @@ class SimpleApprovalBy implements ApprovalBy
         return $approvable->getApprovalFlow($key);
     }
 
-    public function reachAtLeast(Approvable|Model $approvable, $key): bool
+    public function reachAtLeast(Approvable|Model $approvable, string $key): bool
     {
         $approvals = $this->getApprovals($approvable, $key);
 

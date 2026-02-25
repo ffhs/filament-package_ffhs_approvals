@@ -31,4 +31,9 @@ enum TestApprovalStatuses: string implements HasApprovalStatuses
             self::PENDING,
         ];
     }
+
+    public static function getCaseLabel(self|HasApprovalStatuses $case): string
+    {
+        return $case->value;
+    }
 }

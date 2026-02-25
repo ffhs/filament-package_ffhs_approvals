@@ -7,17 +7,21 @@ use Ffhs\Approvals\Contracts\ApprovalBy;
 
 trait HasApprovalBy
 {
-
+    /** @var ApprovalBy[]|Closure */
     protected array|Closure $approvalBy = [];
 
     /**
-     * @return array<ApprovalBy>
+     * @return ApprovalBy[]
      */
     public function getApprovalBys(): array
     {
         return $this->evaluate($this->approvalBy);
     }
 
+    /**
+     * @param ApprovalBy[]|Closure $approvalBy
+     * @return $this
+     */
     public function approvalBy(array|Closure $approvalBy): static
     {
         $this->approvalBy = $approvalBy;

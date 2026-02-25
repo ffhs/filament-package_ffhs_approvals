@@ -2,10 +2,10 @@
 
 namespace Ffhs\Approvals\Enums;
 
-enum ApprovalState
+enum ApprovalState: string
 {
-    case APPROVED;
-    case DENIED;
-    case PENDING;
-    case OPEN;
+    case APPROVED = 'approved';
+    case DENIED = 'denied';
+    case PENDING = 'pending';
+    case OPEN = 'open';
 }

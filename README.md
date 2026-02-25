@@ -4,8 +4,8 @@ This package allows you to easily implement approval workflows in your **Filamen
 define approval logic per model, specify who can approve (based on roles, permissions, or user logic), and expose
 powerful UI actions using Filament’s `Infolist` components.
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/ffhs/filament-package-ffhs_approvals)
-[![Total Downloads](https://img.shields.io/packagist/dt/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/ffhs/filament-package-ffhs_approvals)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/ffhs/filament-package_ffhs_approvals.svg?style=flat-square)](https://packagist.org/packages/ffhs/filament-package_ffhs_approvals)
+[![Total Downloads](https://img.shields.io/packagist/dt/ffhs/filament-package_ffhs_approvals.svg?style=flat-square)](https://packagist.org/packages/ffhs/filament-package_ffhs_approvals)
 
 ## Features:
 
@@ -16,11 +16,35 @@ powerful UI actions using Filament’s `Infolist` components.
 - 🎨 Customize icons, labels, tooltips, colors per status
 - 🛡️ Control button visibility and approval flow states based on business logic
 - 🔔 Built-in confirmation prompts and notifications
-- expandable
+- 🧱 Fully expandable
 
-## Screenshoots
+---
 
-![](images/example_approvals.png)
+## Versions
+
+| Filament Version | Package Version |
+|:----------------:|:---------------:|
+|       3.x        |     ^1.0.0      |
+|       4.x        |     ^2.0.0      |
+|       5.x        |       ---       |
+
+---
+
+## Documentation
+
+**You can find the full documentation [here](https://ffhs.github.io/filament-package_ffhs_approvals/).**
+
+---
+
+## Preview
+
+(The lower section are the Approvals)
+
+![](images/preview-image-1.png)
+
+![](images/preview-image-2.png)
+
+---
 
 ## Installation
 
@@ -42,6 +66,8 @@ You can publish and run the migrations with:
 php artisan vendor:publish --tag="filament-package_ffhs_approvals-migrations"  
 php artisan migrate  
 ```
+
+---
 
 ## Usage
 
@@ -90,8 +116,7 @@ class MyModel extends Model implements Approvable{
 	public function getApprovalFlows(): array  
 	{
 		return [
-			'managment_aproved' => SimpleApprovalFlow::make()
-				->category('any_catergory');  
+			'management_approved' => SimpleApprovalFlow::make()
 				->approvalStatus(ApplicationApprovalStatus::cases())
 				->aprovalBy([
 					SimpleApprovalBy::make('employee')
@@ -124,59 +149,6 @@ ApprovalActions::make('managment_aproved')
 
 ---
 
-### 4. Advanced Configuration
-
-Customize your Filament Action appearance and logic:
-
-```php
-// MyModelView.php
-ApprovalActions::make('managment_aproved')
-    ->requiresConfirmation()
-    ->needResetApprovalBeforeChange()
-    ->size(ActionSize::ExtraSmall)
-    ->alignRight()
-    ->groupLabels([
-        'employee' => 'Any',
-        'manager' => 'Manager',
-        'hr' => 'HR',
-    ])
-    ->casesIcons([
-        MyApprovalStatus::APPROVED->value => 'heroicon-m-check',
-        MyApprovalStatus::INCOMPLETE->value => 'heroicon-o-arrow-right',
-        MyApprovalStatus::DENIED->value => 'heroicon-m-no-symbol',
-    ])
-    ->casesSelectedColors([
-        MyApprovalStatus::APPROVED->value => Color::Green,
-        MyApprovalStatus::INCOMPLETE->value => Color::Orange,
-        MyApprovalStatus::DENIED->value => Color::Red,
-    ])
-    ->casesToolTips([
-        MyApprovalStatus::APPROVED->value => 'This section has been approved for validation.',
-        MyApprovalStatus::INCOMPLETE->value => 'This section has been returned for revision.',
-        MyApprovalStatus::DENIED->value => 'This section has been rejected, which also rejects the application.',
-    ])
-    ->notificationOnResetApproval('The approval status for this section has been reset.')
-    ->notificationOnSetApproval(fn($status) => match ($status) {
-        MyApprovalStatus::APPROVED->value => 'This section has been approved.',
-        MyApprovalStatus::INCOMPLETE->value => 'This section has been returned for revision.',
-        MyApprovalStatus::DENIED->value => 'This section has been rejected.',
-    })
-    ->casesDisabled(fn(MyModel $record) => [
-        MyApprovalStatus::INCOMPLETE->value => $record->state::class !== Received::class,
-    ])
-    ->disabled(function (MyModel $record) {
-        return match ($record->state::class) {
-            Open::class,
-            PaymentFailed::class,
-            Aborted::class,
-            Rejected::class,
-            Withdrawn::class,
-            WithdrawnAfterEnrolled::class => true,
-            default => false,
-        };
-    });
-```
-
 ## Testing
 
 ```bash  
@@ -186,13 +158,13 @@ composer install
 ./vendor/bin/pest test    
 ```
 
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+---
 
 ## Credits
 
 - [Kirschbaum Development Group](https://github.com/kirschbaum-development)
+
+---
 
 ## License
 

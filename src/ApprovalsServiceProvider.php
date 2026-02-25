@@ -4,7 +4,6 @@ namespace Ffhs\Approvals;
 
 use Ffhs\Approvals\Policies\ApprovalByPolicy;
 use Filament\Support\Assets\Asset;
-use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
@@ -36,29 +35,38 @@ class ApprovalsServiceProvider extends PackageServiceProvider
             });
 
         $configFileName = $package->shortName();
+        $package->hasTranslations();
+        $package->hasMigrations($this->getMigrations());
+        $package->hasViews(static::$viewNamespace);
 
         if (file_exists($package->basePath('/../config/' . $configFileName . '.php'))) {
             $package->hasConfigFile();
         }
+    }
 
-        if (file_exists($package->basePath('/../database/migrations'))) {
-            $package->hasMigrations($this->getMigrations());
-        }
+    /**
+     * @return array<class-string>
+     */
+    protected function getCommands(): array
+    {
+        return [];
+    }
 
-        if (file_exists($package->basePath('/../resources/lang'))) {
-            $package->hasTranslations();
-        }
-
-        if (file_exists($package->basePath('/../resources/views'))) {
-            $package->hasViews(static::$viewNamespace);
-        }
+    /**
+     * @return array<string>
+     */
+    protected function getMigrations(): array
+    {
+        return [
+            'create_filament_package_ffhs_approvals_table',
+        ];
     }
 
     public function packageRegistered(): void
     {
     }
 
-    public function boot(): ApprovalsServiceProvider
+    public function boot(): self
     {
         parent::boot();
 
@@ -96,25 +104,23 @@ class ApprovalsServiceProvider extends PackageServiceProvider
         // Testable::mixin(new TestsApprovals());
     }
 
+    /**
+     * @return array<Asset>
+     */
+    protected function getAssets(): array
+    {
+        return [];
+    }
+
     protected function getAssetPackageName(): ?string
     {
         return 'ffhs/filament-package_ffhs_approvals';
     }
 
     /**
-     * @return array<Asset>
+     * @return array<string, mixed>
      */
-    protected function getAssets(): array
-    {
-        return [
-            Css::make('approvals', __DIR__ . '/../resources/dist/approvals.css')->loadedOnRequest(),
-        ];
-    }
-
-    /**
-     * @return array<class-string>
-     */
-    protected function getCommands(): array
+    protected function getScriptData(): array
     {
         return [];
     }
@@ -133,23 +139,5 @@ class ApprovalsServiceProvider extends PackageServiceProvider
     protected function getRoutes(): array
     {
         return [];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function getScriptData(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return array<string>
-     */
-    protected function getMigrations(): array
-    {
-        return [
-            'create_filament_package_ffhs_approvals_table',
-        ];
     }
 }
