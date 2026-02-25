@@ -3,7 +3,8 @@
     "tagline": "Approve you stuff",
     "side_url": "https://ffhs.github.io",
     "base_url": "filament-package_ffhs_approvals",
-    "projectName": "FFHS Approvals",
+    "project_name": "FFHS Approvals",
+    "github_url": "https://github.com/ffhs/filament-package_ffhs_approvals",
     "has_index_page": true,
     "features": [
         {
