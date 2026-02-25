@@ -1,7 +1,8 @@
 {
     "title": "FFHS Approvals",
     "tagline": "Approve you stuff",
-    "side-url": "https://ffhs.github.io/filament-package_ffhs_approvals/",
+    "side_url": "https://ffhs.github.io",
+    "base_url": "filament-package_ffhs_approvals",
     "projectName": "FFHS Approvals",
     "has_index_page": true,
     "features": [
