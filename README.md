@@ -16,7 +16,7 @@ powerful UI actions using Filament’s `Infolist` components.
 - 🎨 Customize icons, labels, tooltips, colors per status
 - 🛡️ Control button visibility and approval flow states based on business logic
 - 🔔 Built-in confirmation prompts and notifications
-- expandable
+- 🧱 Fully expandable
 
 ## Screenshoots
 

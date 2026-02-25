@@ -19,7 +19,7 @@ trait HasFinalCasesColors
             ? $this->getCaseSelectedColor($actionCase)
             : $this->getCaseColor($actionCase);
 
-        return $color ?? $this->getApprovalStatusColor($actionCase);
+        return $color ?? $this->getApprovalStateColor($actionCase);
     }
 
 }

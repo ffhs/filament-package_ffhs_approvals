@@ -24,7 +24,10 @@ interface ApprovalBy
 
     public function getApprovalFlow(Model|Approvable $approvable, string $key): ?ApprovalFlow;
 
-    public function canApproveFromPermissions(Approver|Model $approver): bool;
-
     public function canApprove(Approver|Model $approver, Approvable $approvable): bool;
+
+    /**
+     * ToDo remove in separate interface
+     */
+    public function canApproveFromPermissions(Approver|Model $approver): bool;
 }

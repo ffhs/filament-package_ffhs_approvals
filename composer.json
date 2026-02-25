@@ -82,6 +82,13 @@
         "lint": [
             "@php vendor/bin/pint --ansi",
             "@php vendor/bin/phpstan analyse --verbose --ansi"
+        ],
+        "docusaurus": "cd ./docusaurus && bash ./dev-doco.sh ../docs",
+        "doco": [
+            "rm -rf ./docusaurus/temp/docusaurus/docs",
+            "cp -r ./docs/doc/ ./docusaurus/temp/docusaurus/docs",
+            "rm -rf ./docusaurus/temp/docusaurus/static/img/features",
+            "cp -r ./docs/features/ ./docusaurus/temp/docusaurus/static/img/features"
         ]
     },
     "config": {
