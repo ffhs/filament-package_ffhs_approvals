@@ -19,7 +19,6 @@ use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Concerns\EntanglesStateWithSingularRelationship;
 use Filament\Schemas\Components\Group;
 use Filament\Support\Concerns\HasAlignment;
-use Filament\Support\Concerns\HasVerticalAlignment;
 use Illuminate\Database\Eloquent\Model;
 
 class ApprovalActions extends Component
@@ -28,7 +27,6 @@ class ApprovalActions extends Component
     use CanRequireConfirmation;
     use EntanglesStateWithSingularRelationship;
     use HasAlignment;
-    use HasVerticalAlignment;
     use HasApprovalByLabels;
     use HasApprovalKey;
     use HasApprovalFlowFromRecord;

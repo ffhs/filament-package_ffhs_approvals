@@ -33,7 +33,7 @@ trait HasApprovalStatusColor
      * @param mixed|Closure $statusCategoryColors
      * @return $this
      */
-    public function approvalStatusColor(
+    public function approvalStateColor(
         ApprovalState $approvalState,
         mixed $statusCategoryColors
     ): static {
@@ -41,26 +41,26 @@ trait HasApprovalStatusColor
         return $this;
     }
 
-    public function getApprovalStatusColor(HasApprovalStatuses $actionCase): mixed
+    public function getApprovalStateColor(HasApprovalStatuses $actionCase): mixed
     {
         if (in_array($actionCase, $actionCase::getApprovedStatuses(), true)) {
-            return $this->getApprovedStatusColor();
+            return $this->getApprovedStateColor();
         }
 
         if (in_array($actionCase, $actionCase::getDeniedStatuses(), true)) {
-            return $this->getDeniedStatusColor();
+            return $this->getDeniedStateColor();
         }
 
         if (in_array($actionCase, $actionCase::getPendingStatuses(), true)) {
-            return $this->getPendingStatusColor();
+            return $this->getPendingStateColor();
         }
 
-        return $this->getOpenStatusColor();
+        return $this->getOpenStateColor();
     }
 
-    public function getApprovedStatusColor(): mixed
+    public function getApprovedStateColor(): mixed
     {
-        $colorRaw = $this->getApprovalStatusColors()['approved'] ?? 'success';
+        $colorRaw = $this->getApprovalStateColors()['approved'] ?? 'success';
 
         /**@phpstan-ignore-next-line */
         return $this->evaluate($colorRaw) ?? 'success';
@@ -69,7 +69,7 @@ trait HasApprovalStatusColor
     /**
      * @return array<string, mixed>
      */
-    public function getApprovalStatusColors(): array
+    public function getApprovalStateColors(): array
     {
         if (is_array($this->approvalStatusColors)) {
             $this->approvalStatusColors = $this->evaluate($this->approvalStatusColors);
@@ -79,25 +79,25 @@ trait HasApprovalStatusColor
         return $this->approvalStatusColors ?? [];
     }
 
-    public function getDeniedStatusColor(): mixed
+    public function getDeniedStateColor(): mixed
     {
-        $colorRaw = $this->getApprovalStatusColors()['denied'] ?? 'danger';
+        $colorRaw = $this->getApprovalStateColors()['denied'] ?? 'danger';
 
         /**@phpstan-ignore-next-line */
         return $this->evaluate($colorRaw) ?? 'danger';
     }
 
-    public function getPendingStatusColor(): mixed
+    public function getPendingStateColor(): mixed
     {
-        $colorRaw = $this->getApprovalStatusColors()['pending'] ?? Color::Blue;
+        $colorRaw = $this->getApprovalStateColors()['pending'] ?? Color::Blue;
 
         /**@phpstan-ignore-next-line */
         return $this->evaluate($colorRaw) ?? Color::Blue;
     }
 
-    public function getOpenStatusColor(): mixed
+    public function getOpenStateColor(): mixed
     {
-        $colorRaw = $this->getApprovalStatusColors()['open'] ?? 'gray';
+        $colorRaw = $this->getApprovalStateColors()['open'] ?? 'gray';
 
         /**@phpstan-ignore-next-line */
         return $this->evaluate($colorRaw) ?? 'gray';
