@@ -72,6 +72,7 @@ class ApprovalActions extends Component
                     ->columns(fn() => $this->hasInlineLabel() ? 2 : 1)
                     ->schema([
                         TextEntry::make('title')
+                            ->hidden(fn($state) => empty($state))
                             ->state($this->getApprovalByLabel($approvalBy))
                             ->alignment($this->getAlignment(...))
                             ->hiddenLabel(),

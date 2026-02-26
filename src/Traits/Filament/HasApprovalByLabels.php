@@ -33,14 +33,14 @@ trait HasApprovalByLabels
 
     public function getApprovalByLabel(ApprovalBy $approvalBy): string
     {
-        $evaluation = $this->evaluate($this->getGroupLabels()[$approvalBy->getName()] ?? '');
+        $evaluation = $this->evaluate($this->getGroupLabels()[$approvalBy->getName()] ?? null);
 
-        if (!empty($evaluation)) {
+        if (!is_null($evaluation)) {
             return $evaluation;
         }
 
         $label = $approvalBy->getLabel();
-        return empty($label) ? $approvalBy->getName() : $label;
+        return is_null($label) ? $approvalBy->getName() : $label;
     }
 
     /**
