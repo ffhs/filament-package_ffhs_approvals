@@ -37,6 +37,10 @@ trait HasCasesOnSetApprovalNotifications
             $this->caseNotificationOnSetApprovalUsing = null;
         }
 
+        if(!is_array($this->casesNotificationOnSetApproval)) {
+            $this->casesNotificationOnSetApproval = [];
+        }
+
         $this->casesNotificationOnSetApproval[$actionCase->value] = $notification;
 
         return $this;
