@@ -19,12 +19,17 @@ trait HasCasesLabels
             return $this->getCaseLabelDefault($actionCase);
         }
 
-        return $this->evaluate($this->caseLabelUsing, ['approvalCase' => $actionCase]) ?? $actionCase->value;
+        return $this->evaluate($this->caseLabelUsing, ['approvalCase' => $actionCase]) ?? $actionCase::getCaseLabel(
+            $actionCase
+        );
     }
 
     public function getCaseLabelDefault(HasApprovalStatuses $actionCase): string
     {
-        $caseLabel = $this->evaluate($this->casesLabels)[$actionCase->value] ?? $actionCase->value;
+        $caseLabel = $this->evaluate($this->casesLabels)[$actionCase->value] ?? null;
+        $caseLabel = $this->evaluate($caseLabel, ['approvalCase' => $actionCase]) ?? $actionCase::getCaseLabel(
+            $actionCase
+        );
         return $this->evaluate($caseLabel, ['approvalCase' => $actionCase]);
     }
 

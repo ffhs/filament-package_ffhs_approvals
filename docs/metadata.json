@@ -10,37 +10,32 @@
         {
             "title": "Native PHP Enum Support",
             "description": "Leverage native PHP Enums for clean and type-safe approval status handling. Define approved, denied, and pending states in a structured and maintainable way.",
-            "image": "php.png"
+            "image": "php-logo-white.svg"
         },
         {
             "title": "Multiple Approval Flows",
             "description": "Define and manage multiple independent approval flows per model. Perfect for complex business processes with different approval scenarios.",
-            "image": "flow-chart-svgrepo-com.svg"
+            "image": "flow-arrow.svg"
         },
         {
             "title": "Flexible Approval Logic",
             "description": "Control approvals using role-, user-, and permission-based logic. Combine rules and require specific amounts of approvals per group.",
-            "image": "control-multimedia-player-svgrepo-com.svg"
+            "image": "control-multimedia-player.svg"
         },
         {
             "title": "Seamless Filament Integration",
             "description": "Integrates smoothly with Filament components, forms, and views, allowing you to embed approval controls directly into your admin interface.",
-            "image": "filament-php-icon.png"
+            "image": "filament.svg"
         },
         {
             "title": "Business Logic Control",
             "description": "Dynamically control button visibility and approval flow states based on your own business logic and model conditions.",
-            "image": "business-bag-line-drawing-svgrepo-com.svg"
-        },
-        {
-            "title": "Built-in Confirmations & Notifications",
-            "description": "Includes confirmation prompts and notification support out of the box to ensure safe and transparent approval actions.",
-            "image": "notifications-alert-svgrepo-com.svg"
+            "image": "business-bag-line-drawing.svg"
         },
         {
             "title": "Expandable",
             "description": "Designed to be extendable and customizable, allowing you to adapt flows, logic, and behavior to fit your specific project needs.",
-            "image": "architecture-svgrepo-com.svg"
+            "image": "architecture.svg"
         }
     ]
 }
